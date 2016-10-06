@@ -6,7 +6,10 @@
     End Sub
 
 #Region "Movement"
-    Public Sub PrimitiveRouting(ByVal goal As Battlesquare)
+    Public Sub Tick(ByVal playerShip As ShipPlayer)
+        PrimitiveRouting(playerShip.BattleSquare)
+    End Sub
+    Private Sub PrimitiveRouting(ByVal goal As Battlesquare)
         Dim firstPositions As New List(Of BattlePosition())
         Dim secondPositions As New Dictionary(Of BattlePosition(), List(Of BattlePosition()))
 
