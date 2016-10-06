@@ -16,8 +16,7 @@
             PlayerInput(playerShip, SkipAiTurn)
             For Each combatant In battlefield.Combatants
                 If TypeOf combatant Is ShipAI AndAlso SkipAiTurn = False Then
-                    Dim aiShip As ShipAI = CType(combatant, ShipAI)
-                    aiShip.PrimitiveRouting(playerShip.BattleSquare)
+                    CType(combatant, ShipAI).Tick(playerShip)
                 End If
             Next
 
