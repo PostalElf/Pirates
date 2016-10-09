@@ -114,8 +114,8 @@
         If AttackReady(quarter) = False Then Return Nothing
 
         Dim range As Integer = AttackRanges(quarter)
-        Dim attackDirection As BattleDirection = BattleSquare.GetSubjectiveDirection(Facing, quarter)
-        Dim attackSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, quarter, range)
+        Dim attackDirection As BattleDirection = Battlesquare.GetSubjectiveDirection(Facing, quarter)
+        Dim attackSquare As Battlesquare = Battlesquare.GetSubjectiveAdjacent(Facing, quarter, range)
         If attackSquare.Contents Is Nothing Then Return Nothing Else Attack = attackSquare
         Dim attackTarget As BattlefieldObject = attackSquare.Contents
 
@@ -168,7 +168,7 @@
         DamageLog.Add(damage)
 
         If DamageSustained(targetQuarter) >= HullPoints(targetQuarter) Then
-            BattleSquare.Battlefield.DeadObjects.Add(Me)
+            Battlesquare.Battlefield.DeadObjects.Add(Me)
         End If
     End Sub
 #End Region

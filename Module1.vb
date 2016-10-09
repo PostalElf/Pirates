@@ -1,6 +1,12 @@
 ﻿Module Module1
 
     Sub Main()
+        Dim crew As New Crew
+        crew.AddSkillXP(crew.CrewSkill.Leadership, 1300)
+        crew.AddSkillXP(crew.CrewSkill.Leadership, 210)
+    End Sub
+
+    Private Sub Battle()
         Dim battlefield As Battlefield = SetupBattlefield()
         Dim playerShip As Ship = Nothing
         For Each Ship In battlefield.Combatants
