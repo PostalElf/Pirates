@@ -7,6 +7,7 @@
             Weapons.Add(quarter, Nothing)
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 100)
+            Crews.Add(quarter, New List(Of Crew))
         Next
 
         'note: ties in heuristic distance are broken by how high the move is up in the list
@@ -100,6 +101,10 @@
     Public Sub MovedInto(ByRef ship As Ship) Implements BattlefieldObject.MovedInto
         'TODO
     End Sub
+#End Region
+
+#Region "Crew"
+    Public Crews As New Dictionary(Of ShipQuarter, List(Of Crew))
 #End Region
 
 #Region "Attack"
