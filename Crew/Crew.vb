@@ -80,6 +80,17 @@
         Next
         Return Nothing
     End Function
+    Public Sub ReloadWeapon(Optional ByRef weapon As CrewBonus = Nothing)
+        If weapon Is Nothing = False Then
+            weapon.Ammo = weapon.AmmoMax
+        Else
+            For Each cbl In CrewBonuses
+                For Each cb In cbl
+                    cb.Ammo = cb.AmmoMax
+                Next
+            Next
+        End If
+    End Sub
 
     Public Class CrewBonus
         Public Name As String
@@ -88,8 +99,14 @@
 
         Public Skill As CrewSkill
         Public Damage As Integer
-        Public CritChance As Integer
-        Public CritDamage As Integer
+        Public DamageType As DamageType
+        Public ReadOnly Property IsReady As Boolean
+            Get
+                If Ammo > 0 Then Return True Else Return False
+            End Get
+        End Property
+        Public Ammo As Integer
+        Public AmmoMax As Integer
     End Class
 #End Region
 
@@ -125,9 +142,18 @@
         Next
         Return bestSkill
     End Function
-    Private Function GetBestDamage() As Damage
-        Dim bestSkill As CrewSkill = GetBestSkill(True)
-
+    Private Function GetBestWeapon() As CrewBonus
+        Dim bestWeapon As CrewBonus = Nothing
+        Dim bestWeaponValue As Integer = -1
+        For Each cbl In CrewBonuses
+            For Each cb In cbl
+                If cb.IsReady = True AndAlso cb.Damage > bestWeaponValue Then
+                    bestWeapon = cb
+                    bestWeaponValue = cb.Damage
+                End If
+            Next
+        Next
+        Return bestWeapon
     End Function
     Public Sub AddSkillXP(ByVal cs As CrewSkill, ByVal value As Integer)
         Dim maxLevel As Integer = SkillThresholds.Count - 1
@@ -173,7 +199,10 @@
         MeleeAttack(target)
     End Sub
     Public Sub MeleeAttack(ByRef target As Crew)
-
+        Dim weapon As CrewBonus = GetBestWeapon()
+        Dim damage As New Damage(weapon.Damage, weapon.DamageType, Name)
+        target.Damage(damage)
+        weapon.Ammo -= 1
     End Sub
     Private Sub Damage(ByVal damage As Damage)
         DamageSustained += damage.Amt
