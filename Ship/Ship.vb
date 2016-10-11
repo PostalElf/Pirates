@@ -6,7 +6,7 @@
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
             Weapons.Add(quarter, New List(Of ShipWeapon))
             DamageSustained.Add(quarter, 0)
-            HullPoints.Add(quarter, 100)
+            HullPoints.Add(quarter, 10)
             Crews.Add(quarter, New List(Of Crew))
         Next
 
@@ -98,7 +98,7 @@
         BattleSquare = targetSquare
         BattleSquare.Contents = Me
     End Sub
-    Public Sub MovedInto(ByRef ship As Ship) Implements BattlefieldObject.MovedInto
+    Public Sub MovedInto(ByRef bo As BattlefieldObject) Implements BattlefieldObject.MovedInto
         'TODO
     End Sub
 #End Region
@@ -120,12 +120,12 @@
         If weapon.IsReady = False Then Return Nothing
 
         Dim range As Integer = weapon.Range
-        Dim attackDirection As BattleDirection = BattleSquare.GetSubjectiveDirection(Facing, quarter)
         Dim attackSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, quarter, range)
         If attackSquare.Contents Is Nothing Then Return Nothing Else Attack = attackSquare
         Dim attackTarget As BattlefieldObject = attackSquare.Contents
 
         Dim damage As ShipDamage = weapon.ShipDamage
+        Dim attackDirection As BattleDirection = BattleSquare.ReverseDirection(BattleSquare.GetSubjectiveDirection(Facing, quarter))
         Dim targetQuarter As ShipQuarter = attackTarget.GetTargetQuarter(attackDirection)
         attackTarget.Damage(damage, targetQuarter)
     End Function
@@ -169,12 +169,14 @@
     Private DamageSustained As New Dictionary(Of ShipQuarter, Integer)
     Private HullPoints As New Dictionary(Of ShipQuarter, Integer)
     Private DamageLog As New List(Of ShipDamage)
-    Public Sub Damage(ByVal damage As ShipDamage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
+    Private Sub Damage(ByVal damage As ShipDamage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
         DamageSustained(targetQuarter) += damage.Amt
         DamageLog.Add(damage)
+        Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.Amt & " damage.")
 
         If DamageSustained(targetQuarter) >= HullPoints(targetQuarter) Then
-            Battlesquare.Battlefield.DeadObjects.Add(Me)
+            BattleSquare.Battlefield.DeadObjects.Add(Me)
+            Report.Add(Name & " has been destroyed!")
         End If
     End Sub
 #End Region

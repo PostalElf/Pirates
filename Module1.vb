@@ -1,9 +1,7 @@
 ﻿Module Module1
 
     Sub Main()
-        Dim crew As New Crew
-        crew.AddSkillXP(crew.CrewSkill.Leadership, 1300)
-        crew.AddSkillXP(crew.CrewSkill.Leadership, 210)
+        Battle()
     End Sub
 
     Private Sub Battle()
@@ -17,6 +15,8 @@
         While True
             Console.Clear()
             battlefield.ConsoleWrite()
+            Console.WriteLine()
+            Report.ConsoleReport()
             Console.WriteLine()
 
             PlayerInput(playerShip, SkipAiTurn)
@@ -47,7 +47,7 @@
         With ai1
             .ConsoleColour = ConsoleColor.Green
             .Facing = BattleDirection.East
-            .Name = "AI1"
+            .Name = "Her Majesty's Rook"
             .SetSquare(battlefield(1, 1))
         End With
         battlefield.Combatants.Add(ai1)
@@ -56,7 +56,7 @@
         With ai2
             .ConsoleColour = ConsoleColor.Green
             .Facing = BattleDirection.North
-            .Name = "AI2"
+            .Name = "His Lordship's Mistress"
             .SetSquare(battlefield(2, 2))
         End With
         battlefield.Combatants.Add(ai2)
