@@ -52,6 +52,10 @@
         Public Name As String
         Public Slot As String
         Public SkillBonuses As New Dictionary(Of CrewSkill, Integer)
+
+        Public Damage As Integer
+        Public CritChance As Integer
+        Public CritDamage As Integer
     End Class
 #End Region
 
