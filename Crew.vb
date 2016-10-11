@@ -5,6 +5,32 @@
             SkillsXP.Add(cs, 0)
         Next
     End Sub
+    Public Shared Function Generate(ByVal race As CrewRace, Optional ByRef rng As Random = Nothing) As Crew
+        If rng Is Nothing Then rng = New Random
+
+        Dim crew As New Crew
+        With crew
+            .Name = GenerateName(race)
+            .Race = race
+        End With
+        Return crew
+    End Function
+    Private Shared Function GenerateName(ByVal race As CrewRace, Optional ByRef rng As Random = Nothing) As String
+        If rng Is Nothing Then rng = New Random
+        If NamePrefixes.Count = 0 Then NamePrefixes = IO.SimpleFilegetAll("namePrefixes.txt")
+        If NameSuffixes.Count = 0 Then NameSuffixes = IO.SimpleFilegetAll("nameSuffixes.txt")
+
+        Dim prefix As String = GetNamePart(NamePrefixes, rng)
+        Dim suffix As String = GetNamePart(NameSuffixes, rng)
+        Return prefix & " " & suffix
+    End Function
+    Private Shared NamePrefixes As New List(Of String)
+    Private Shared NameSuffixes As New List(Of String)
+    Private Shared Function GetNamePart(ByRef targetList As List(Of String), ByRef rng As Random) As String
+        Dim roll As Integer = rng.Next(targetList.Count)
+        GetNamePart = targetList(roll)
+        targetList.RemoveAt(roll)
+    End Function
     Public Overrides Function ToString() As String
         Return Name
     End Function
