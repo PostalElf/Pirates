@@ -74,6 +74,8 @@
     Public Sub Move(ByVal move As BattleMove()) Implements BattlefieldObject.Move
         Dim turn As Boolean = False
         For Each d In move
+            Dim continueMovement As Boolean = True
+
             'turn if necessary
             Facing = TurnFacing(d)
             If d = BattleMove.TurnLeft OrElse d = BattleMove.TurnRight Then turn = True
@@ -88,8 +90,11 @@
 
             'if targetsquare is ticked, move
             If targetSquare Is Nothing = False Then
-                If targetSquare.Contents Is Nothing Then SetSquare(targetSquare) Else targetSquare.Contents.MovedInto(Me)
+                If targetSquare.Contents Is Nothing Then SetSquare(targetSquare) Else continueMovement = targetSquare.Contents.MovedInto(Me)
             End If
+
+            'check if continueMovement was flagged
+            If continueMovement = False Then Exit For
         Next
 
         JustTurned = turn
@@ -99,7 +104,7 @@
         BattleSquare = targetSquare
         BattleSquare.Contents = Me
     End Sub
-    Public Sub MovedInto(ByRef bo As BattlefieldObject) Implements BattlefieldObject.MovedInto
+    Public Function MovedInto(ByRef bo As BattlefieldObject) As Boolean Implements BattlefieldObject.MovedInto
         'bo is the attacker
         'this ship is the defender
 
@@ -117,7 +122,9 @@
 
         Dim rammerDamage As New ShipDamage(1, DamageType.Ramming, Name)
         bo.Damage(rammerDamage, ShipQuarter.Fore)
-    End Sub
+
+        Return False
+    End Function
 #End Region
 
 #Region "Crew"

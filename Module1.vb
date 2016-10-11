@@ -5,7 +5,8 @@
     End Sub
 
     Private Sub Battle()
-        Dim battlefield As Battlefield = SetupBattlefield()
+        Dim rng As New Random
+        Dim battlefield As Battlefield = SetupBattlefield(rng)
         Dim playerShip As Ship = Nothing
         For Each Ship In battlefield.Combatants
             If TypeOf Ship Is ShipPlayer Then playerShip = Ship
@@ -31,7 +32,7 @@
             battlefield.CleanDeadObjects()
         End While
     End Sub
-    Private Function SetupBattlefield() As Battlefield
+    Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
         Dim battlefield As Battlefield = battlefield.Generate(10, 10, 2)
         Dim cannon As New ShipWeapon("Cannons", 3, DamageType.Cannon, 1, 1, 3)
 
@@ -42,8 +43,8 @@
             .Name = "Barron's Spear"
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
             .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human))
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human))
+            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng))
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng))
             .SetSquare(battlefield(5, 5))
             .Cheaterbug()
         End With
@@ -56,8 +57,8 @@
             .Name = "Her Majesty's Rook"
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
             .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human))
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human))
+            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng))
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng))
             .SetSquare(battlefield(1, 1))
         End With
         battlefield.Combatants.Add(ai1)
@@ -69,8 +70,8 @@
             .Name = "His Lordship's Mistress"
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
             .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human))
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human))
+            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng))
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng))
             .SetSquare(battlefield(2, 2))
         End With
         battlefield.Combatants.Add(ai2)

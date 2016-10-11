@@ -19,10 +19,11 @@
     Public Sub Move(ByVal move() As BattleMove) Implements BattlefieldObject.Move
         'do nothing
     End Sub
-    Public Sub MovedInto(ByRef bo As BattlefieldObject) Implements BattlefieldObject.MovedInto
+    Public Function MovedInto(ByRef bo As BattlefieldObject) As Boolean Implements BattlefieldObject.MovedInto
         Dim damage As New ShipDamage(1, DamageType.Ramming, "Rocks")
         bo.Damage(damage, bo.Facing)
-    End Sub
+        Return True
+    End Function
     Public Sub Damage(ByVal damage As ShipDamage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
         'immune
     End Sub

@@ -4,7 +4,7 @@
     ReadOnly Property PathingCost As Integer
     Property Facing As BattleDirection
     Sub Move(ByVal move As BattleMove())
-    Sub MovedInto(ByRef target As BattlefieldObject)
+    Function MovedInto(ByRef target As BattlefieldObject) As Boolean                'return false to stop all queued movement
 
     Sub ConsoleWrite()
 
