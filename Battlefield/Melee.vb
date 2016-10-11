@@ -26,6 +26,13 @@
         Dim targets As New List(Of Crew)(Defenders)
         For Each Crew In Attackers
             Crew.MeleeAttack(targets)
+            If targets.Count = 0 Then targets = New List(Of Crew)(Defenders)
+        Next
+
+        targets = New List(Of Crew)(Attackers)
+        For Each Crew In Defenders
+            Crew.MeleeAttack(targets)
+            If targets.Count = 0 Then targets = New List(Of Crew)(Attackers)
         Next
     End Sub
 End Class
