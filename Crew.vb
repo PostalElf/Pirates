@@ -131,12 +131,12 @@
 #End Region
 
 #Region "Movement"
-    Private Ship As Ship
+    Public Ship As Ship
     Private ShipQuarter As ShipQuarter
 
     Public Sub Move(ByVal quarter As ShipQuarter)
-        Ship.Crews(ShipQuarter).Remove(Me)
-        Ship.Crews(quarter).Add(Me)
+        Ship.RemoveCrew(Pirates.ShipQuarter.Starboard, Me)
+        Ship.AddCrew(quarter, Me)
         ShipQuarter = quarter
     End Sub
 #End Region

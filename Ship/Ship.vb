@@ -105,12 +105,26 @@
 #End Region
 
 #Region "Crew"
-    Public Crews As New Dictionary(Of ShipQuarter, List(Of Crew))
+    Private Crews As New Dictionary(Of ShipQuarter, List(Of Crew))
+    Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew)
+        Crews(quarter).Add(crew)
+        crew.Ship = Me
+    End Sub
+    Public Sub RemoveCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew)
+        If Crews(quarter).Contains(crew) = False Then Exit Sub
+        Crews(quarter).Remove(crew)
+        crew.Ship = Nothing
+    End Sub
+    Public Function GetCrewCount(ByVal quarter As ShipQuarter) As Integer
+        Return Crews(quarter).Count
+    End Function
 #End Region
 
 #Region "Attack"
     Protected Weapons As New Dictionary(Of ShipQuarter, List(Of ShipWeapon))
     Public Sub AddWeapon(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon)
+        weapon.Ship = Me
+        weapon.Quarter = quarter
         Weapons(quarter).Add(weapon)
     End Sub
     Public Function GetWeapons(ByVal quarter As ShipQuarter) As List(Of ShipWeapon)
@@ -123,12 +137,11 @@
         Dim range As Integer = weapon.Range
         Dim attackSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, quarter, range)
         If attackSquare.Contents Is Nothing Then Return Nothing Else Attack = attackSquare
-        Dim attackTarget As BattlefieldObject = attackSquare.Contents
 
-        Dim damage As ShipDamage = weapon.ShipDamage
+        Dim attackTarget As BattlefieldObject = attackSquare.Contents
         Dim attackDirection As BattleDirection = BattleSquare.ReverseDirection(BattleSquare.GetSubjectiveDirection(Facing, quarter))
-        Dim targetQuarter As ShipQuarter = attackTarget.GetTargetQuarter(attackDirection)
-        attackTarget.Damage(damage, targetQuarter)
+        'attackDirection is reversed because otherwise it comes from the attacker's direction, not the target's
+        weapon.Attack(attackDirection, attackTarget)
     End Function
     Private Function GetTargetQuarter(ByVal attackDirection As BattleDirection) As ShipQuarter Implements BattlefieldObject.GetTargetQuarter
         'determine target quarter by ship facing and attackDirection
@@ -179,6 +192,13 @@
             BattleSquare.Battlefield.DeadObjects.Add(Me)
             Report.Add(Name & " has been destroyed!")
         End If
+    End Sub
+    Public Sub Tick() Implements BattlefieldObject.Tick
+        For Each q In Weapons.Keys
+            For Each w In Weapons(q)
+                w.Tick()
+            Next
+        Next
     End Sub
 #End Region
 
