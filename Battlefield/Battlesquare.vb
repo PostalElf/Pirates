@@ -55,6 +55,12 @@
         If f > 3 Then f = 0
         Return f
     End Function
+    Public Shared Function ReverseDirection(ByVal direction As BattleDirection) As BattleDirection
+        direction += 2
+        If direction < 0 Then direction = 3
+        If direction > 3 Then direction = 0
+        Return direction
+    End Function
     Public Function GetPathable(ByVal facing As BattleDirection, ByVal move As BattleMove) As BattlePosition
         Dim f As BattleDirection = facing
         Dim current As Battlesquare = Me
