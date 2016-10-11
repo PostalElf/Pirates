@@ -10,9 +10,12 @@
     Public Sub Move(ByVal move() As BattleMove) Implements BattlefieldObject.Move
         'ignore
     End Sub
-    Public Sub MovedInto(ByRef ship As Ship) Implements BattlefieldObject.MovedInto
+    Public Sub MovedInto(ByRef bo As BattlefieldObject) Implements BattlefieldObject.MovedInto
         Dim targetSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, ShipQuarter.Fore, 1)
-        ship.SetSquare(targetSquare)
+        If TypeOf bo Is Ship Then
+            Dim ship As Ship = CType(bo, Ship)
+            ship.SetSquare(targetSquare)
+        End If
     End Sub
     Public ReadOnly Property PathingCost As Integer Implements BattlefieldObject.PathingCost
         Get

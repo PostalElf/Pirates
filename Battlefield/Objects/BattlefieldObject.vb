@@ -3,7 +3,7 @@
     ReadOnly Property PathingCost As Integer
     Property Facing As BattleDirection
     Sub Move(ByVal move As BattleMove())
-    Sub MovedInto(ByRef ship As Ship)
+    Sub MovedInto(ByRef target As BattlefieldObject)
 
     Sub ConsoleWrite()
 
