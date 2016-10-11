@@ -1,4 +1,5 @@
 ﻿<DebuggerStepThrough()> Public Class Dev
+    Public Shared Rng As New Random
     Public Shared Function Constrain(ByVal value As Integer, Optional ByVal min As Integer = 0, Optional ByVal max As Integer = 100) As Integer
         If value < min Then value = min
         If value > max Then value = max

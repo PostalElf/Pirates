@@ -110,7 +110,7 @@
         'bo is the attacker
         'this ship is the defender
 
-        Dim rammedDamage As New ShipDamage(2, DamageType.Ramming, bo.Name)
+        Dim rammedDamage As New Damage(2, DamageType.Ramming, bo.Name)
         Dim attackDirection As BattleDirection
         For Each direction In [Enum].GetValues(GetType(BattleDirection))
             Dim current As BattlefieldObject = BattleSquare.GetAdjacent(direction, 1).Contents
@@ -122,7 +122,7 @@
         Dim targetQuarter As ShipQuarter = GetTargetQuarter(attackDirection)
         Damage(rammedDamage, targetQuarter)
 
-        Dim rammerDamage As New ShipDamage(1, DamageType.Ramming, Name)
+        Dim rammerDamage As New Damage(1, DamageType.Ramming, Name)
         bo.Damage(rammerDamage, ShipQuarter.Fore)
 
         Return False
@@ -139,6 +139,15 @@
         If Crews(quarter).Contains(crew) = False Then Exit Sub
         Crews(quarter).Remove(crew)
         crew.Ship = Nothing
+    End Sub
+    Public Sub RemoveCrew(ByRef crew As Crew)
+        For Each k In Crews.Keys
+            If Crews(k).Contains(crew) Then
+                Crews(k).Remove(crew)
+                crew.Ship = Nothing
+                Exit Sub
+            End If
+        Next
     End Sub
     Public Function GetCrews(ByVal quarter As ShipQuarter) As List(Of Crew)
         Return Crews(quarter)
@@ -226,8 +235,8 @@
     Public InMelee As Boolean = False
     Private DamageSustained As New Dictionary(Of ShipQuarter, Integer)
     Private HullPoints As New Dictionary(Of ShipQuarter, Integer)
-    Private DamageLog As New List(Of ShipDamage)
-    Private Sub Damage(ByVal damage As ShipDamage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
+    Private DamageLog As New List(Of Damage)
+    Private Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
         DamageSustained(targetQuarter) += damage.Amt
         DamageLog.Add(damage)
         Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.Amt & " damage.")

@@ -102,8 +102,13 @@
 
     Public Combatants As New List(Of Ship)
     Public Melees As New List(Of Melee)
+    Public DeadCrew As New List(Of Crew)
     Public DeadObjects As New List(Of BattlefieldObject)
-    Public Sub CleanDeadObjects()
+    Public Sub CleanUp()
+        CleanDeadCrew()
+        CleanDeadObjects()
+    End Sub
+    Private Sub CleanDeadObjects()
         For n = DeadObjects.Count - 1 To 0 Step -1
             DeadObjects(n).BattleSquare.Contents = Nothing
             DeadObjects(n).BattleSquare = Nothing
@@ -112,6 +117,13 @@
 
             DeadObjects(n) = Nothing
             DeadObjects.RemoveAt(n)
+        Next
+    End Sub
+    Private Sub CleanDeadCrew()
+        For n = DeadCrew.Count - 1 To 0 Step -1
+            DeadCrew(n).Ship.RemoveCrew(DeadCrew(n))
+            DeadCrew(n) = Nothing
+            DeadCrew.RemoveAt(n)
         Next
     End Sub
 End Class

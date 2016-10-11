@@ -35,7 +35,7 @@
                 Melee.tick()
             Next
 
-            battlefield.CleanDeadObjects()
+            battlefield.CleanUp()
         End While
     End Sub
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield

@@ -44,11 +44,17 @@
     End Enum
 
 #Region "Bonuses"
+    Private CrewBonuses As List(Of CrewBonus)() = {Scars, Mutations, Equipment}
+    Private Scars As New List(Of CrewBonus)
     Private Mutations As New List(Of CrewBonus)
     Private Equipment As New List(Of CrewBonus)
     Private Sub AddBonus(ByVal listName As String, ByVal effect As CrewBonus)
+        'check slot against all lists
+        For Each cbl In CrewBonuses
+            If GetSlot(cbl, effect.Slot) Is Nothing = False Then Exit Sub
+        Next
+
         Dim targetList As List(Of CrewBonus) = GetBonusList(listName)
-        If GetSlot(targetList, effect.Slot) Is Nothing = False Then Exit Sub
         targetList.Add(effect)
     End Sub
     Private Sub RemoveBonus(ByVal listName As String, ByVal effect As CrewBonus)
@@ -62,6 +68,7 @@
     End Sub
     Private Function GetBonusList(ByVal listName As String) As List(Of CrewBonus)
         Select Case listName.ToLower
+            Case "scars", "scar" : Return Scars
             Case "mutations", "mutation" : Return Mutations
             Case "equipment" : Return Equipment
         End Select
@@ -79,6 +86,7 @@
         Public Slot As String
         Public SkillBonuses As New Dictionary(Of CrewSkill, Integer)
 
+        Public Skill As CrewSkill
         Public Damage As Integer
         Public CritChance As Integer
         Public CritDamage As Integer
@@ -91,13 +99,35 @@
     Private Shared SkillThresholds As Integer() = {0, 100, 300, 600, 1000, 1500}
     Public Function GetSkill(ByVal cs As CrewSkill)
         Dim total As Integer = Skills(cs)
-        For Each mutation In Mutations
-            If mutation.SkillBonuses.ContainsKey(cs) Then total += mutation.SkillBonuses(cs)
+        For Each s In Scars
+            If s.SkillBonuses.ContainsKey(cs) Then total += s.SkillBonuses(cs)
+        Next
+        For Each m In Mutations
+            If m.SkillBonuses.ContainsKey(cs) Then total += m.SkillBonuses(cs)
         Next
         For Each e In Equipment
             If e.SkillBonuses.ContainsKey(cs) Then total += e.SkillBonuses(cs)
         Next
         Return total
+    End Function
+    Private Function GetBestSkill(ByVal meleeOnly As Boolean) As CrewSkill
+        Dim bestSkill As CrewSkill = Nothing
+        Dim bestSkillValue As Integer = -1
+        For Each cs In [Enum].GetValues(GetType(CrewSkill))
+            If meleeOnly = False OrElse cs > 100 Then
+                Dim skill As CrewSkill = cs
+                Dim skillValue As Integer = GetSkill(cs)
+                If skillValue > bestSkillValue Then
+                    bestSkill = skill
+                    bestSkillValue = skillValue
+                End If
+            End If
+        Next
+        Return bestSkill
+    End Function
+    Private Function GetBestDamage() As Damage
+        Dim bestSkill As CrewSkill = GetBestSkill(True)
+
     End Function
     Public Sub AddSkillXP(ByVal cs As CrewSkill, ByVal value As Integer)
         Dim maxLevel As Integer = SkillThresholds.Count - 1
@@ -120,14 +150,42 @@
     End Sub
 
     Public Enum CrewSkill
-        Leadership
+        Leadership = 1
         Sailing
         Navigation
         Gunnery
-        Firearms
-        Melee
 
+        Firearms = 101
+        Melee
     End Enum
+#End Region
+
+#Region "Melee Combat"
+    Private DamageLog As New List(Of Damage)
+    Private Health As Integer
+    Private DamageSustained As Integer
+
+    Public Sub MeleeAttack(ByRef targets As List(Of Crew))
+        Dim roll As Integer = Dev.Rng.Next(targets.Count - 1)
+        Dim target As Crew = targets(roll)
+        targets.RemoveAt(roll)
+
+        MeleeAttack(target)
+    End Sub
+    Public Sub MeleeAttack(ByRef target As Crew)
+
+    End Sub
+    Private Sub Damage(ByVal damage As Damage)
+        DamageSustained += damage.Amt
+        DamageLog.Add(damage)
+        Report.Add(Name & " was struck for " & damage.Amt & " damage.")
+
+        If DamageSustained >= Health Then
+            Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
+            battlefield.DeadCrew.Add(Me)
+            Report.Add(Name & " has perished in battle!")
+        End If
+    End Sub
 #End Region
 
 #Region "Movement"

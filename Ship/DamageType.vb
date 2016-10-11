@@ -2,4 +2,7 @@
     Cannon
     Fire
     Ramming
+
+    Firearms
+    Blade
 End Enum

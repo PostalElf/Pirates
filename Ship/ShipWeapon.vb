@@ -1,6 +1,6 @@
 ﻿Public Class ShipWeapon
     Public Name As String
-    Public ShipDamage As ShipDamage
+    Public ShipDamage As Damage
     Public Range As Integer
     Public Ship As Ship
     Public Quarter As ShipQuarter
@@ -31,7 +31,7 @@
 
     Public Sub New()
     End Sub
-    Public Sub New(ByVal aName As String, ByVal aShipDamage As ShipDamage, ByVal aRange As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
+    Public Sub New(ByVal aName As String, ByVal aShipDamage As Damage, ByVal aRange As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
         Name = aName
         ShipDamage = aShipDamage
         ShipDamage.Sender = Name
@@ -45,7 +45,7 @@
         CrewCount = aCrewCount
         CooldownMax = aCoolDown
 
-        Dim damage As New ShipDamage(dAmt, dType, Name)
+        Dim damage As New Damage(dAmt, dType, Name)
         ShipDamage = damage
     End Sub
     Public Overrides Function ToString() As String
@@ -55,7 +55,7 @@
         Dim w As New ShipWeapon
         With weapon
             w.Name = .Name
-            w.ShipDamage = ShipDamage.clone(.ShipDamage)
+            w.ShipDamage = Damage.Clone(.ShipDamage)
             w.Range = .Range
             w.Ship = .Ship
             w.Quarter = .Quarter

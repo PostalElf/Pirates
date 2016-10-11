@@ -78,7 +78,7 @@
     <Compile Include="Battlefield\Battlesquare.vb" />
     <Compile Include="Battlefield\Objects\BF_Rock.vb" />
     <Compile Include="Battlefield\Objects\BF_Tides.vb" />
-    <Compile Include="Crew.vb" />
+    <Compile Include="Crew\Crew.vb" />
     <Compile Include="Dev\IO.vb" />
     <Compile Include="Dev\Menu.vb" />
     <Compile Include="Report.vb" />

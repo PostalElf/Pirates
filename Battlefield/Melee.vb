@@ -23,6 +23,9 @@
     End Sub
 
     Public Sub Tick()
-
+        Dim targets As New List(Of Crew)(Defenders)
+        For Each Crew In Attackers
+            Crew.MeleeAttack(targets)
+        Next
     End Sub
 End Class
