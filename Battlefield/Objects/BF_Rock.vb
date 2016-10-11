@@ -1,6 +1,14 @@
 ﻿Public Class BF_Rock
     Implements BattlefieldObject
 
+    Public Property Name As String Implements BattlefieldObject.Name
+        Get
+            Return "Rock"
+        End Get
+        Set(ByVal value As String)
+            'do nothing
+        End Set
+    End Property
     Public ReadOnly Property PathingCost As Integer Implements BattlefieldObject.PathingCost
         Get
             Return 100

@@ -1,6 +1,6 @@
 ﻿Public MustInherit Class Ship
     Implements BattlefieldObject
-    Public Name As String
+    Public Property Name As String Implements BattlefieldObject.Name
     Public Faction As faction
 
     Public Sub New()
@@ -100,7 +100,23 @@
         BattleSquare.Contents = Me
     End Sub
     Public Sub MovedInto(ByRef bo As BattlefieldObject) Implements BattlefieldObject.MovedInto
-        'TODO
+        'bo is the attacker
+        'this ship is the defender
+
+        Dim rammedDamage As New ShipDamage(2, DamageType.Ramming, bo.Name)
+        Dim attackDirection As BattleDirection
+        For Each direction In [Enum].GetValues(GetType(BattleDirection))
+            Dim current As BattlefieldObject = BattleSquare.GetAdjacent(direction, 1).Contents
+            If current Is Nothing = False AndAlso current.Equals(bo) Then
+                attackDirection = direction
+                Exit For
+            End If
+        Next
+        Dim targetQuarter As ShipQuarter = GetTargetQuarter(attackDirection)
+        Damage(rammedDamage, targetQuarter)
+
+        Dim rammerDamage As New ShipDamage(1, DamageType.Ramming, Name)
+        bo.Damage(rammerDamage, ShipQuarter.Fore)
     End Sub
 #End Region
 
@@ -130,19 +146,22 @@
     Public Function GetWeapons(ByVal quarter As ShipQuarter) As List(Of ShipWeapon)
         Return Weapons(quarter)
     End Function
-    Public Function Attack(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon) As Battlesquare
-        If Weapons(quarter).Contains(weapon) = False Then Return Nothing
-        If weapon.IsReady = False Then Return Nothing
+    Public Sub Attack(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon)
+        If Weapons(quarter).Contains(weapon) = False Then Exit Sub
+        If weapon.IsReady = False Then Exit Sub
 
         Dim range As Integer = weapon.Range
         Dim attackSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, quarter, range)
-        If attackSquare.Contents Is Nothing Then Return Nothing Else Attack = attackSquare
-
         Dim attackTarget As BattlefieldObject = attackSquare.Contents
-        Dim attackDirection As BattleDirection = BattleSquare.ReverseDirection(BattleSquare.GetSubjectiveDirection(Facing, quarter))
-        'attackDirection is reversed because otherwise it comes from the attacker's direction, not the target's
+        Dim attackDirection As BattleDirection
+        For Each direction In [Enum].GetValues(GetType(BattleDirection))
+            If BattleSquare.GetAdjacent(attackDirection, range).Equals(attackSquare) Then
+                attackDirection = direction
+                Exit For
+            End If
+        Next
         weapon.Attack(attackDirection, attackTarget)
-    End Function
+    End Sub
     Private Function GetTargetQuarter(ByVal attackDirection As BattleDirection) As ShipQuarter Implements BattlefieldObject.GetTargetQuarter
         'determine target quarter by ship facing and attackDirection
         Select Case Facing

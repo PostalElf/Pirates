@@ -1,4 +1,5 @@
 ﻿Public Interface BattlefieldObject
+    Property Name As String
     Property BattleSquare As Battlesquare
     ReadOnly Property PathingCost As Integer
     Property Facing As BattleDirection

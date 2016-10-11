@@ -5,6 +5,14 @@
         Facing = pFacing
     End Sub
 
+    Public Property Name As String Implements BattlefieldObject.Name
+        Get
+            Return "Tides"
+        End Get
+        Set(ByVal value As String)
+            'do nothing
+        End Set
+    End Property
     Public Property BattleSquare As Battlesquare Implements BattlefieldObject.BattleSquare
     Public Property Facing As BattleDirection Implements BattlefieldObject.Facing
     Public Sub Move(ByVal move() As BattleMove) Implements BattlefieldObject.Move

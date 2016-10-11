@@ -42,7 +42,7 @@
         Dim d As BattleDirection = GetSubjectiveDirection(facing, quarter)
         Return GetAdjacent(d, distance)
     End Function
-    Public Function GetSubjectiveDirection(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter) As BattleDirection
+    Private Function GetSubjectiveDirection(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter) As BattleDirection
         'given facing and quarter, get direction
 
         Dim f As BattleDirection = facing
