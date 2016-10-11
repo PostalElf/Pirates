@@ -101,6 +101,7 @@
     End Sub
 
     Public Combatants As New List(Of Ship)
+    Public Melees As New List(Of Melee)
     Public DeadObjects As New List(Of BattlefieldObject)
     Public Sub CleanDeadObjects()
         For n = DeadObjects.Count - 1 To 0 Step -1

@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Battlefield\BattleDirection.vb" />
     <Compile Include="Battlefield\Battlefield.vb" />
+    <Compile Include="Battlefield\Melee.vb" />
     <Compile Include="Battlefield\Objects\BattlefieldObject.vb" />
     <Compile Include="Battlefield\BattleMove.vb" />
     <Compile Include="Battlefield\BattlePosition.vb" />

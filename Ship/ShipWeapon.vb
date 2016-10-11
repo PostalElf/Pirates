@@ -13,7 +13,7 @@
         Get
             If CooldownCounter > 0 Then Return False
             If Ship Is Nothing Then Return False
-            If Ship.GetCrewCount(Quarter) < CrewCount Then Return False
+            If Ship.GetCrews(Quarter).Count < CrewCount Then Return False
             Return True
         End Get
     End Property
@@ -48,6 +48,9 @@
         Dim damage As New ShipDamage(dAmt, dType, Name)
         ShipDamage = damage
     End Sub
+    Public Overrides Function ToString() As String
+        Return Name & " - Range " & Range & " - Damage " & ShipDamage.Amt
+    End Function
     Public Shared Function Clone(ByRef weapon As ShipWeapon) As ShipWeapon
         Dim w As New ShipWeapon
         With weapon

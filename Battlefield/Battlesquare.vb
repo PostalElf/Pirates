@@ -56,9 +56,11 @@
         Return f
     End Function
     Public Shared Function ReverseDirection(ByVal direction As BattleDirection) As BattleDirection
-        direction += 2
-        If direction < 0 Then direction = 3
-        If direction > 3 Then direction = 0
+        For n = 1 To 2
+            direction += 1
+            If direction < 0 Then direction = 3
+            If direction > 3 Then direction = 0
+        Next
         Return direction
     End Function
     Public Function GetPathable(ByVal facing As BattleDirection, ByVal move As BattleMove) As BattlePosition

@@ -6,6 +6,8 @@
     Public Sub New()
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
             Weapons.Add(quarter, New List(Of ShipWeapon))
+            AddWeapon(quarter, New ShipWeapon("Grappling Hooks", 0, DamageType.Cannon, 1, 1, 1))
+
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 10)
             Crews.Add(quarter, New List(Of Crew))
@@ -138,8 +140,8 @@
         Crews(quarter).Remove(crew)
         crew.Ship = Nothing
     End Sub
-    Public Function GetCrewCount(ByVal quarter As ShipQuarter) As Integer
-        Return Crews(quarter).Count
+    Public Function GetCrews(ByVal quarter As ShipQuarter) As List(Of Crew)
+        Return Crews(quarter)
     End Function
 #End Region
 
@@ -167,7 +169,22 @@
                 Exit For
             End If
         Next
-        weapon.Attack(attackDirection, attackTarget)
+
+        If weapon.Name <> "Grappling Hooks" Then
+            weapon.Attack(attackDirection, attackTarget)
+        Else
+            If TypeOf attackTarget Is Ship = False Then Exit Sub
+            Dim attackShip As Ship = CType(attackTarget, Ship)
+            Dim attackQuarter As ShipQuarter = BattleSquare.ReverseDirection(attackShip.GetTargetQuarter(attackDirection))
+
+            Dim melee As New Melee(Me, quarter, attackShip, attackQuarter)
+            Dim battlefield As Battlefield = BattleSquare.Battlefield
+            melee.Battlefield = battlefield
+            battlefield.Melees.Add(melee)
+
+            Report.Add(Name & " and " & attackTarget.Name & " are joined in melee!")
+            Report.Add(GetCrews(quarter).Count & " vs " & attackShip.GetCrews(attackQuarter).Count)
+        End If
     End Sub
     Private Function GetTargetQuarter(ByVal attackDirection As BattleDirection) As ShipQuarter Implements BattlefieldObject.GetTargetQuarter
         'determine target quarter by ship facing and attackDirection
@@ -206,6 +223,7 @@
         Return Nothing
     End Function
 
+    Public InMelee As Boolean = False
     Private DamageSustained As New Dictionary(Of ShipQuarter, Integer)
     Private HullPoints As New Dictionary(Of ShipQuarter, Integer)
     Private DamageLog As New List(Of ShipDamage)

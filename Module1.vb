@@ -22,11 +22,17 @@
 
             PlayerInput(playerShip, SkipAiTurn)
             For Each combatant In battlefield.Combatants
+                If combatant.InMelee = True Then Continue For
+
                 If TypeOf combatant Is ShipAI AndAlso SkipAiTurn = False Then
                     CType(combatant, ShipAI).Tick(playerShip)
                 Else
                     combatant.Tick()
                 End If
+            Next
+
+            For Each Melee In battlefield.Melees
+                Melee.tick()
             Next
 
             battlefield.CleanDeadObjects()
