@@ -1,6 +1,7 @@
 ﻿Public MustInherit Class Ship
     Implements BattlefieldObject
     Public Name As String
+    Public Faction As faction
 
     Public Sub New()
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
