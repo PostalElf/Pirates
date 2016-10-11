@@ -36,8 +36,8 @@
         With ship
             .ConsoleColour = ConsoleColor.White
             .Facing = BattleDirection.East
-            .Weapons(ShipQuarter.Port) = New ShipWeapon("Cannons", 3, DamageType.Cannon, 1)
-            .Weapons(ShipQuarter.Starboard) = New ShipWeapon("Cannons", 3, DamageType.Cannon, 1)
+            .AddWeapon(ShipQuarter.Port, New ShipWeapon("Cannons", 3, DamageType.Cannon, 1))
+            .AddWeapon(ShipQuarter.Starboard, New ShipWeapon("Cannons", 3, DamageType.Cannon, 1))
             .SetSquare(battlefield(5, 5))
             .Cheaterbug()
         End With
@@ -67,8 +67,8 @@
         Dim targetMove As BattleMove() = Nothing
         Dim input As ConsoleKeyInfo = Console.ReadKey()
         Select Case input.Key
-            Case ConsoleKey.NumPad3, ConsoleKey.L : ship.Attack(ShipQuarter.Starboard)
-            Case ConsoleKey.NumPad1, ConsoleKey.J : ship.Attack(ShipQuarter.Port)
+            Case ConsoleKey.NumPad3, ConsoleKey.L : GetPlayerAttack(ship, ShipQuarter.Starboard)
+            Case ConsoleKey.NumPad1, ConsoleKey.J : GetPlayerAttack(ship, ShipQuarter.Port)
             Case ConsoleKey.NumPad8, ConsoleKey.I : targetMove = {BattleMove.Forward, BattleMove.Forward}
             Case ConsoleKey.NumPad5, ConsoleKey.K : targetMove = {BattleMove.Forward}
             Case ConsoleKey.NumPad9, ConsoleKey.O : targetMove = {BattleMove.Forward, BattleMove.TurnRight}
@@ -92,6 +92,15 @@
         Else
             SkipAiTurn = True
         End If
+    End Sub
+    Private Sub GetPlayerAttack(ByRef ship As Ship, ByVal quarter As ShipQuarter)
+        Dim weaponList As List(Of ShipWeapon) = ship.GetWeapons(quarter)
+        If weaponList.Count = 0 Then Exit Sub
+
+        Dim target As ShipWeapon = Nothing
+        If weaponList.Count = 1 Then target = weaponList(0) Else target = Menu.getListChoice(weaponList, 0, vbCrLf & "Select weapon:")
+        If target Is Nothing Then Exit Sub
+        ship.Attack(quarter, target)
     End Sub
     Private Function MovesContain(ByVal m1 As List(Of BattleMove()), ByVal m2 As BattleMove()) As Boolean
         For Each mm In m1
