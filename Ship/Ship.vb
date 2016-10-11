@@ -7,6 +7,7 @@
             Weapons.Add(quarter, Nothing)
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 100)
+            Crews.Add(quarter, New List(Of Crew))
         Next
 
         'note: ties in heuristic distance are broken by how high the move is up in the list
@@ -102,6 +103,10 @@
     End Sub
 #End Region
 
+#Region "Crew"
+    Public Crews As New Dictionary(Of ShipQuarter, List(Of Crew))
+#End Region
+
 #Region "Attack"
     Public Weapons As New Dictionary(Of ShipQuarter, ShipWeapon)
     Protected Function AttackRanges(ByVal quarter As ShipQuarter) As Integer
@@ -114,8 +119,8 @@
         If AttackReady(quarter) = False Then Return Nothing
 
         Dim range As Integer = AttackRanges(quarter)
-        Dim attackDirection As BattleDirection = BattleSquare.GetSubjectiveDirection(Facing, quarter)
-        Dim attackSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, quarter, range)
+        Dim attackDirection As BattleDirection = Battlesquare.GetSubjectiveDirection(Facing, quarter)
+        Dim attackSquare As Battlesquare = Battlesquare.GetSubjectiveAdjacent(Facing, quarter, range)
         If attackSquare.Contents Is Nothing Then Return Nothing Else Attack = attackSquare
         Dim attackTarget As BattlefieldObject = attackSquare.Contents
 
@@ -168,7 +173,7 @@
         DamageLog.Add(damage)
 
         If DamageSustained(targetQuarter) >= HullPoints(targetQuarter) Then
-            BattleSquare.Battlefield.DeadObjects.Add(Me)
+            Battlesquare.Battlefield.DeadObjects.Add(Me)
         End If
     End Sub
 #End Region

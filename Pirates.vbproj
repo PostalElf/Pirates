@@ -77,6 +77,7 @@
     <Compile Include="Battlefield\Battlesquare.vb" />
     <Compile Include="Battlefield\Objects\BF_Rock.vb" />
     <Compile Include="Battlefield\Objects\BF_Tides.vb" />
+    <Compile Include="Crew.vb" />
     <Compile Include="Ship\ShipDamage.vb" />
     <Compile Include="Ship\DamageType.vb" />
     <Compile Include="Ship\ShipPlayer.vb" />
