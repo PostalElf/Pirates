@@ -4,7 +4,7 @@
 
     Public Sub New()
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
-            Weapons.Add(quarter, Nothing)
+            Weapons.Add(quarter, New List(Of ShipWeapon))
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 100)
             Crews.Add(quarter, New List(Of Crew))
@@ -108,23 +108,24 @@
 #End Region
 
 #Region "Attack"
-    Public Weapons As New Dictionary(Of ShipQuarter, ShipWeapon)
-    Protected Function AttackRanges(ByVal quarter As ShipQuarter) As Integer
-        If Weapons(quarter) Is Nothing Then Return -1 Else Return Weapons(quarter).Range
+    Protected Weapons As New Dictionary(Of ShipQuarter, List(Of ShipWeapon))
+    Public Sub AddWeapon(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon)
+        Weapons(quarter).Add(weapon)
+    End Sub
+    Public Function GetWeapons(ByVal quarter As ShipQuarter) As List(Of ShipWeapon)
+        Return Weapons(quarter)
     End Function
-    Protected Function AttackReady(ByVal quarter As ShipQuarter) As Boolean
-        If Weapons(quarter) Is Nothing Then Return False Else Return Weapons(quarter).IsReady
-    End Function
-    Public Function Attack(ByVal quarter As ShipQuarter) As Battlesquare
-        If AttackReady(quarter) = False Then Return Nothing
+    Public Function Attack(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon) As Battlesquare
+        If Weapons(quarter).Contains(weapon) = False Then Return Nothing
+        If weapon.IsReady = False Then Return Nothing
 
-        Dim range As Integer = AttackRanges(quarter)
-        Dim attackDirection As BattleDirection = Battlesquare.GetSubjectiveDirection(Facing, quarter)
-        Dim attackSquare As Battlesquare = Battlesquare.GetSubjectiveAdjacent(Facing, quarter, range)
+        Dim range As Integer = weapon.Range
+        Dim attackDirection As BattleDirection = BattleSquare.GetSubjectiveDirection(Facing, quarter)
+        Dim attackSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, quarter, range)
         If attackSquare.Contents Is Nothing Then Return Nothing Else Attack = attackSquare
         Dim attackTarget As BattlefieldObject = attackSquare.Contents
 
-        Dim damage As ShipDamage = Weapons(quarter).ShipDamage
+        Dim damage As ShipDamage = weapon.ShipDamage
         Dim targetQuarter As ShipQuarter = attackTarget.GetTargetQuarter(attackDirection)
         attackTarget.Damage(damage, targetQuarter)
     End Function

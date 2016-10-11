@@ -59,11 +59,13 @@
 
         'consider ship position; broadside facing enemy is more valuable
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
-            If AttackReady(quarter) = True Then
-                Dim range As Integer = AttackRanges(quarter)
-                Dim target As Battlesquare = start.Square.GetSubjectiveAdjacent(start.Facing, quarter, range)
-                If target.Equals(goal) Then raw -= 10
-            End If
+            For Each weapon In Weapons(quarter)
+                If weapon.IsReady Then
+                    Dim range As Integer = weapon.Range
+                    Dim target As Battlesquare = start.Square.GetSubjectiveAdjacent(start.Facing, quarter, range)
+                    If target.Equals(goal) Then raw -= 10
+                End If
+            Next
         Next
 
         Return raw
