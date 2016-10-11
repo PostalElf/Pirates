@@ -36,6 +36,9 @@
     Public Sub Damage(ByVal damage As ShipDamage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
         'immune
     End Sub
+    Public Sub Tick() Implements BattlefieldObject.Tick
+        'do nothing
+    End Sub
     Private Function GetTargetQuarter(ByVal attackDirection As BattleDirection) As ShipQuarter Implements BattlefieldObject.GetTargetQuarter
         Return ShipQuarter.Fore
     End Function

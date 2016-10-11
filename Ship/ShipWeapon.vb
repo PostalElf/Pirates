@@ -2,28 +2,63 @@
     Public Name As String
     Public ShipDamage As ShipDamage
     Public Range As Integer
+    Public Ship As Ship
+    Public Quarter As ShipQuarter
+    Public CrewCount As Integer
 
-    Public Sub Cooldown(ByVal value As Integer)
+    Private Sub Cooldown(ByVal value As Integer)
         CooldownCounter -= value
     End Sub
     Public ReadOnly Property IsReady As Boolean
         Get
-            If CooldownCounter <= 0 Then Return True Else Return False
+            If CooldownCounter > 0 Then Return False
+            If Ship Is Nothing Then Return False
+            If Ship.GetCrewCount(Quarter) < CrewCount Then Return False
+            Return True
         End Get
     End Property
-    Public CooldownCounter As Integer
-    Public CooldownMax As Integer
+    Private CooldownCounter As Integer
+    Private CooldownMax As Integer
 
-    Public Sub New(ByVal aName As String, ByVal aShipDamage As ShipDamage, ByVal aRange As Integer)
+    Public Sub Attack(ByVal attackDirection As BattleDirection, ByVal attackTarget As BattlefieldObject)
+        Dim targetQuarter As ShipQuarter = attackTarget.GetTargetQuarter(attackDirection)
+        attackTarget.Damage(ShipDamage, targetQuarter)
+        CooldownCounter = CooldownMax
+    End Sub
+    Public Sub Tick()
+        Cooldown(1)
+    End Sub
+
+    Public Sub New()
+    End Sub
+    Public Sub New(ByVal aName As String, ByVal aShipDamage As ShipDamage, ByVal aRange As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
         Name = aName
         ShipDamage = aShipDamage
+        ShipDamage.Sender = Name
         Range = aRange
+        CrewCount = aCrewCount
+        CooldownMax = aCoolDown
     End Sub
-    Public Sub New(ByVal aName As String, ByVal dAmt As Integer, ByVal dType As DamageType, ByVal aRange As Integer)
+    Public Sub New(ByVal aName As String, ByVal dAmt As Integer, ByVal dType As DamageType, ByVal aRange As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
         Name = aName
         Range = aRange
+        CrewCount = aCrewCount
+        CooldownMax = aCoolDown
 
         Dim damage As New ShipDamage(dAmt, dType, Name)
         ShipDamage = damage
     End Sub
+    Public Shared Function Clone(ByRef weapon As ShipWeapon) As ShipWeapon
+        Dim w As New ShipWeapon
+        With weapon
+            w.Name = .Name
+            w.ShipDamage = ShipDamage.clone(.ShipDamage)
+            w.Range = .Range
+            w.Ship = .Ship
+            w.Quarter = .Quarter
+            w.CrewCount = .CrewCount
+            w.CooldownMax = .CooldownMax
+        End With
+        Return w
+    End Function
 End Class

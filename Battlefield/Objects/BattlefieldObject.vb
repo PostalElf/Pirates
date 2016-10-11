@@ -8,5 +8,6 @@
     Sub ConsoleWrite()
 
     Sub Damage(ByVal damage As ShipDamage, ByVal targetQuarter As ShipQuarter)
+    Sub Tick()
     Function GetTargetQuarter(ByVal attackDirection As BattleDirection) As ShipQuarter
 End Interface
