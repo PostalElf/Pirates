@@ -59,35 +59,27 @@
 
 
         'attackers attack
-        Dim targets As New List(Of Crew)(Defenders)
-        For Each Crew In Attackers
-            Crew.MeleeAttack(targets)
-            If targets.Count = 0 Then targets = New List(Of Crew)(Defenders)
-        Next
-
-        'defenders attack
-        targets = New List(Of Crew)(Attackers)
-        For Each Crew In Defenders
-            Crew.MeleeAttack(targets)
-            If targets.Count = 0 Then targets = New List(Of Crew)(Attackers)
-        Next
+        Attack(Attackers, Defenders)
+        Attack(Defenders, Attackers)
 
         'reinforcements
+        Reinforce(AttackersRe, Attackers)
+        Reinforce(DefendersRe, Defenders)
+    End Sub
+    Private Sub Attack(ByRef offenders As List(Of Crew), ByRef targetList As List(Of Crew))
+        Dim targets As New List(Of Crew)(targetList)
+        For Each Crew In offenders
+            Crew.MeleeAttack(targets)
+            If targets.Count = 0 Then targets = New List(Of Crew)(targetList)
+        Next
+    End Sub
+    Private Sub Reinforce(ByRef offenders As List(Of Crew), ByRef destination As List(Of Crew))
         Const ReinforcementCount As Integer = 2
-        If AttackersRe.Count > 0 Then
+        If offenders.Count < 0 Then
             For n = 1 To ReinforcementCount
-                Dim c As Crew = Dev.GetRandom(Of Crew)(AttackersRe)
+                Dim c As Crew = Dev.GetRandom(Of Crew)(offenders)
                 If c Is Nothing = False Then
-                    Attackers.Add(c)
-                    Report.Add(c.Name & " joins the melee.")
-                End If
-            Next
-        End If
-        If DefendersRe.Count > 0 Then
-            For n = 1 To ReinforcementCount
-                Dim c As Crew = Dev.GetRandom(Of Crew)(DefendersRe)
-                If c Is Nothing = False Then
-                    Defenders.Add(c)
+                    destination.Add(c)
                     Report.Add(c.Name & " joins the melee.")
                 End If
             Next

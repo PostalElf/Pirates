@@ -18,7 +18,7 @@
             With cutlass
                 .Name = "Belaying Pin"
                 .Skill = CrewSkill.Melee
-                .Damage = 1
+                .Damage = 10
                 .DamageType = DamageType.Blunt
                 .AmmoUse = 0
                 .Slot = "Weapon"
@@ -193,7 +193,8 @@
             End If
         ElseIf attSkill = defSkill Then
             'glancing hit
-            Dim damage As New Damage(0, 1, weapon.DamageType, Name)
+            Dim dmgValue As Integer = Dev.Constrain(weapon.Damage / 2, 1)
+            Dim damage As New Damage(0, dmgValue, weapon.DamageType, Name)
             target.Damage(damage)
             If weapon.AmmoUse > 0 Then
                 Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
