@@ -54,9 +54,10 @@
 #Region "Movement"
     Protected JustTurned As Boolean = False
     Private _AvailableMoves As New List(Of BattleMove())
-    Public ReadOnly Property AvailableMoves As List(Of BattleMove())
+    Public Overridable ReadOnly Property AvailableMoves As List(Of BattleMove())
         Get
             If IgnoresJustTurned = False AndAlso JustTurned = True Then
+                'if just turned, can only move one step
                 Dim total As New List(Of BattleMove())
                 For Each moves In _AvailableMoves
                     If moves.Length = 1 Then total.Add(moves)
@@ -330,6 +331,9 @@
             BattleSquare.Battlefield.DeadObjects.Add(Me)
             Report.Add(Name & " has been destroyed!")
         End If
+    End Sub
+    Public Sub EnterCombat(ByRef battlefield As Battlefield, ByRef combatantList As List(Of Ship))
+        combatantList.Add(Me)
     End Sub
     Public Sub Tick() Implements BattlefieldObject.Tick
         For Each q In Weapons.Keys

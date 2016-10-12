@@ -7,7 +7,7 @@
     Private Sub Battle()
         Dim rng As New Random
         Dim battlefield As Battlefield = SetupBattlefield(rng)
-        Dim playerShip As Ship = Nothing
+        Dim playerShip As ShipPlayer = Nothing
         For Each Ship In battlefield.Combatants
             If TypeOf Ship Is ShipPlayer Then playerShip = Ship
         Next
@@ -23,10 +23,9 @@
             If AITurn = True Then
                 For Each combatant In battlefield.Combatants
                     If combatant.InMelee = True Then Continue For
-                    If TypeOf combatant Is ShipAI Then
-                        CType(combatant, ShipAI).Tick(playerShip)
-                    Else
-                        combatant.Tick()
+                    If TypeOf combatant Is ShipAI Then : CType(combatant, ShipAI).Tick(playerShip)
+                    ElseIf TypeOf combatant Is ShipPlayer Then : CType(combatant, ShipPlayer).Tick()
+                    Else : combatant.Tick()
                     End If
                 Next
 
@@ -47,32 +46,31 @@
         Dim ship As New ShipPlayer
         With ship
             .ConsoleColour = ConsoleColor.White
-            .Facing = BattleDirection.East
             .Name = "Baron's Spear"
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
             .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(grapeshot))
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(hooks))
             .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(hooks))
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Sailing)
             .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Sailing)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-            .SetSquare(battlefield(5, 5))
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Sailing)
             .Cheaterbug()
         End With
-        battlefield.Combatants.Add(ship)
+        battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
 
         Dim ai1 As New ShipAI
         With ai1
             .ConsoleColour = ConsoleColor.Green
-            .Facing = BattleDirection.East
             .Name = "Her Majesty's Rook"
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
             .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
             .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-            .SetSquare(battlefield(1, 1))
         End With
-        battlefield.Combatants.Add(ai1)
+        battlefield.AddCombatant(ai1, 1, 1, BattleDirection.East)
 
         Dim ai2 As New ShipAI
         With ai2
@@ -85,11 +83,11 @@
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
             .SetSquare(battlefield(2, 2))
         End With
-        battlefield.Combatants.Add(ai2)
+        battlefield.AddCombatant(ai2, 2, 2, BattleDirection.North)
 
         Return battlefield
     End Function
-    Private Function PlayerInput(ByRef ship As Ship, ByRef battlefield As Battlefield) As Boolean
+    Private Function PlayerInput(ByRef ship As ShipPlayer, ByRef battlefield As Battlefield) As Boolean
         'return true when player ends turn
 
         Dim targetMove As BattleMove() = Nothing
@@ -113,11 +111,9 @@
 
         If ship.InMelee = True Then Return True
 
-        If targetMove Is Nothing = False Then
-            If MovesContain(ship.AvailableMoves, targetMove) Then
-                ship.Move(targetMove)
-                Return True
-            End If
+        If targetMove Is Nothing = False AndAlso ship.CheckSpendMoveToken(targetMove) = True Then
+            ship.SpendMoveToken(targetMove)
+            Return True
         End If
         Return False
     End Function
@@ -141,20 +137,6 @@
         If target Is Nothing Then Exit Sub
         ship.Attack(target)
     End Sub
-    Private Function MovesContain(ByVal m1 As List(Of BattleMove()), ByVal m2 As BattleMove()) As Boolean
-        For Each mm In m1
-            If MovesMatch(mm, m2) Then Return True
-        Next
-        Return False
-    End Function
-    Private Function MovesMatch(ByVal m1 As BattleMove(), ByVal m2 As BattleMove()) As Boolean
-        If m1.Length <> m2.Length Then Return False
-
-        For n = 0 To m1.Length - 1
-            If m1(n) <> m2(n) Then Return False
-        Next
-        Return True
-    End Function
     Private Sub TestSnippet(ByVal battlefield As Battlefield)
         Dim targetSquare As Battlesquare = battlefield(4, 4)
         Dim target As New ShipPlayer

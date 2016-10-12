@@ -89,6 +89,16 @@
         Return True
     End Function
 
+    Public Sub AddCombatant(ByRef combatant As Ship, ByVal x As Integer, ByVal y As Integer, ByVal facing As BattleDirection)
+        combatant.Facing = facing
+        combatant.SetSquare(Square(x, y))
+        Select Case combatant.GetType
+            Case GetType(ShipPlayer) : CType(combatant, ShipPlayer).EnterCombat(Me, Combatants)
+            Case GetType(ShipAI) : CType(combatant, ShipAI).EnterCombat(Me, Combatants)
+            Case Else : combatant.EnterCombat(Me, Combatants)
+        End Select
+    End Sub
+
     Public Sub ConsoleWrite()
         For y = 0 To MaxY
             For x = 0 To MaxX
