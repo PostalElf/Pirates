@@ -15,7 +15,6 @@
 
         For Each gt In [Enum].GetValues(GetType(GoodType))
             Goods.Add(gt, 0)
-            CarryingCapacity.Add(gt, 0)
         Next
 
         'note: ties in heuristic distance are broken by how high the move is up in the list
@@ -135,15 +134,48 @@
 #End Region
 
 #Region "Goods"
+    Private HullSpace As Integer
+    Private Crates As New List(Of Crate)
+    Private Function GetCarryingCapacity(ByVal gt As GoodType) As Integer
+        Dim total As Integer = 0
+        For Each Crate In Crates
+            If Crate.GoodType = gt Then total += Crate.Capacity
+        Next
+        Return total
+    End Function
+    Public Function CheckAddCrate(ByVal crate As Crate) As Boolean
+        If HullSpace - crate.HullCost < 0 Then Return False
+        Return True
+    End Function
+    Public Sub AddCrate(ByVal crate As Crate)
+        Crates.Add(crate)
+        HullSpace -= crate.HullCost
+    End Sub
+    Public Sub RemoveCrate(ByVal crate As Crate)
+        If Crates.Contains(crate) = False Then Exit Sub
+        Crates.Remove(crate)
+        HullSpace += crate.HullCost
+    End Sub
+
     Private Goods As New Dictionary(Of GoodType, Integer)
-    Private CarryingCapacity As New Dictionary(Of GoodType, Integer)
     Public Function GetGood(ByVal gt As GoodType) As Integer
         Return Goods(gt)
     End Function
+    Public Function CheckAddGood(ByVal gt As GoodType, ByVal value As Integer) As Boolean
+        If Goods(gt) + value > GetCarryingCapacity(gt) Then Return False
+        Return True
+    End Function
     Public Sub AddGood(ByVal gt As GoodType, ByVal value As Integer)
         Goods(gt) += value
-        Dev.Constrain(Goods(gt), 0, CarryingCapacity(gt))
+        Dev.Constrain(Goods(gt), 0, GetCarryingCapacity(gt))
     End Sub
+
+    Public Class Crate
+        Public Name As String
+        Public GoodType As GoodType
+        Public Capacity As Integer
+        Public HullCost As Integer
+    End Class
 #End Region
 
 #Region "Crew"
