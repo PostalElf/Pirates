@@ -317,13 +317,13 @@
         If damage.ShipDamage > 0 Then
             Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.")
             DamageSustained(targetQuarter) += damage.ShipDamage
+            DamageLog.Add(damage)
         End If
         If damage.CrewDamage > 0 Then
             For Each Crew In GetCrews(targetQuarter, Nothing)
-                Crew.ShipAttack(accuracy, damage)
+                Crew.ShipAttack(accuracy, damage.Clone(damage))
             Next
         End If
-        DamageLog.Add(damage)
 
         If DamageSustained(targetQuarter) >= HullPoints(targetQuarter) Then
             BattleSquare.Battlefield.DeadObjects.Add(Me)
