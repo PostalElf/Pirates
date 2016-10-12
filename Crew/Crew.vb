@@ -237,8 +237,9 @@
     Private ShipQuarter As ShipQuarter
 
     Public Sub Move(ByVal quarter As ShipQuarter, Optional ByVal role As CrewSkill = Nothing)
-        Ship.RemoveCrew(Pirates.ShipQuarter.Starboard, Me)
-        Ship.AddCrew(quarter, Me)
+        Dim keepShip As Ship = Ship
+        Ship.RemoveCrew(ShipQuarter, Me)
+        keepShip.AddCrew(quarter, Me)
         ShipQuarter = quarter
         If role <> Nothing Then Me.Role = role
     End Sub

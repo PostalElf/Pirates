@@ -105,6 +105,9 @@
             Case ConsoleKey.V
                 ViewBattlefield(battlefield)
                 Return False
+            Case ConsoleKey.C
+                viewSelf(ship)
+                Return False
             Case ConsoleKey.Spacebar : Return True
             Case ConsoleKey.Escape : End
         End Select
@@ -127,6 +130,45 @@
             Console.WriteLine()
         Next
         Console.ReadKey()
+    End Sub
+    Private Sub ViewSelf(ByVal ship As ShipPlayer)
+        Dim t As Integer = 12
+        Dim s As String = Dev.vbSpace(1)
+        Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
+        Console.WriteLine()
+
+        Dim roles As CrewSkill() = {CrewSkill.Sailing, CrewSkill.Gunnery}
+        For Each role In roles
+            Console.WriteLine(role.ToString & ":")
+            For Each q In quarters
+                For Each Crew In ship.GetCrews(q, role)
+                    Console.WriteLine(s & Dev.vbTab(q.ToString & ":", t) & Crew.Name & " (" & Crew.GetSkill(role) & ")")
+                Next
+            Next
+            Console.WriteLine()
+        Next
+
+        Select Case Menu.getListChoice(New List(Of String) From {"Move Sailor", "Move Gunner"}, 0)
+            Case "Move Sailor" : MoveCrew(ship, CrewSkill.Sailing)
+            Case "Move Gunner" : MoveCrew(ship, CrewSkill.Gunnery)
+            Case Else : Exit Sub
+        End Select
+    End Sub
+    Private Sub MoveCrew(ByRef ship As ShipPlayer, ByVal role As CrewSkill)
+        Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
+        Dim choiceList As New List(Of Crew)
+        For Each q In quarters
+            choiceList.AddRange(Ship.GetCrews(q, role))
+        Next
+        Dim target As Crew = Menu.getListChoice(choiceList, 0, "Move who?")
+        Dim destination As ShipQuarter = Menu.getListChoice(Of ShipQuarter)(quarters, 0, "To where?")
+        Dim newrole As CrewSkill = Nothing
+        If Menu.confirmChoice(0, "Keep role? ") = True Then
+            newrole = target.Role
+        Else
+            newrole = Menu.getListChoice(New List(Of CrewSkill) From {CrewSkill.Sailing, CrewSkill.Gunnery}, 0, "Select new role:")
+        End If
+        Ship.AddCommand("Move", target, destination, newrole)
     End Sub
     Private Sub GetPlayerAttack(ByRef ship As Ship, ByVal quarter As ShipQuarter)
         Dim weaponList As List(Of ShipWeapon) = ship.GetWeapons(quarter)

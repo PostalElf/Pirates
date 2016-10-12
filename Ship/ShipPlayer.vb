@@ -46,6 +46,42 @@
     End Function
 #End Region
 
+#Region "Commands"
+    Private Commands As New List(Of Command)
+    Public Sub AddCommand(ByVal type As String, ByVal target As Object, ByVal destination As Object, Optional ByVal secondary As Object = Nothing)
+        Commands.Add(New Command(type, target, destination, secondary))
+    End Sub
+    Private Sub RunCommands()
+        While Commands.Count > 0
+            Dim command As Command = Commands(0)
+            With command
+                Select Case .Type
+                    Case "Move"
+                        Dim crew As Crew = CType(.Target, Crew)
+                        Dim quarter As ShipQuarter = CType(.Destination, ShipQuarter)
+                        Dim role As CrewSkill = CType(.Secondary, CrewSkill)
+                        crew.Move(quarter, role)
+                End Select
+            End With
+            Commands.RemoveAt(0)
+        End While
+    End Sub
+
+    Public Class Command
+        Public Type As String
+        Public Target As Object
+        Public Destination As Object
+        Public Secondary As Object
+
+        Public Sub New(ByVal aType As String, ByVal aTarget As Object, ByVal aDestination As Object, Optional ByVal aSecondary As Object = Nothing)
+            Type = aType
+            Target = aTarget
+            Destination = aDestination
+            Secondary = aSecondary
+        End Sub
+    End Class
+#End Region
+
     Public Overloads Sub EnterCombat(ByRef battlefield As Battlefield, ByRef combatantList As List(Of Ship))
         MyBase.EnterCombat(battlefield, combatantList)
 
@@ -93,5 +129,8 @@
                 Report.Add(rep)
             End While
         Next
+
+        'execute commands
+        RunCommands()
     End Sub
 End Class
