@@ -1,19 +1,21 @@
 ﻿Public Class Damage
-    Public Amt As Integer
+    Public ShipDamage As Integer
+    Public CrewDamage As Integer
     Public Type As DamageType
     Public Sender As String
 
     Public Sub New()
     End Sub
-    Public Sub New(ByVal pAmt As Integer, ByVal pType As DamageType, ByVal pSender As String)
-        Amt = pAmt
+    Public Sub New(ByVal pShipDamage As Integer, ByVal pCrewDamage As Integer, ByVal pType As DamageType, ByVal pSender As String)
+        ShipDamage = pShipDamage
+        CrewDamage = pCrewDamage
         Type = pType
         Sender = pSender
     End Sub
     Public Shared Function Clone(ByRef shipDamage As Damage) As Damage
         Dim d As New Damage
         With shipDamage
-            d.Amt = .Amt
+            d.ShipDamage = .ShipDamage
             d.Type = .Type
             d.Sender = .Sender
         End With
@@ -22,7 +24,7 @@
 
     Public Shared Operator =(ByVal d1 As Damage, ByVal d2 As Damage)
         If d1.Type <> d2.Type Then Return False
-        If d1.Amt <> d2.Amt Then Return False
+        If d1.ShipDamage <> d2.ShipDamage Then Return False
 
         Return True
     End Operator

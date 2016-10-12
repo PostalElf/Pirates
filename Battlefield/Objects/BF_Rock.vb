@@ -20,7 +20,7 @@
         'do nothing
     End Sub
     Public Function MovedInto(ByRef bo As BattlefieldObject) As Boolean Implements BattlefieldObject.MovedInto
-        Dim damage As New Damage(1, DamageType.Ramming, "Rocks")
+        Dim damage As New Damage(1, 0, DamageType.Ramming, "Rocks")
         bo.Damage(damage, bo.Facing)
         Return True
     End Function

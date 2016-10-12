@@ -20,7 +20,7 @@
     Public Sub New()
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
             Weapons.Add(quarter, New List(Of ShipWeapon))
-            AddWeapon(quarter, New ShipWeapon("Grappling Hooks", 0, DamageType.Cannon, 1, 1, 1))
+            AddWeapon(quarter, New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, 1, 1))
 
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 10)
@@ -128,7 +128,7 @@
         'bo is the attacker
         'this ship is the defender
 
-        Dim rammedDamage As New Damage(2, DamageType.Ramming, bo.Name)
+        Dim rammedDamage As New Damage(2, 0, DamageType.Ramming, bo.Name)
         Dim attackDirection As BattleDirection
         For Each direction In [Enum].GetValues(GetType(BattleDirection))
             Dim current As BattlefieldObject = BattleSquare.GetAdjacent(direction, 1).Contents
@@ -140,7 +140,7 @@
         Dim targetQuarter As ShipQuarter = GetTargetQuarter(attackDirection)
         Damage(rammedDamage, targetQuarter)
 
-        Dim rammerDamage As New Damage(1, DamageType.Ramming, Name)
+        Dim rammerDamage As New Damage(1, 0, DamageType.Ramming, Name)
         bo.Damage(rammerDamage, ShipQuarter.Fore)
 
         Return False
@@ -300,9 +300,9 @@
     Private HullPoints As New Dictionary(Of ShipQuarter, Integer)
     Private DamageLog As New List(Of Damage)
     Private Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
-        DamageSustained(targetQuarter) += damage.Amt
+        DamageSustained(targetQuarter) += damage.ShipDamage
         DamageLog.Add(damage)
-        Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.Amt & " damage.")
+        Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.")
 
         If DamageSustained(targetQuarter) >= HullPoints(targetQuarter) Then
             BattleSquare.Battlefield.DeadObjects.Add(Me)

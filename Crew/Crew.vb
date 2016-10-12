@@ -223,14 +223,14 @@
         Dim defSkill As Integer = target.GetSkill(skill) + FateRoll()
         If attSkill > defSkill Then
             'success, damage
-            Dim damage As New Damage(weapon.Damage, weapon.DamageType, Name)
+            Dim damage As New Damage(0, weapon.Damage, weapon.DamageType, Name)
             target.Damage(damage)
             If weapon.AmmoUse > 0 Then
                 Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
             End If
         ElseIf attSkill = defSkill Then
             'glancing hit
-            Dim damage As New Damage(1, weapon.DamageType, Name)
+            Dim damage As New Damage(0, 1, weapon.DamageType, Name)
             target.Damage(damage)
             If weapon.AmmoUse > 0 Then
                 Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
@@ -243,9 +243,9 @@
     Private Sub Damage(ByVal damage As Damage)
         If Ship Is Nothing Then Exit Sub
 
-        DamageSustained += damage.Amt
+        DamageSustained += damage.CrewDamage
         DamageLog.Add(damage)
-        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.Amt & " damage by " & damage.Sender & ".")
+        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.ShipDamage & " damage by " & damage.Sender & ".")
 
         If DamageSustained >= Health Then
             Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield

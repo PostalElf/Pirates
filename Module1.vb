@@ -40,7 +40,7 @@
     End Sub
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
         Dim battlefield As Battlefield = battlefield.Generate(10, 10, 2)
-        Dim cannon As New ShipWeapon("Cannons", 3, DamageType.Cannon, 1, 1, 3)
+        Dim cannon As New ShipWeapon("Cannons", 3, 0, DamageType.Cannon, 1, 1, 3)
 
         Dim ship As New ShipPlayer
         With ship

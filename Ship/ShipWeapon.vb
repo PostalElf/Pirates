@@ -39,17 +39,17 @@
         CrewCount = aCrewCount
         CooldownMax = aCoolDown
     End Sub
-    Public Sub New(ByVal aName As String, ByVal dAmt As Integer, ByVal dType As DamageType, ByVal aRange As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
+    Public Sub New(ByVal aName As String, ByVal dShipDamage As Integer, ByVal dCrewDamage As Integer, ByVal dType As DamageType, ByVal aRange As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
         Name = aName
         Range = aRange
         CrewCount = aCrewCount
         CooldownMax = aCoolDown
 
-        Dim damage As New Damage(dAmt, dType, Name)
+        Dim damage As New Damage(dShipDamage, dCrewDamage, dType, Name)
         ShipDamage = damage
     End Sub
     Public Overrides Function ToString() As String
-        Return Name & " - Range " & Range & " - Damage " & ShipDamage.Amt
+        Return Name & " - Range " & Range & " - Damage " & ShipDamage.ShipDamage
     End Function
     Public Shared Function Clone(ByRef weapon As ShipWeapon) As ShipWeapon
         Dim w As New ShipWeapon
