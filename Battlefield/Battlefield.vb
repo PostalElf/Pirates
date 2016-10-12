@@ -116,7 +116,17 @@
                 DeadObjects(n).BattleSquare = Nothing
             End If
 
-            If TypeOf DeadObjects(n) Is Ship Then Combatants.Remove(DeadObjects(n))
+            If TypeOf DeadObjects(n) Is Ship Then
+                Dim ship As Ship = CType(DeadObjects(n), Ship)
+                Combatants.Remove(ship)
+                For Each q In [Enum].GetValues(GetType(ShipQuarter))
+                    For Each Crew In ship.GetCrews(q)
+                        DeadCrew.Add(Crew)
+                        Crew.Ship = Nothing
+                    Next
+                Next
+            End If
+
             For Each m In Melees
                 If m.Contains(DeadObjects(n)) = True Then
                     m.IsOver = True

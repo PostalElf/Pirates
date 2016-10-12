@@ -1,6 +1,20 @@
 ﻿Public MustInherit Class Ship
     Implements BattlefieldObject
     Public Property Name As String Implements BattlefieldObject.Name
+    Private _ID As String
+    Public Property ID As String
+        Get
+            If _ID = Nothing Then
+                _ID = Name.Remove(2, Name.Length - 3)
+                _ID = _ID.ToUpper
+            End If
+            Return _ID
+        End Get
+        Set(ByVal value As String)
+            If value.Length > 3 Then value.Remove(2, value.Length - 3)
+            _ID = value
+        End Set
+    End Property
     Public Faction As faction
 
     Public Sub New()
@@ -241,8 +255,7 @@
             melee.Battlefield = battlefield
             battlefield.Melees.Add(melee)
 
-            Report.Add(Name & " and " & attackTarget.Name & " are joined in melee!")
-            Report.Add(GetCrews(quarter).Count & " vs " & attackShip.GetCrews(attackQuarter).Count)
+            Report.Add(Name & " (" & GetCrews(quarter).Count & ") and " & attackTarget.Name & " (" & attackShip.GetCrews(attackQuarter).Count & ") are joined in melee!")
         End If
     End Sub
     Private Function GetTargetQuarter(ByVal attackDirection As BattleDirection) As ShipQuarter Implements BattlefieldObject.GetTargetQuarter

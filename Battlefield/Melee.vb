@@ -77,13 +77,19 @@
         If AttackersRe.Count > 0 Then
             For n = 1 To ReinforcementCount
                 Dim c As Crew = Dev.GetRandom(Of Crew)(AttackersRe)
-                If c Is Nothing = False Then Attackers.Add(c)
+                If c Is Nothing = False Then
+                    Attackers.Add(c)
+                    Report.Add(c.Name & " joins the melee.")
+                End If
             Next
         End If
         If DefendersRe.Count > 0 Then
             For n = 1 To ReinforcementCount
                 Dim c As Crew = Dev.GetRandom(Of Crew)(DefendersRe)
-                If c Is Nothing = False Then Defenders.Add(c)
+                If c Is Nothing = False Then
+                    Defenders.Add(c)
+                    Report.Add(c.Name & " joins the melee.")
+                End If
             Next
         End If
     End Sub

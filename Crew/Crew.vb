@@ -52,7 +52,7 @@
         Return Name
     End Function
 
-    Private Name As String
+    Public Name As String
     Private Race As CrewRace
     Public Enum CrewRace
         Human
@@ -226,9 +226,11 @@
         End If
     End Sub
     Private Sub Damage(ByVal damage As Damage)
+        If Ship Is Nothing Then Exit Sub
+
         DamageSustained += damage.Amt
         DamageLog.Add(damage)
-        Report.Add(Name & " was struck for " & damage.Amt & " damage.")
+        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.Amt & " damage.")
 
         If DamageSustained >= Health Then
             Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield

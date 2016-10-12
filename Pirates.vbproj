@@ -81,6 +81,7 @@
     <Compile Include="Crew\Crew.vb" />
     <Compile Include="Dev\IO.vb" />
     <Compile Include="Dev\Menu.vb" />
+    <Compile Include="Goods\GoodType.vb" />
     <Compile Include="Report.vb" />
     <Compile Include="Ship\Faction.vb" />
     <Compile Include="Damage.vb" />
