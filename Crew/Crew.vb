@@ -16,13 +16,21 @@
 
             Dim cutlass As New CrewBonus
             With cutlass
-                .Name = "Cutlass"
+                .Name = "Belaying Pin"
                 .Damage = 1
-                .DamageType = DamageType.Blade
-                .AmmoMax = 10
+                .DamageType = DamageType.Blunt
+                .AmmoMax = 5
                 .Slot = "Weapon"
             End With
             .AddBonus("equipment", cutlass)
+
+            Dim skills As New List(Of CrewSkill)([Enum].GetValues(GetType(CrewSkill)))
+            For n = 1 To 2
+                Dim roll As Integer = rng.Next(skills.Count - 1)
+                Dim skill As CrewSkill = skills(roll)
+                skills.RemoveAt(roll)
+                .AddSkillXP(skill, SkillThresholds(n))
+            Next
         End With
         Return crew
     End Function

@@ -5,4 +5,5 @@
 
     Firearms
     Blade
+    Blunt
 End Enum
