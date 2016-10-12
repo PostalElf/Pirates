@@ -209,10 +209,7 @@
     Private DamageSustained As Integer
 
     Public Sub MeleeAttack(ByRef targets As List(Of Crew))
-        Dim roll As Integer = Dev.Rng.Next(targets.Count - 1)
-        Dim target As Crew = targets(roll)
-        targets.RemoveAt(roll)
-
+        Dim target As Crew = Dev.GetRandom(targets)
         MeleeAttack(target)
     End Sub
     Public Sub MeleeAttack(ByRef target As Crew)

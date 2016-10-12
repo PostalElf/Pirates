@@ -99,7 +99,9 @@
             Case ConsoleKey.NumPad4 : targetMove = {BattleMove.TurnLeft}
             Case ConsoleKey.NumPad6 : targetMove = {BattleMove.TurnRight}
             Case ConsoleKey.NumPad2, ConsoleKey.OemComma : targetMove = {BattleMove.Backwards}
-            Case ConsoleKey.V : ViewBattlefield(battlefield)
+            Case ConsoleKey.V
+                ViewBattlefield(battlefield)
+                Return False
             Case ConsoleKey.Spacebar : Return True
             Case ConsoleKey.Escape : End
         End Select
