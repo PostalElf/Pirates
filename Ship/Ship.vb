@@ -5,13 +5,13 @@
     Public Property ID As String
         Get
             If _ID = Nothing Then
-                _ID = Name.Remove(2, Name.Length - 3)
+                _ID = Name.Remove(3, Name.Length - 3)
                 _ID = _ID.ToUpper
             End If
             Return _ID
         End Get
         Set(ByVal value As String)
-            If value.Length > 3 Then value.Remove(2, value.Length - 3)
+            If value.Length > 3 Then value.Remove(3, value.Length - 3)
             _ID = value
         End Set
     End Property
@@ -43,6 +43,11 @@
 
     Public Sub Cheaterbug()
         IgnoresJustTurned = True
+        For Each wlist In Weapons.Values
+            For Each w In wlist
+                w.Cheaterbug()
+            Next
+        Next
     End Sub
 #End Region
 
@@ -138,10 +143,10 @@
             End If
         Next
         Dim targetQuarter As ShipQuarter = GetTargetQuarter(attackDirection)
-        Damage(rammedDamage, targetQuarter)
+        Damage(rammedDamage, targetQuarter, 5)
 
         Dim rammerDamage As New Damage(1, 0, DamageType.Ramming, Name)
-        bo.Damage(rammerDamage, ShipQuarter.Fore)
+        bo.Damage(rammerDamage, ShipQuarter.Fore, 5)
 
         Return False
     End Function
@@ -194,26 +199,35 @@
 
 #Region "Crew"
     Private Crews As New Dictionary(Of ShipQuarter, List(Of Crew))
-    Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew)
+    Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, Optional ByVal role As Crew.CrewSkill = Nothing)
         Crews(quarter).Add(crew)
         crew.Ship = Me
+        If role <> Nothing Then crew.Role = role
     End Sub
     Public Sub RemoveCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew)
         If Crews(quarter).Contains(crew) = False Then Exit Sub
         Crews(quarter).Remove(crew)
         crew.Ship = Nothing
+        crew.Role = Nothing
     End Sub
     Public Sub RemoveCrew(ByRef crew As Crew)
         For Each k In Crews.Keys
             If Crews(k).Contains(crew) Then
                 Crews(k).Remove(crew)
                 crew.Ship = Nothing
+                crew.Role = Nothing
                 Exit Sub
             End If
         Next
     End Sub
-    Public Function GetCrews(ByVal quarter As ShipQuarter) As List(Of Crew)
-        Return Crews(quarter)
+    Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As Crew.CrewSkill) As List(Of Crew)
+        If role = Nothing Then Return Crews(quarter)
+
+        Dim total As New List(Of Crew)
+        For Each c In Crews(quarter)
+            If c.Role = role Then total.Add(c)
+        Next
+        Return total
     End Function
 #End Region
 
@@ -236,15 +250,15 @@
         Dim attackTarget As BattlefieldObject = attackSquare.Contents
         Dim attackDirection As BattleDirection
         For Each direction In [Enum].GetValues(GetType(BattleDirection))
-            Dim targetSquare As Battlesquare = BattleSquare.GetAdjacent(direction, range)
-            If targetSquare.Equals(attackSquare) Then
+            Dim targetSquare As Battlesquare = attackSquare.GetAdjacent(direction, range)
+            If targetSquare.Equals(BattleSquare) Then
                 attackDirection = direction
                 Exit For
             End If
         Next
 
         If weapon.Name <> "Grappling Hooks" Then
-            weapon.Attack(attackDirection, attackTarget)
+            weapon.Attack(attackDirection, attackTarget, GetCrews(quarter, Crew.CrewSkill.Gunnery))
         Else
             If TypeOf attackTarget Is Ship = False Then Exit Sub
             Dim attackShip As Ship = CType(attackTarget, Ship)
@@ -255,7 +269,7 @@
             melee.Battlefield = battlefield
             battlefield.Melees.Add(melee)
 
-            Report.Add(Name & " (" & GetCrews(quarter).Count & ") and " & attackTarget.Name & " (" & attackShip.GetCrews(attackQuarter).Count & ") are joined in melee!")
+            Report.Add(Name & " (" & GetCrews(quarter, Nothing).Count & ") and " & attackTarget.Name & " (" & attackShip.GetCrews(attackQuarter, Nothing).Count & ") are joined in melee!")
         End If
     End Sub
     Private Function GetTargetQuarter(ByVal attackDirection As BattleDirection) As ShipQuarter Implements BattlefieldObject.GetTargetQuarter
@@ -299,10 +313,17 @@
     Private DamageSustained As New Dictionary(Of ShipQuarter, Integer)
     Private HullPoints As New Dictionary(Of ShipQuarter, Integer)
     Private DamageLog As New List(Of Damage)
-    Private Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
-        DamageSustained(targetQuarter) += damage.ShipDamage
+    Private Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
+        If damage.ShipDamage > 0 Then
+            Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.")
+            DamageSustained(targetQuarter) += damage.ShipDamage
+        End If
+        If damage.CrewDamage > 0 Then
+            For Each Crew In GetCrews(targetQuarter, Nothing)
+                Crew.ShipAttack(accuracy, damage)
+            Next
+        End If
         DamageLog.Add(damage)
-        Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.")
 
         If DamageSustained(targetQuarter) >= HullPoints(targetQuarter) Then
             BattleSquare.Battlefield.DeadObjects.Add(Me)
@@ -338,7 +359,7 @@
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             sus(0) &= DamageSustained(q).ToString("00") & "/"
             sus(1) &= HullPoints(q).ToString("00") & "/"
-            sus(2) &= GetCrews(q).Count.ToString("00") & "/"
+            sus(2) &= GetCrews(q, Nothing).Count.ToString("00") & "/"
         Next
         For n = 0 To sus.Length - 1
             sus(n) = sus(n).Remove(sus(n).Length - 1, 1)
