@@ -80,6 +80,7 @@
         With weapon
             w.Name = .Name
             w.Damage = Damage.Clone(.Damage)
+            w.AmmoType = .AmmoType
             w.Range = .Range
             w.Ship = .Ship
             w.Quarter = .Quarter

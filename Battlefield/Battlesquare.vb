@@ -28,6 +28,15 @@
                 Return Nothing
         End Select
     End Function
+    Public Function GetAdjacents(ByVal direction As BattleDirection, ByVal distance As Integer) As Queue(Of Battlesquare)
+        If distance <= 0 Then Return Nothing
+
+        Dim total As New Queue(Of Battlesquare)
+        For n = 1 To distance
+            total.Enqueue(GetAdjacent(direction, n))
+        Next
+        Return total
+    End Function
     Public Function GetAdjacents(ByVal distance As Integer) As List(Of Battlesquare)
         Dim total As New List(Of Battlesquare)
         For Each d As BattleDirection In [Enum].GetValues(GetType(BattleDirection))
@@ -41,6 +50,16 @@
 
         Dim d As BattleDirection = GetSubjectiveDirection(facing, quarter)
         Return GetAdjacent(d, distance)
+    End Function
+    Public Function GetSubjectiveAdjacents(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter, ByVal distance As Integer) As Queue(Of Battlesquare)
+        If distance <= 0 Then Return Nothing
+
+        Dim total As New Queue(Of Battlesquare)
+        Dim d As BattleDirection = GetSubjectiveDirection(facing, quarter)
+        For n = 1 To distance
+            total.Enqueue(GetSubjectiveAdjacent(facing, quarter, n))
+        Next
+        Return total
     End Function
     Private Function GetSubjectiveDirection(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter) As BattleDirection
         'given facing and quarter, get direction

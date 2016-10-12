@@ -252,15 +252,26 @@
         If weapon.IsReady = False Then Exit Sub
 
         Dim range As Integer = weapon.Range
-        Dim attackSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, quarter, range)
-        Dim attackTarget As BattlefieldObject = attackSquare.Contents
+        Dim attackSquares As Queue(Of Battlesquare) = BattleSquare.GetSubjectiveAdjacents(Facing, quarter, range)
+        Dim attackTarget As BattlefieldObject = Nothing
+        While attackSquares.Count > 0
+            Dim attackSquare As Battlesquare = attackSquares.Dequeue
+            If attackSquare.Contents Is Nothing = False Then
+                attackTarget = attackSquare.Contents
+                Exit While
+            End If
+        End While
+        If attackTarget Is Nothing Then Exit Sub
+
         Dim attackDirection As BattleDirection
         For Each direction In [Enum].GetValues(GetType(BattleDirection))
-            Dim targetSquare As Battlesquare = attackSquare.GetAdjacent(direction, range)
-            If targetSquare.Equals(BattleSquare) Then
-                attackDirection = direction
-                Exit For
-            End If
+            Dim targetSquares As Queue(Of Battlesquare) = attackTarget.BattleSquare.GetAdjacents(direction, range)
+            While targetSquares.Count > 0
+                If targetSquares.Dequeue.Equals(BattleSquare) Then
+                    attackDirection = direction
+                    Exit For
+                End If
+            End While
         Next
 
         If weapon.Name <> "Grappling Hooks" Then
