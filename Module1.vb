@@ -12,7 +12,6 @@
             If TypeOf Ship Is ShipPlayer Then playerShip = Ship
         Next
 
-        Dim SkipAiTurn As Boolean = False
         While True
             Console.Clear()
             battlefield.ConsoleWrite()
@@ -20,22 +19,23 @@
             Report.ConsoleReport()
             Console.WriteLine()
 
-            PlayerInput(playerShip, SkipAiTurn)
-            For Each combatant In battlefield.Combatants
-                If combatant.InMelee = True Then Continue For
+            Dim AITurn As Boolean = PlayerInput(playerShip, battlefield)
+            If AITurn = True Then
+                For Each combatant In battlefield.Combatants
+                    If combatant.InMelee = True Then Continue For
+                    If TypeOf combatant Is ShipAI Then
+                        CType(combatant, ShipAI).Tick(playerShip)
+                    Else
+                        combatant.Tick()
+                    End If
+                Next
 
-                If TypeOf combatant Is ShipAI AndAlso SkipAiTurn = False Then
-                    CType(combatant, ShipAI).Tick(playerShip)
-                Else
-                    combatant.Tick()
-                End If
-            Next
+                For Each Melee In battlefield.Melees
+                    Melee.Tick()
+                Next
 
-            For Each Melee In battlefield.Melees
-                Melee.Tick()
-            Next
-
-            battlefield.CleanUp()
+                battlefield.CleanUp()
+            End If
         End While
     End Sub
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
@@ -84,7 +84,9 @@
 
         Return battlefield
     End Function
-    Private Sub PlayerInput(ByRef ship As Ship, ByRef SkipAiTurn As Boolean)
+    Private Function PlayerInput(ByRef ship As Ship, ByRef battlefield As Battlefield) As Boolean
+        'return true when player ends turn
+
         Dim targetMove As BattleMove() = Nothing
         Dim input As ConsoleKeyInfo = Console.ReadKey()
         Select Case input.Key
@@ -97,24 +99,23 @@
             Case ConsoleKey.NumPad4 : targetMove = {BattleMove.TurnLeft}
             Case ConsoleKey.NumPad6 : targetMove = {BattleMove.TurnRight}
             Case ConsoleKey.NumPad2, ConsoleKey.OemComma : targetMove = {BattleMove.Backwards}
-            Case ConsoleKey.Spacebar
-                SkipAiTurn = False
-                Exit Sub
+            Case ConsoleKey.V : ViewBattlefield(battlefield)
+            Case ConsoleKey.Spacebar : Return True
             Case ConsoleKey.Escape : End
         End Select
 
-        If ship.InMelee = True Then Exit Sub
+        If ship.InMelee = True Then Return True
 
         If targetMove Is Nothing = False Then
             If MovesContain(ship.AvailableMoves, targetMove) Then
                 ship.Move(targetMove)
-                SkipAiTurn = False
-            Else
-                SkipAiTurn = True
+                Return True
             End If
-        Else
-            SkipAiTurn = True
         End If
+        Return False
+    End Function
+    Private Sub ViewBattlefield(ByVal battlefield As Battlefield)
+
     End Sub
     Private Sub GetPlayerAttack(ByRef ship As Ship, ByVal quarter As ShipQuarter)
         Dim weaponList As List(Of ShipWeapon) = ship.GetWeapons(quarter)
