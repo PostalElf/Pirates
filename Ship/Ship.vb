@@ -329,5 +329,24 @@
             Case BattleDirection.West : Console.Write("←")
         End Select
     End Sub
+    Public Sub ConsoleReport()
+        Const s As Integer = 8
+        Dim t As String = Dev.vbSpace(1)
+
+        Console.WriteLine("[" & ID & "] " & Name)
+        Dim sus(2) As String
+        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+            sus(0) &= DamageSustained(q).ToString("00") & "/"
+            sus(1) &= HullPoints(q).ToString("00") & "/"
+            sus(2) &= GetCrews(q).Count.ToString("00") & "/"
+        Next
+        For n = 0 To sus.Length - 1
+            sus(n) = sus(n).Remove(sus(n).Length - 1, 1)
+        Next
+
+        Console.WriteLine(t & Dev.vbTab("Damage:", s) & sus(0))
+        Console.WriteLine(t & Dev.vbTab("Hull:", s) & sus(1))
+        Console.WriteLine(t & Dev.vbTab("Crew:", s) & sus(2))
+    End Sub
 #End Region
 End Class

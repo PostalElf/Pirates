@@ -115,7 +115,15 @@
         Return False
     End Function
     Private Sub ViewBattlefield(ByVal battlefield As Battlefield)
-
+        Console.WriteLine()
+        For Each combatant In battlefield.Combatants
+            If TypeOf combatant Is Ship Then
+                Dim ship As Ship = CType(combatant, Ship)
+                ship.ConsoleReport()
+            End If
+            Console.WriteLine()
+        Next
+        Console.ReadKey()
     End Sub
     Private Sub GetPlayerAttack(ByRef ship As Ship, ByVal quarter As ShipQuarter)
         Dim weaponList As List(Of ShipWeapon) = ship.GetWeapons(quarter)
