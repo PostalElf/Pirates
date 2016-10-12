@@ -42,7 +42,7 @@
         End Select
     End Sub
 
-    Public Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
+    Public Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
         'immune
     End Sub
     Public Sub Tick() Implements BattlefieldObject.Tick

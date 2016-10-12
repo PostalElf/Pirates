@@ -16,6 +16,7 @@
         Dim d As New Damage
         With shipDamage
             d.ShipDamage = .ShipDamage
+            d.CrewDamage = .CrewDamage
             d.Type = .Type
             d.Sender = .Sender
         End With
@@ -25,6 +26,7 @@
     Public Shared Operator =(ByVal d1 As Damage, ByVal d2 As Damage)
         If d1.Type <> d2.Type Then Return False
         If d1.ShipDamage <> d2.ShipDamage Then Return False
+        If d1.CrewDamage <> d2.CrewDamage Then Return False
 
         Return True
     End Operator

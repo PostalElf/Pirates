@@ -120,7 +120,7 @@
                 Dim ship As Ship = CType(DeadObjects(n), Ship)
                 Combatants.Remove(ship)
                 For Each q In [Enum].GetValues(GetType(ShipQuarter))
-                    For Each Crew In ship.GetCrews(q)
+                    For Each Crew In ship.GetCrews(q, Nothing)
                         DeadCrew.Add(Crew)
                         Crew.Ship = Nothing
                     Next

@@ -129,6 +129,7 @@
 #End Region
 
 #Region "Skills"
+    Public Role As CrewSkill
     Private Skills As New Dictionary(Of CrewSkill, Integer)
     Private SkillsXP As New Dictionary(Of CrewSkill, Integer)
     Private Shared SkillThresholds As Integer() = {0, 100, 300, 600, 1000, 1500}
@@ -198,13 +199,14 @@
         Sailing
         Navigation
         Gunnery
+        Bracing
 
         Firearms = 101
         Melee
     End Enum
 #End Region
 
-#Region "Melee Combat"
+#Region "Combat"
     Private DamageLog As New List(Of Damage)
     Private Health As Integer
     Private DamageSustained As Integer
@@ -239,6 +241,13 @@
             'miss
             Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off an attack from " & Name & ".")
         End If
+    End Sub
+    Public Sub ShipAttack(ByVal accuracy As Integer, ByRef damage As Damage)
+        If damage.CrewDamage <= 0 Then Exit Sub
+
+        Dim skill As Integer = GetSkill(CrewSkill.Bracing) + FateRoll()
+        If skill > accuracy Then damage.CrewDamage = 1
+        Me.Damage(damage)
     End Sub
     Private Sub Damage(ByVal damage As Damage)
         If Ship Is Nothing Then Exit Sub

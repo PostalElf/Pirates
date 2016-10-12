@@ -23,16 +23,16 @@
     Public Sub New(ByRef attacker As Ship, ByVal attackingQuarter As ShipQuarter, ByRef defender As Ship, ByVal defendingQuarter As ShipQuarter)
         AttackerShip = attacker
         AttackerShip.InMelee = True
-        Attackers.AddRange(AttackerShip.GetCrews(attackingQuarter))
+        Attackers.AddRange(AttackerShip.GetCrews(attackingQuarter, Nothing))
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
-            If q <> attackingQuarter Then AttackersRe.AddRange(attacker.GetCrews(q))
+            If q <> attackingQuarter Then AttackersRe.AddRange(attacker.GetCrews(q, Nothing))
         Next
 
         DefenderShip = defender
         DefenderShip.InMelee = True
-        Defenders.AddRange(DefenderShip.GetCrews(defendingQuarter))
+        Defenders.AddRange(DefenderShip.GetCrews(defendingQuarter, Nothing))
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
-            If q <> defendingQuarter Then DefendersRe.AddRange(defender.GetCrews(q))
+            If q <> defendingQuarter Then DefendersRe.AddRange(defender.GetCrews(q, Nothing))
         Next
     End Sub
 

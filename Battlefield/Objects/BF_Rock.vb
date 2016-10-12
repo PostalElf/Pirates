@@ -21,10 +21,10 @@
     End Sub
     Public Function MovedInto(ByRef bo As BattlefieldObject) As Boolean Implements BattlefieldObject.MovedInto
         Dim damage As New Damage(1, 0, DamageType.Ramming, "Rocks")
-        bo.Damage(damage, bo.Facing)
+        bo.Damage(damage, bo.Facing, 5)
         Return True
     End Function
-    Public Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter) Implements BattlefieldObject.Damage
+    Public Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
         'immune
     End Sub
     Public Sub Tick() Implements BattlefieldObject.Tick

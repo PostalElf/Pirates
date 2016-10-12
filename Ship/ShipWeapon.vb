@@ -11,18 +11,36 @@
     End Sub
     Public ReadOnly Property IsReady As Boolean
         Get
-            If CooldownCounter > 0 Then Return False
             If Ship Is Nothing Then Return False
-            If Ship.GetCrews(Quarter).Count < CrewCount Then Return False
+            If IgnoresCooldown = False Then
+                If CooldownCounter > 0 Then Return False
+            End If
+            If IgnoresCrewCount = False Then
+                If Ship.GetCrews(Quarter, Crew.CrewSkill.Gunnery).Count < CrewCount Then Return False
+            End If
             Return True
         End Get
     End Property
     Private CooldownCounter As Integer
     Private CooldownMax As Integer
 
-    Public Sub Attack(ByVal attackDirection As BattleDirection, ByVal attackTarget As BattlefieldObject)
+#Region "Cheaterbug"
+    Private IgnoresCooldown As Boolean = False
+    Private IgnoresCrewCount As Boolean = False
+    Public Sub Cheaterbug()
+        IgnoresCooldown = True
+        IgnoresCrewCount = True
+    End Sub
+#End Region
+
+    Public Sub Attack(ByVal attackDirection As BattleDirection, ByVal attackTarget As BattlefieldObject, ByVal crews As List(Of Crew))
         Dim targetQuarter As ShipQuarter = attackTarget.GetTargetQuarter(attackDirection)
-        attackTarget.Damage(ShipDamage, targetQuarter)
+        Dim accuracy As Integer = 0
+        For Each c In crews
+            accuracy += c.GetSkill(Crew.CrewSkill.Gunnery)
+        Next
+
+        attackTarget.Damage(ShipDamage, targetQuarter, accuracy)
         CooldownCounter = CooldownMax
     End Sub
     Public Sub Tick()

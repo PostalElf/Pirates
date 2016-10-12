@@ -41,16 +41,18 @@
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
         Dim battlefield As Battlefield = battlefield.Generate(10, 10, 2)
         Dim cannon As New ShipWeapon("Cannons", 3, 0, DamageType.Cannon, 1, 1, 3)
+        Dim grapeshot As New ShipWeapon("Grapeshot", 1, 2, DamageType.Firearms, 1, 2, 5)
 
         Dim ship As New ShipPlayer
         With ship
             .ConsoleColour = ConsoleColor.White
             .Facing = BattleDirection.East
-            .Name = "Barron's Spear"
+            .Name = "Baron's Spear"
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
-            .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng))
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng))
+            .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(grapeshot))
+            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), Crew.CrewSkill.Gunnery)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), Crew.CrewSkill.Gunnery)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), Crew.CrewSkill.Gunnery)
             .SetSquare(battlefield(5, 5))
             .Cheaterbug()
         End With
@@ -63,8 +65,8 @@
             .Name = "Her Majesty's Rook"
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
             .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng))
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng))
+            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), Crew.CrewSkill.Gunnery)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), Crew.CrewSkill.Gunnery)
             .SetSquare(battlefield(1, 1))
         End With
         battlefield.Combatants.Add(ai1)
@@ -76,8 +78,8 @@
             .Name = "His Lordship's Mistress"
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
             .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng))
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng))
+            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), Crew.CrewSkill.Gunnery)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), Crew.CrewSkill.Gunnery)
             .SetSquare(battlefield(2, 2))
         End With
         battlefield.Combatants.Add(ai2)
