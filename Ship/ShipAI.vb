@@ -9,6 +9,20 @@
     Public Overloads Sub Tick(ByVal playerShip As ShipPlayer)
         MyBase.Tick()
         PrimitiveRouting(playerShip.BattleSquare)
+        PrimitiveAttack(playerShip)
+    End Sub
+    Private Sub PrimitiveAttack(ByRef playership As Ship)
+        For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
+            For Each weapon In GetWeapons(quarter)
+                If weapon.IsReady = False Then Continue For
+                Dim targetSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, quarter, weapon.Range)
+                If targetSquare.Contents Is Nothing Then Continue For
+
+                If targetSquare.Contents.Equals(playership) Then
+                    Attack(quarter, weapon)
+                End If
+            Next
+        Next
     End Sub
     Private Sub PrimitiveRouting(ByVal goal As Battlesquare)
         Dim firstPositions As New List(Of BattlePosition())

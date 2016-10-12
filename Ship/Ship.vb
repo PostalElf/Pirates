@@ -20,7 +20,6 @@
     Public Sub New()
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
             Weapons.Add(quarter, New List(Of ShipWeapon))
-            AddWeapon(quarter, New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, 1, 1))
 
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 100)
@@ -357,9 +356,9 @@
         Console.WriteLine("[" & ID & "] " & Name)
         Dim sus(2) As String
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
-            sus(0) &= DamageSustained(q).ToString("00") & "/"
-            sus(1) &= HullPoints(q).ToString("00") & "/"
-            sus(2) &= GetCrews(q, Nothing).Count.ToString("00") & "/"
+            sus(0) &= DamageSustained(q).ToString("000") & "/"
+            sus(1) &= HullPoints(q).ToString("000") & "/"
+            sus(2) &= GetCrews(q, Nothing).Count.ToString("000") & "/"
         Next
         For n = 0 To sus.Length - 1
             sus(n) = sus(n).Remove(sus(n).Length - 1, 1)
