@@ -139,7 +139,9 @@
     End Sub
     Private Sub CleanDeadCrew()
         For n = DeadCrew.Count - 1 To 0 Step -1
-            DeadCrew(n).Ship.RemoveCrew(DeadCrew(n))
+            If DeadCrew(n).Ship Is Nothing = False Then
+                DeadCrew(n).Ship.RemoveCrew(DeadCrew(n))
+            End If
             DeadCrew(n) = Nothing
             DeadCrew.RemoveAt(n)
         Next

@@ -79,6 +79,8 @@
     <Compile Include="Battlefield\Objects\BF_Rock.vb" />
     <Compile Include="Battlefield\Objects\BF_Tides.vb" />
     <Compile Include="Crew\Crew.vb" />
+    <Compile Include="Crew\CrewBonus.vb" />
+    <Compile Include="Crew\CrewSkill.vb" />
     <Compile Include="Dev\IO.vb" />
     <Compile Include="Dev\Menu.vb" />
     <Compile Include="Goods\GoodType.vb" />

@@ -90,4 +90,18 @@
         GetRandom = targetList(roll)
         targetList.RemoveAt(roll)
     End Function
+    Public Shared Function FateRoll() As Integer
+        'roll 4 fudge dice for bell-curved -4 to +4
+
+        Dim total As Integer = 0
+        For n = 1 To 4
+            Dim roll As Integer = Rng.Next(1, 4)
+            Select Case roll
+                Case 1 ' do nothing
+                Case 2 : total += 1
+                Case 3 : total -= 1
+            End Select
+        Next
+        Return total
+    End Function
 End Class

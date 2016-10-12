@@ -12,7 +12,7 @@
         With crew
             .Name = GenerateName(race)
             .Race = race
-            .Health = 10
+            .Health = 100
 
             Dim cutlass As New CrewBonus
             With cutlass
@@ -98,34 +98,6 @@
         Next
         Return Nothing
     End Function
-
-    Public Class CrewBonus
-        Public Name As String
-        Public Slot As String
-        Public SkillBonuses As New Dictionary(Of CrewSkill, Integer)
-
-        Public Skill As CrewSkill
-        Public Damage As Integer
-        Public DamageType As DamageType
-        Public ReadOnly Property IsReady(ByVal ship As Ship) As Boolean
-            Get
-                If AmmoUse <= 0 Then Return True
-
-                Dim AmmoType As GoodType = GetAmmoType()
-                If Ship.GetGood(AmmoType) >= AmmoUse Then Return True
-
-                Return False
-            End Get
-        End Property
-
-        Public AmmoUse As Integer
-        Public Function GetAmmoType() As GoodType
-            Select Case DamageType
-                Case Pirates.DamageType.Firearms : Return GoodType.Bullets
-                Case Else : Return Nothing
-            End Select
-        End Function
-    End Class
 #End Region
 
 #Region "Skills"
@@ -193,17 +165,6 @@
             End If
         Next
     End Sub
-
-    Public Enum CrewSkill
-        Leadership = 1
-        Sailing
-        Navigation
-        Gunnery
-        Bracing
-
-        Firearms = 101
-        Melee
-    End Enum
 #End Region
 
 #Region "Combat"
@@ -221,8 +182,8 @@
         Dim skill As CrewSkill = weapon.Skill
 
         'roll skill vs skill
-        Dim attSkill As Integer = GetSkill(skill) + FateRoll()
-        Dim defSkill As Integer = target.GetSkill(skill) + FateRoll()
+        Dim attSkill As Integer = GetSkill(skill) + Dev.FateRoll()
+        Dim defSkill As Integer = target.GetSkill(skill) + Dev.FateRoll()
         If attSkill > defSkill Then
             'success, damage
             Dim damage As New Damage(0, weapon.Damage, weapon.DamageType, Name)
@@ -242,19 +203,26 @@
             Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off an attack from " & Name & ".")
         End If
     End Sub
-    Public Sub ShipAttack(ByVal accuracy As Integer, ByRef damage As Damage)
+    Public Sub ShipAttack(ByVal accuracy As Integer, ByVal damage As Damage)
         If damage.CrewDamage <= 0 Then Exit Sub
 
-        Dim skill As Integer = GetSkill(CrewSkill.Bracing) + FateRoll()
-        If skill > accuracy Then damage.CrewDamage = 1
-        Me.Damage(damage)
+        Dim skill As Integer = GetSkill(CrewSkill.Bracing) + Dev.FateRoll()
+        If skill > accuracy + Dev.FateRoll() Then
+            'Dim nuDamage As Damage = damage.Clone(damage)
+            'nuDamage.CrewDamage = Dev.Constrain(nuDamage.CrewDamage / 2, 1)
+            damage.CrewDamage = Dev.Constrain(damage.CrewDamage / 2, 1)
+            Me.Damage(damage)
+        Else
+            Me.Damage(damage)
+        End If
     End Sub
     Private Sub Damage(ByVal damage As Damage)
         If Ship Is Nothing Then Exit Sub
+        If damage.CrewDamage <= 0 Then Exit Sub
 
         DamageSustained += damage.CrewDamage
         DamageLog.Add(damage)
-        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.ShipDamage & " damage by " & damage.Sender & ".")
+        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.CrewDamage & " damage by " & damage.Sender & ".")
 
         If DamageSustained >= Health Then
             Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
@@ -262,20 +230,6 @@
             Report.Add("[" & Ship.ID & "] " & Name & " has perished in battle!")
         End If
     End Sub
-    Private Shared Function FateRoll() As Integer
-        'roll 4 fudge dice for bell-curved -4 to +4
-
-        Dim total As Integer = 0
-        For n = 1 To 4
-            Dim roll As Integer = Dev.Rng.Next(1, 4)
-            Select Case roll
-                Case 1 ' do nothing
-                Case 2 : total += 1
-                Case 3 : total -= 1
-            End Select
-        Next
-        Return total
-    End Function
 #End Region
 
 #Region "Movement"

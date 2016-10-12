@@ -23,7 +23,7 @@
             AddWeapon(quarter, New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, 1, 1))
 
             DamageSustained.Add(quarter, 0)
-            HullPoints.Add(quarter, 10)
+            HullPoints.Add(quarter, 100)
             Crews.Add(quarter, New List(Of Crew))
         Next
 
@@ -199,7 +199,7 @@
 
 #Region "Crew"
     Private Crews As New Dictionary(Of ShipQuarter, List(Of Crew))
-    Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, Optional ByVal role As Crew.CrewSkill = Nothing)
+    Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, Optional ByVal role As CrewSkill = Nothing)
         Crews(quarter).Add(crew)
         crew.Ship = Me
         If role <> Nothing Then crew.Role = role
@@ -220,7 +220,7 @@
             End If
         Next
     End Sub
-    Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As Crew.CrewSkill) As List(Of Crew)
+    Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As CrewSkill) As List(Of Crew)
         If role = Nothing Then Return Crews(quarter)
 
         Dim total As New List(Of Crew)
@@ -258,7 +258,7 @@
         Next
 
         If weapon.Name <> "Grappling Hooks" Then
-            weapon.Attack(attackDirection, attackTarget, GetCrews(quarter, Crew.CrewSkill.Gunnery))
+            weapon.Attack(attackDirection, attackTarget, GetCrews(quarter, CrewSkill.Gunnery))
         Else
             If TypeOf attackTarget Is Ship = False Then Exit Sub
             Dim attackShip As Ship = CType(attackTarget, Ship)

@@ -16,7 +16,7 @@
                 If CooldownCounter > 0 Then Return False
             End If
             If IgnoresCrewCount = False Then
-                If Ship.GetCrews(Quarter, Crew.CrewSkill.Gunnery).Count < CrewCount Then Return False
+                If Ship.GetCrews(Quarter, CrewSkill.Gunnery).Count < CrewCount Then Return False
             End If
             Return True
         End Get
@@ -35,10 +35,11 @@
 
     Public Sub Attack(ByVal attackDirection As BattleDirection, ByVal attackTarget As BattlefieldObject, ByVal crews As List(Of Crew))
         Dim targetQuarter As ShipQuarter = attackTarget.GetTargetQuarter(attackDirection)
-        Dim accuracy As Integer = 0
+        Dim accuracy As Double = 0
         For Each c In crews
-            accuracy += c.GetSkill(Crew.CrewSkill.Gunnery)
+            accuracy += c.GetSkill(CrewSkill.Gunnery)
         Next
+        accuracy = Math.Round(accuracy / crews.Count, 0, MidpointRounding.AwayFromZero)
 
         attackTarget.Damage(ShipDamage, targetQuarter, accuracy)
         CooldownCounter = CooldownMax
@@ -58,13 +59,7 @@
         CooldownMax = aCoolDown
     End Sub
     Public Sub New(ByVal aName As String, ByVal dShipDamage As Integer, ByVal dCrewDamage As Integer, ByVal dType As DamageType, ByVal aRange As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
-        Name = aName
-        Range = aRange
-        CrewCount = aCrewCount
-        CooldownMax = aCoolDown
-
-        Dim damage As New Damage(dShipDamage, dCrewDamage, dType, Name)
-        ShipDamage = damage
+        Me.New(aName, New Damage(dShipDamage, dCrewDamage, dType, aName), aRange, aCrewCount, aCoolDown)
     End Sub
     Public Overrides Function ToString() As String
         Return Name & " - Range " & Range & " - Damage " & ShipDamage.ShipDamage
