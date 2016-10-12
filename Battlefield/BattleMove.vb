@@ -3,4 +3,5 @@
     TurnRight
     TurnLeft
     Backwards
+    Halt
 End Enum

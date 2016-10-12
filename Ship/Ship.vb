@@ -35,6 +35,7 @@
         _AvailableMoves.Add({BattleMove.Forward, BattleMove.TurnLeft})
         _AvailableMoves.Add({BattleMove.Forward, BattleMove.TurnRight})
         _AvailableMoves.Add({BattleMove.Forward})
+        _AvailableMoves.Add({BattleMove.Halt})
     End Sub
 
 #Region "Specials"
@@ -132,7 +133,7 @@
         'bo is the attacker
         'this ship is the defender
 
-        Dim rammedDamage As New Damage(2, 0, DamageType.Ramming, bo.Name)
+        Dim rammedDamage As New Damage(20, 0, DamageType.Ramming, bo.Name)
         Dim attackDirection As BattleDirection
         For Each direction In [Enum].GetValues(GetType(BattleDirection))
             Dim current As BattlefieldObject = BattleSquare.GetAdjacent(direction, 1).Contents
@@ -144,7 +145,7 @@
         Dim targetQuarter As ShipQuarter = GetTargetQuarter(attackDirection)
         Damage(rammedDamage, targetQuarter, 5)
 
-        Dim rammerDamage As New Damage(1, 0, DamageType.Ramming, Name)
+        Dim rammerDamage As New Damage(10, 0, DamageType.Ramming, Name)
         bo.Damage(rammerDamage, ShipQuarter.Fore, 5)
 
         Return False
@@ -240,7 +241,8 @@
     Public Function GetWeapons(ByVal quarter As ShipQuarter) As List(Of ShipWeapon)
         Return Weapons(quarter)
     End Function
-    Public Sub Attack(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon)
+    Public Sub Attack(ByVal weapon As ShipWeapon)
+        Dim quarter As ShipQuarter = weapon.Quarter
         If Weapons(quarter).Contains(weapon) = False Then Exit Sub
         If weapon.IsReady = False Then Exit Sub
 

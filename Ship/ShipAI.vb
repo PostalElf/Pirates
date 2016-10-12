@@ -12,18 +12,23 @@
         PrimitiveAttack(playerShip)
     End Sub
     Private Sub PrimitiveAttack(ByRef playership As Ship)
+        For Each weapon In CheckTarget(BattleSquare, playership.BattleSquare)
+            Attack(weapon)
+        Next
+    End Sub
+    Private Function CheckTarget(ByVal start As Battlesquare, ByVal playershipSquare As Battlesquare) As List(Of ShipWeapon)
+        Dim total As New List(Of ShipWeapon)
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
             For Each weapon In GetWeapons(quarter)
                 If weapon.IsReady = False Then Continue For
-                Dim targetSquare As Battlesquare = BattleSquare.GetSubjectiveAdjacent(Facing, quarter, weapon.Range)
-                If targetSquare.Contents Is Nothing Then Continue For
-
-                If targetSquare.Contents.Equals(playership) Then
-                    Attack(quarter, weapon)
+                Dim targetSquare As Battlesquare = start.GetSubjectiveAdjacent(Facing, quarter, weapon.Range)
+                If targetSquare.Equals(playershipSquare) Then
+                    total.Add(weapon)
                 End If
             Next
         Next
-    End Sub
+        Return total
+    End Function
     Private Sub PrimitiveRouting(ByVal goal As Battlesquare)
         Dim firstPositions As New List(Of BattlePosition())
         Dim secondPositions As New Dictionary(Of BattlePosition(), List(Of BattlePosition()))
@@ -52,7 +57,7 @@
         Dim targetMoves As BattleMove() = Nothing
         For Each fp As BattlePosition() In firstPositions
             For Each sp In secondPositions(fp)
-                Dim pathCost As Integer = GetHeuristicDistance(fp, goal) + GetHeuristicDistance(sp, goal)
+                Dim pathCost As Integer = GetHeuristicDistance(fp, sp(sp.Length - 1).Square) + GetHeuristicDistance(sp, goal)
                 If pathCost < targetPathCost Then
                     targetFirstPosition = fp
                     targetPathCost = pathCost
@@ -72,15 +77,9 @@
         'add terrain cost
         raw += start.Square.PathingCost + goal.PathingCost
 
-        'consider ship position; broadside facing enemy is more valuable
-        For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
-            For Each weapon In Weapons(quarter)
-                If weapon.IsReady Then
-                    Dim range As Integer = weapon.Range
-                    Dim target As Battlesquare = start.Square.GetSubjectiveAdjacent(start.Facing, quarter, range)
-                    If target.Equals(goal) Then raw -= 10
-                End If
-            Next
+        'consider ship position; facing with ready weapon is more valuable
+        For Each weapon In CheckTarget(start.Square, goal)
+            raw -= 2
         Next
 
         Return raw

@@ -139,7 +139,7 @@
         Dim target As ShipWeapon = Nothing
         If weaponList.Count = 1 Then target = weaponList(0) Else target = Menu.getListChoice(weaponList, 0, vbCrLf & "Select weapon:")
         If target Is Nothing Then Exit Sub
-        ship.Attack(quarter, target)
+        ship.Attack(target)
     End Sub
     Private Function MovesContain(ByVal m1 As List(Of BattleMove()), ByVal m2 As BattleMove()) As Boolean
         For Each mm In m1
