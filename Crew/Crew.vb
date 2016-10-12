@@ -244,4 +244,34 @@
         If role <> Nothing Then Me.Role = role
     End Sub
 #End Region
+
+#Region "Console"
+    Public Sub ConsoleReport()
+        Dim s As String = Dev.vbSpace(1)
+        Dim ss As String = Dev.vbSpace(2)
+        Dim t As Integer = 13
+
+        Console.WriteLine(Name)
+        Console.WriteLine(s & "Race:   " & Race.ToString)
+
+        Console.WriteLine(s & "Skills: ")
+        For Each k In Skills.Keys
+            Console.WriteLine(ss & Dev.vbTab(k.ToString & ":", t) & GetSkill(k))
+        Next
+
+        If Equipment.Count > 0 Then ConsoleReportList(Equipment, "Gear:")
+        If Mutations.Count > 0 Then ConsoleReportList(Mutations, "Mutations:")
+    End Sub
+    Private Sub ConsoleReportList(ByVal l As List(Of CrewBonus), ByVal title As String)
+        Console.WriteLine(Dev.vbSpace(1) & title)
+        For Each i In l
+            With i
+                Console.Write(Dev.vbSpace(2) & "(" & .Slot & ") " & .Name)
+                If .Damage > 0 Then Console.Write(" - " & .Damage & " " & .DamageType.ToString)
+                If .AmmoUse > 0 Then Console.Write(" - " & .AmmoUse & " " & .GetAmmoType)
+                Console.WriteLine()
+            End With
+        Next
+    End Sub
+#End Region
 End Class

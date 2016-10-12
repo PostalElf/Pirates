@@ -1,11 +1,12 @@
 ﻿Module Module1
+    Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
 
     Sub Main()
         Battle()
     End Sub
 
     Private Sub Battle()
-        Dim rng As New Random
+        Dim rng As New Random(5)
         Dim battlefield As Battlefield = SetupBattlefield(rng)
         Dim playerShip As ShipPlayer = Nothing
         For Each Ship In battlefield.Combatants
@@ -148,19 +149,14 @@
             Console.WriteLine()
         Next
 
-        Select Case Menu.getListChoice(New List(Of String) From {"Move Sailor", "Move Gunner"}, 0)
-            Case "Move Sailor" : MoveCrew(ship, CrewSkill.Sailing)
-            Case "Move Gunner" : MoveCrew(ship, CrewSkill.Gunnery)
+        Select Case Menu.getListChoice(New List(Of String) From {"Move Crew", "Examine Crew"}, 0)
+            Case "Move Crew" : MoveCrew(ship)
+            Case "Examine Crew" : ExamineCrew(ship)
             Case Else : Exit Sub
         End Select
     End Sub
-    Private Sub MoveCrew(ByRef ship As ShipPlayer, ByVal role As CrewSkill)
-        Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
-        Dim choiceList As New List(Of Crew)
-        For Each q In quarters
-            choiceList.AddRange(Ship.GetCrews(q, role))
-        Next
-        Dim target As Crew = Menu.getListChoice(choiceList, 0, "Move who?")
+    Private Sub MoveCrew(ByRef ship As ShipPlayer)
+        Dim target As Crew = GetCrew(ship)
         Dim destination As ShipQuarter = Menu.getListChoice(Of ShipQuarter)(quarters, 0, "To where?")
         Dim newrole As CrewSkill = Nothing
         If Menu.confirmChoice(0, "Keep role? ") = True Then
@@ -168,8 +164,25 @@
         Else
             newrole = Menu.getListChoice(New List(Of CrewSkill) From {CrewSkill.Sailing, CrewSkill.Gunnery}, 0, "Select new role:")
         End If
-        Ship.AddCommand("Move", target, destination, newrole)
+        ship.AddCommand("Move", target, destination, newrole)
     End Sub
+    Private Sub ExamineCrew(ByRef ship As ShipPlayer)
+        Dim target As Crew = GetCrew(ship)
+        Console.WriteLine()
+        target.ConsoleReport()
+        Console.WriteLine()
+        Console.ReadKey()
+    End Sub
+    Private Function GetCrew(ByRef ship As ShipPlayer) As Crew
+        Dim role As CrewSkill = Menu.getListChoice(Of CrewSkill)(New List(Of CrewSkill)({CrewSkill.Sailing, CrewSkill.Gunnery}), 0, "From which role?")
+        Dim choiceList As New List(Of Crew)
+        For Each q In quarters
+            choiceList.AddRange(ship.GetCrews(q, role))
+        Next
+
+        Dim target As Crew = Menu.getListChoice(choiceList, 0, "Which crew member?")
+        Return target
+    End Function
     Private Sub GetPlayerAttack(ByRef ship As Ship, ByVal quarter As ShipQuarter)
         Dim weaponList As List(Of ShipWeapon) = ship.GetWeapons(quarter)
         If weaponList.Count = 0 Then Exit Sub
