@@ -19,7 +19,7 @@
                 .Name = "Belaying Pin"
                 .Damage = 1
                 .DamageType = DamageType.Blunt
-                .AmmoMax = 5
+                .AmmoUse = 0
                 .Slot = "Weapon"
             End With
             .AddBonus("equipment", cutlass)
@@ -97,17 +97,6 @@
         Next
         Return Nothing
     End Function
-    Public Sub ReloadWeapon(Optional ByRef weapon As CrewBonus = Nothing)
-        If weapon Is Nothing = False Then
-            weapon.Ammo = weapon.AmmoMax
-        Else
-            For Each cbl In CrewBonuses
-                For Each cb In cbl
-                    cb.Ammo = cb.AmmoMax
-                Next
-            Next
-        End If
-    End Sub
 
     Public Class CrewBonus
         Public Name As String
@@ -117,13 +106,24 @@
         Public Skill As CrewSkill
         Public Damage As Integer
         Public DamageType As DamageType
-        Public ReadOnly Property IsReady As Boolean
+        Public ReadOnly Property IsReady(ByVal ship As Ship) As Boolean
             Get
-                If Ammo > 0 Then Return True Else Return False
+                If AmmoUse <= 0 Then Return True
+
+                Dim AmmoType As GoodType = GetAmmoType()
+                If Ship.GetGood(AmmoType) >= AmmoUse Then Return True
+
+                Return False
             End Get
         End Property
-        Public Ammo As Integer
-        Public AmmoMax As Integer
+
+        Public AmmoUse As Integer
+        Public Function GetAmmoType() As GoodType
+            Select Case DamageType
+                Case Pirates.DamageType.Firearms : Return GoodType.Bullets
+                Case Else : Return Nothing
+            End Select
+        End Function
     End Class
 #End Region
 
@@ -164,7 +164,7 @@
         Dim bestWeaponValue As Integer = -1
         For Each cbl In CrewBonuses
             For Each cb In cbl
-                If cb.IsReady = True AndAlso cb.Damage > bestWeaponValue Then
+                If cb.IsReady(Ship) = True AndAlso cb.Damage > bestWeaponValue Then
                     bestWeapon = cb
                     bestWeaponValue = cb.Damage
                 End If
@@ -221,7 +221,9 @@
 
         Dim damage As New Damage(weapon.Damage, weapon.DamageType, Name)
         target.Damage(damage)
-        weapon.Ammo -= 1
+        If weapon.AmmoUse > 0 Then
+            Ship.AddGood(weapon.getAmmoType, -weapon.AmmoUse)
+        End If
     End Sub
     Private Sub Damage(ByVal damage As Damage)
         DamageSustained += damage.Amt

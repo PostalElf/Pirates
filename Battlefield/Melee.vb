@@ -34,13 +34,6 @@
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             If q <> defendingQuarter Then DefendersRe.AddRange(defender.GetCrews(q))
         Next
-
-        Dim cls As List(Of Crew)() = {Attackers, AttackersRe, Defenders, DefendersRe}
-        For Each cl In cls
-            For Each c In cl
-                c.ReloadWeapon()
-            Next
-        Next
     End Sub
 
     Public Sub Tick()

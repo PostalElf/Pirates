@@ -13,6 +13,11 @@
             Crews.Add(quarter, New List(Of Crew))
         Next
 
+        For Each gt In [Enum].GetValues(GetType(GoodType))
+            Goods.Add(gt, 0)
+            CarryingCapacity.Add(gt, 0)
+        Next
+
         'note: ties in heuristic distance are broken by how high the move is up in the list
         _AvailableMoves.Add({BattleMove.Forward, BattleMove.Forward})
         _AvailableMoves.Add({BattleMove.Forward, BattleMove.TurnLeft})
@@ -127,6 +132,18 @@
 
         Return False
     End Function
+#End Region
+
+#Region "Goods"
+    Private Goods As New Dictionary(Of GoodType, Integer)
+    Private CarryingCapacity As New Dictionary(Of GoodType, Integer)
+    Public Function GetGood(ByVal gt As GoodType) As Integer
+        Return Goods(gt)
+    End Function
+    Public Sub AddGood(ByVal gt As GoodType, ByVal value As Integer)
+        Goods(gt) += value
+        Dev.Constrain(Goods(gt), 0, CarryingCapacity(gt))
+    End Sub
 #End Region
 
 #Region "Crew"
