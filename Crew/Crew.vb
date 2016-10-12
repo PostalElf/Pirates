@@ -17,6 +17,7 @@
             Dim cutlass As New CrewBonus
             With cutlass
                 .Name = "Belaying Pin"
+                .Skill = CrewSkill.Melee
                 .Damage = 1
                 .DamageType = DamageType.Blunt
                 .AmmoUse = 0
@@ -215,11 +216,28 @@
     Public Sub MeleeAttack(ByRef target As Crew)
         Dim weapon As CrewBonus = GetBestWeapon()
         If weapon Is Nothing Then Exit Sub
+        Dim skill As CrewSkill = weapon.Skill
 
-        Dim damage As New Damage(weapon.Damage, weapon.DamageType, Name)
-        target.Damage(damage)
-        If weapon.AmmoUse > 0 Then
-            Ship.AddGood(weapon.getAmmoType, -weapon.AmmoUse)
+        'roll skill vs skill
+        Dim attSkill As Integer = GetSkill(skill) + FateRoll()
+        Dim defSkill As Integer = target.GetSkill(skill) + FateRoll()
+        If attSkill > defSkill Then
+            'success, damage
+            Dim damage As New Damage(weapon.Damage, weapon.DamageType, Name)
+            target.Damage(damage)
+            If weapon.AmmoUse > 0 Then
+                Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
+            End If
+        ElseIf attSkill = defSkill Then
+            'glancing hit
+            Dim damage As New Damage(1, weapon.DamageType, Name)
+            target.Damage(damage)
+            If weapon.AmmoUse > 0 Then
+                Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
+            End If
+        Else
+            'miss
+            Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off an attack from " & Name & ".")
         End If
     End Sub
     Private Sub Damage(ByVal damage As Damage)
@@ -227,14 +245,28 @@
 
         DamageSustained += damage.Amt
         DamageLog.Add(damage)
-        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.Amt & " damage.")
+        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.Amt & " damage by " & damage.Sender & ".")
 
         If DamageSustained >= Health Then
             Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
             battlefield.DeadCrew.Add(Me)
-            Report.Add(Name & " has perished in battle!")
+            Report.Add("[" & Ship.ID & "] " & Name & " has perished in battle!")
         End If
     End Sub
+    Private Shared Function FateRoll() As Integer
+        'roll 4 fudge dice for bell-curved -4 to +4
+
+        Dim total As Integer = 0
+        For n = 1 To 4
+            Dim roll As Integer = Dev.Rng.Next(1, 4)
+            Select Case roll
+                Case 1 ' do nothing
+                Case 2 : total += 1
+                Case 3 : total -= 1
+            End Select
+        Next
+        Return total
+    End Function
 #End Region
 
 #Region "Movement"
