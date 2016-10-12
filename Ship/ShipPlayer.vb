@@ -1,6 +1,14 @@
 ﻿Public Class ShipPlayer
     Inherits Ship
 
+#Region "Specials"
+    Protected IgnoresMoveTokens As Boolean = False
+    Public Overloads Sub Cheaterbug()
+        MyBase.Cheaterbug()
+        IgnoresMoveTokens = True
+    End Sub
+#End Region
+
 #Region "Move Tokens"
     Private MoveTokens As New List(Of BattleMove())
     Private MoveTokenProgress As New Dictionary(Of ShipQuarter, Integer)
@@ -20,13 +28,14 @@
         End Get
     End Property
 
-    Public Function CheckSpendMoveToken(ByVal moveToken As BattleMove())
+    Public Function CheckSpendMoveToken(ByVal moveToken As BattleMove()) As Boolean
+        If IgnoresMoveTokens = True Then Return True
         If MovesIndexOf(MoveTokens, moveToken) = -1 Then Return False
         Return True
     End Function
     Public Sub SpendMoveToken(ByVal moveToken As BattleMove())
         If CheckSpendMoveToken(moveToken) = False Then Exit Sub
-        MoveTokens.RemoveAt(MovesIndexOf(MoveTokens, moveToken))
+        If IgnoresMoveTokens = False Then MoveTokens.RemoveAt(MovesIndexOf(MoveTokens, moveToken))
         Move(moveToken)
     End Sub
     Private Function MovesIndexOf(ByVal m1 As List(Of BattleMove()), ByVal m2 As BattleMove()) As Integer
