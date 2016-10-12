@@ -1,6 +1,7 @@
 ﻿Public Class ShipPlayer
     Inherits Ship
 
+#Region "Move Tokens"
     Private MoveTokens As New List(Of BattleMove())
     Private MoveTokenProgress As New Dictionary(Of ShipQuarter, Integer)
     Private Const MoveTokenThreshold As Integer = 5
@@ -18,6 +19,32 @@
             End If
         End Get
     End Property
+
+    Public Function CheckSpendMoveToken(ByVal moveToken As BattleMove())
+        If MovesIndexOf(MoveTokens, moveToken) = -1 Then Return False
+        Return True
+    End Function
+    Public Sub SpendMoveToken(ByVal moveToken As BattleMove())
+        If CheckSpendMoveToken(moveToken) = False Then Exit Sub
+        MoveTokens.RemoveAt(MovesIndexOf(MoveTokens, moveToken))
+        Move(moveToken)
+    End Sub
+    Private Function MovesIndexOf(ByVal m1 As List(Of BattleMove()), ByVal m2 As BattleMove()) As Integer
+        For n = 0 To m1.Count - 1
+            Dim mm = m1(n)
+            If MovesMatch(mm, m2) Then Return n
+        Next
+        Return -1
+    End Function
+    Private Function MovesMatch(ByVal m1 As BattleMove(), ByVal m2 As BattleMove()) As Boolean
+        If m1.Length <> m2.Length Then Return False
+
+        For n = 0 To m1.Length - 1
+            If m1(n) <> m2(n) Then Return False
+        Next
+        Return True
+    End Function
+#End Region
 
     Public Overloads Sub EnterCombat(ByRef battlefield As Battlefield, ByRef combatantList As List(Of Ship))
         MyBase.EnterCombat(battlefield, combatantList)
@@ -67,28 +94,4 @@
             End While
         Next
     End Sub
-    Public Function CheckSpendMoveToken(ByVal moveToken As BattleMove())
-        If MovesIndexOf(MoveTokens, moveToken) = -1 Then Return False
-        Return True
-    End Function
-    Public Sub SpendMoveToken(ByVal moveToken As BattleMove())
-        If CheckSpendMoveToken(moveToken) = False Then Exit Sub
-        MoveTokens.RemoveAt(MovesIndexOf(MoveTokens, moveToken))
-        Move(moveToken)
-    End Sub
-    Private Function MovesIndexOf(ByVal m1 As List(Of BattleMove()), ByVal m2 As BattleMove()) As Integer
-        For n = 0 To m1.Count - 1
-            Dim mm = m1(n)
-            If MovesMatch(mm, m2) Then Return n
-        Next
-        Return -1
-    End Function
-    Private Function MovesMatch(ByVal m1 As BattleMove(), ByVal m2 As BattleMove()) As Boolean
-        If m1.Length <> m2.Length Then Return False
-
-        For n = 0 To m1.Length - 1
-            If m1(n) <> m2(n) Then Return False
-        Next
-        Return True
-    End Function
 End Class
