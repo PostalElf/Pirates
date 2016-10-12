@@ -82,4 +82,12 @@
         Next
         Return Nothing
     End Function
+
+    Public Shared Function GetRandom(Of T)(ByRef targetList As List(Of T)) As T
+        If targetList.Count = 0 Then Return Nothing
+
+        Dim roll As Integer = Rng.Next(targetList.Count - 1)
+        GetRandom = targetList(roll)
+        targetList.RemoveAt(roll)
+    End Function
 End Class

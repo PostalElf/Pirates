@@ -26,10 +26,8 @@
 
             Dim skills As New List(Of CrewSkill)([Enum].GetValues(GetType(CrewSkill)))
             For n = 1 To 2
-                Dim roll As Integer = rng.Next(skills.Count - 1)
-                Dim skill As CrewSkill = skills(roll)
-                skills.RemoveAt(roll)
-                .AddSkillXP(skill, SkillThresholds(n))
+                Dim cs As CrewSkill = Dev.GetRandom(Of CrewSkill)(skills)
+                .AddSkillXP(cs, SkillThresholds(n))
             Next
         End With
         Return crew

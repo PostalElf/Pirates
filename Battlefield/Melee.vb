@@ -80,13 +80,18 @@
         Next
 
         'reinforcements
-        If AttackersRe Is Nothing = False Then
-            Attackers.AddRange(AttackersRe)
-            AttackersRe = Nothing
+        Const ReinforcementCount As Integer = 2
+        If AttackersRe.Count > 0 Then
+            For n = 1 To ReinforcementCount
+                Dim c As Crew = Dev.GetRandom(Of Crew)(AttackersRe)
+                If c Is Nothing = False Then Attackers.Add(c)
+            Next
         End If
-        If DefendersRe Is Nothing = False Then
-            Defenders.AddRange(DefendersRe)
-            DefendersRe = Nothing
+        If DefendersRe.Count > 0 Then
+            For n = 1 To ReinforcementCount
+                Dim c As Crew = Dev.GetRandom(Of Crew)(DefendersRe)
+                If c Is Nothing = False Then Defenders.Add(c)
+            Next
         End If
     End Sub
     Public Function Contains(ByVal ship As Ship) As Boolean
