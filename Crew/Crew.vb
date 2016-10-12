@@ -12,6 +12,17 @@
         With crew
             .Name = GenerateName(race)
             .Race = race
+            .Health = 10
+
+            Dim cutlass As New CrewBonus
+            With cutlass
+                .Name = "Cutlass"
+                .Damage = 1
+                .DamageType = DamageType.Blade
+                .AmmoMax = 10
+                .Slot = "Weapon"
+            End With
+            .AddBonus("equipment", cutlass)
         End With
         Return crew
     End Function
@@ -44,10 +55,10 @@
     End Enum
 
 #Region "Bonuses"
-    Private CrewBonuses As List(Of CrewBonus)() = {Scars, Mutations, Equipment}
     Private Scars As New List(Of CrewBonus)
     Private Mutations As New List(Of CrewBonus)
     Private Equipment As New List(Of CrewBonus)
+    Private CrewBonuses As List(Of CrewBonus)() = {Scars, Mutations, Equipment}
     Private Sub AddBonus(ByVal listName As String, ByVal effect As CrewBonus)
         'check slot against all lists
         For Each cbl In CrewBonuses
@@ -200,6 +211,8 @@
     End Sub
     Public Sub MeleeAttack(ByRef target As Crew)
         Dim weapon As CrewBonus = GetBestWeapon()
+        If weapon Is Nothing Then Exit Sub
+
         Dim damage As New Damage(weapon.Damage, weapon.DamageType, Name)
         target.Damage(damage)
         weapon.Ammo -= 1

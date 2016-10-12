@@ -173,7 +173,8 @@
         Dim attackTarget As BattlefieldObject = attackSquare.Contents
         Dim attackDirection As BattleDirection
         For Each direction In [Enum].GetValues(GetType(BattleDirection))
-            If BattleSquare.GetAdjacent(attackDirection, range).Equals(attackSquare) Then
+            Dim targetSquare As Battlesquare = BattleSquare.GetAdjacent(direction, range)
+            If targetSquare.Equals(attackSquare) Then
                 attackDirection = direction
                 Exit For
             End If

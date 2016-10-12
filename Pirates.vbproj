@@ -83,7 +83,7 @@
     <Compile Include="Dev\Menu.vb" />
     <Compile Include="Report.vb" />
     <Compile Include="Ship\Faction.vb" />
-    <Compile Include="Ship\ShipDamage.vb" />
+    <Compile Include="Damage.vb" />
     <Compile Include="Ship\DamageType.vb" />
     <Compile Include="Ship\ShipPlayer.vb" />
     <Compile Include="Ship\ShipQuarter.vb" />

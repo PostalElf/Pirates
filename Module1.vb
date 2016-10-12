@@ -32,7 +32,7 @@
             Next
 
             For Each Melee In battlefield.Melees
-                Melee.tick()
+                Melee.Tick()
             Next
 
             battlefield.CleanUp()
@@ -102,6 +102,8 @@
                 Exit Sub
             Case ConsoleKey.Escape : End
         End Select
+
+        If ship.InMelee = True Then Exit Sub
 
         If targetMove Is Nothing = False Then
             If MovesContain(ship.AvailableMoves, targetMove) Then

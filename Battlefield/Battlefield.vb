@@ -107,13 +107,21 @@
     Public Sub CleanUp()
         CleanDeadCrew()
         CleanDeadObjects()
+        CleanDeadMelees()
     End Sub
     Private Sub CleanDeadObjects()
         For n = DeadObjects.Count - 1 To 0 Step -1
-            DeadObjects(n).BattleSquare.Contents = Nothing
-            DeadObjects(n).BattleSquare = Nothing
+            If DeadObjects(n).BattleSquare Is Nothing = False Then
+                DeadObjects(n).BattleSquare.Contents = Nothing
+                DeadObjects(n).BattleSquare = Nothing
+            End If
 
             If TypeOf DeadObjects(n) Is Ship Then Combatants.Remove(DeadObjects(n))
+            For Each m In Melees
+                If m.Contains(DeadObjects(n)) = True Then
+                    m.IsOver = True
+                End If
+            Next
 
             DeadObjects(n) = Nothing
             DeadObjects.RemoveAt(n)
@@ -124,6 +132,15 @@
             DeadCrew(n).Ship.RemoveCrew(DeadCrew(n))
             DeadCrew(n) = Nothing
             DeadCrew.RemoveAt(n)
+        Next
+    End Sub
+    Private Sub CleanDeadMelees()
+        For n = Melees.Count - 1 To 0 Step -1
+            If Melees(n).IsOver = True Then
+                Melees(n).Battlefield = Nothing
+                Melees(n) = Nothing
+                Melees.RemoveAt(n)
+            End If
         Next
     End Sub
 End Class

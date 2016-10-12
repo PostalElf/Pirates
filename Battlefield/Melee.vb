@@ -1,5 +1,19 @@
 ﻿Public Class Melee
     Public Battlefield As Battlefield
+    Private _IsOver As Boolean = False
+    Public Property IsOver As Boolean
+        Get
+            Return _IsOver
+        End Get
+        Set(ByVal value As Boolean)
+            _IsOver = value
+            If value = True Then
+                AttackerShip.InMelee = False
+                DefenderShip.InMelee = False
+            End If
+        End Set
+    End Property
+
     Private AttackerShip As Ship
     Private Attackers As New List(Of Crew)
     Private AttackersRe As New List(Of Crew)
@@ -30,6 +44,27 @@
     End Sub
 
     Public Sub Tick()
+        Dim winner As Ship = Nothing
+        Dim loser As Ship = Nothing
+        If Attackers.Count = 0 Then
+            winner = DefenderShip
+            loser = AttackerShip
+        ElseIf Defenders.Count = 0 Then
+            'attackers win
+            winner = AttackerShip
+            loser = DefenderShip
+        End If
+        If winner Is Nothing = False Then
+            Report.Add(loser.Name & " has been sunk in the melee!")
+            winner.InMelee = False
+            loser.InMelee = False
+            Battlefield.DeadObjects.Add(loser)
+
+            IsOver = True
+            Exit Sub
+        End If
+
+
         'attackers attack
         Dim targets As New List(Of Crew)(Defenders)
         For Each Crew In Attackers
@@ -54,4 +89,7 @@
             DefendersRe = Nothing
         End If
     End Sub
+    Public Function Contains(ByVal ship As Ship) As Boolean
+        If AttackerShip.Equals(ship) OrElse DefenderShip.Equals(ship) Then Return True Else Return False
+    End Function
 End Class
