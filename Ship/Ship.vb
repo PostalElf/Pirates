@@ -120,7 +120,8 @@
             End If
 
             'check if continueMovement was flagged
-            If continueMovement = False Then Exit For
+            'disabled to allow for better movement
+            'If continueMovement = False Then Exit For
         Next
 
         JustTurned = turn
@@ -188,6 +189,9 @@
     Public Sub AddGood(ByVal gt As GoodType, ByVal value As Integer)
         Goods(gt) += value
         Dev.Constrain(Goods(gt), 0, GetCarryingCapacity(gt))
+    End Sub
+    Public Sub AddGood(ByVal good As Good)
+        AddGood(good.Type, good.Qty)
     End Sub
 
     Public Class Crate
