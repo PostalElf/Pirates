@@ -91,6 +91,7 @@
     <Compile Include="Ship\Faction.vb" />
     <Compile Include="Battlefield\Damage\Damage.vb" />
     <Compile Include="Battlefield\Damage\DamageType.vb" />
+    <Compile Include="Ship\ShipModule.vb" />
     <Compile Include="Ship\ShipPlayer.vb" />
     <Compile Include="Ship\ShipQuarter.vb" />
     <Compile Include="Dev\Dev.vb" />
