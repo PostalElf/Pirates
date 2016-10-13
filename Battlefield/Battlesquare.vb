@@ -13,8 +13,10 @@
 #End Region
 
     Private Function GetShiftedSquare(ByVal xShift As Integer, ByVal yShift As Integer) As Battlesquare
-        Dim pX As Integer = Dev.Constrain(X + xShift, 0, Battlefield.MaxX)
-        Dim pY As Integer = Dev.Constrain(Y + yShift, 0, Battlefield.MaxY)
+        'Dim pX As Integer = Dev.Constrain(X + xShift, 0, Battlefield.MaxX)
+        'Dim pY As Integer = Dev.Constrain(Y + yShift, 0, Battlefield.MaxY)
+        Dim pX As Integer = X + xShift
+        Dim pY As Integer = Y + yShift
         Return Battlefield(pX, pY)
     End Function
     Public Function GetAdjacent(ByVal direction As BattleDirection, ByVal distance As Integer) As Battlesquare
@@ -33,7 +35,8 @@
 
         Dim total As New Queue(Of Battlesquare)
         For n = 1 To distance
-            total.Enqueue(GetAdjacent(direction, n))
+            Dim sq As Battlesquare = GetAdjacent(direction, n)
+            If sq Is Nothing = False Then total.Enqueue(sq)
         Next
         Return total
     End Function
@@ -57,7 +60,8 @@
         Dim total As New Queue(Of Battlesquare)
         Dim d As BattleDirection = GetSubjectiveDirection(facing, quarter)
         For n = 1 To distance
-            total.Enqueue(GetSubjectiveAdjacent(facing, quarter, n))
+            Dim sq As Battlesquare = GetSubjectiveAdjacent(facing, quarter, n)
+            If sq Is Nothing = False Then total.Enqueue(sq)
         Next
         Return total
     End Function
@@ -107,8 +111,8 @@
             Select Case move
                 Case BattleMove.TurnLeft : f -= 1
                 Case BattleMove.TurnRight : f += 1
-                Case BattleMove.Forward : current = current.GetSubjectiveAdjacent(f, ShipQuarter.Fore, 1)
-                Case BattleMove.Backwards : current = current.GetSubjectiveAdjacent(f, ShipQuarter.Aft, 1)
+                Case BattleMove.Forward : If current Is Nothing = False Then current = current.GetSubjectiveAdjacent(f, ShipQuarter.Fore, 1)
+                Case BattleMove.Backwards : If current Is Nothing = False Then current = current.GetSubjectiveAdjacent(f, ShipQuarter.Aft, 1)
             End Select
 
             If f < 0 Then f = 3
