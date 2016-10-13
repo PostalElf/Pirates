@@ -69,9 +69,6 @@
         ExecuteMoves(targetMoves)
     End Sub
     Private Function GetHeuristicDistance(ByVal start As BattlePosition, ByVal goal As Battlesquare) As Double
-        If start.Square Is Nothing Then Return 1000
-        If goal Is Nothing Then Return 1000
-
         'manhattan distance as base
         Dim dx As Integer = Math.Abs(start.Square.X - goal.X)
         Dim dy As Integer = Math.Abs(start.Square.Y - goal.Y)
