@@ -182,7 +182,7 @@
 #Region "Goods"
     Protected HullSpace As Integer
     Private Crates As New List(Of GoodCrate)
-    Private Function GetCarryingCapacity(ByVal gt As GoodType) As Integer
+    Private Function GetGoodCapacity(ByVal gt As GoodType) As Integer
         Dim total As Integer = 0
         For Each Crate In Crates
             If Crate.GoodType = gt Then total += Crate.Capacity
@@ -208,12 +208,12 @@
         Return Goods(gt)
     End Function
     Public Function CheckAddGood(ByVal gt As GoodType, ByVal value As Integer) As Boolean
-        If Goods(gt) + value > GetCarryingCapacity(gt) Then Return False
+        If Goods(gt) + value > GetGoodCapacity(gt) Then Return False
         Return True
     End Function
     Public Sub AddGood(ByVal gt As GoodType, ByVal value As Integer)
         Goods(gt) += value
-        Dev.Constrain(Goods(gt), 0, GetCarryingCapacity(gt))
+        Dev.Constrain(Goods(gt), 0, GetGoodCapacity(gt))
     End Sub
     Public Sub AddGood(ByVal good As Good)
         AddGood(good.Type, good.Qty)
@@ -240,6 +240,15 @@
         m.Ship = Nothing
         HullSpace += m.HullCost
     End Sub
+    Public Function GetModuleCapacity(ByVal type As ShipModule.ModuleType) As Integer
+        Dim total As Integer = 0
+        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+            For Each m In Modules(q)
+                If m.Type = type Then total += m.Capacity
+            Next
+        Next
+        Return total
+    End Function
 #End Region
 
 #Region "Crew"
@@ -249,7 +258,7 @@
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             crewCount += GetCrews(q, Nothing).Count
         Next
-        If crewCount + 1 > GetCarryingCapacity(GoodType.Crew) Then Return False
+        If crewCount + 1 > GetModuleCapacity(ShipModule.ModuleType.Crew) Then Return False
 
         Return True
     End Function

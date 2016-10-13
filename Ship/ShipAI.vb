@@ -38,7 +38,7 @@
             End Select
 
             .HullSpace = Pirates.Ship.GenerateHullSpace(.Type)
-            .AddCrate(New GoodCrate("Standard Quarters", GoodType.Crew, 10, 5))
+            .AddModule(ShipQuarter.Fore, New ShipModule("Quarters", ShipModule.ModuleType.Crew, 5, 1))
 
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
                 .HullPoints(q) = Pirates.Ship.GenerateHullPoints(.Type)

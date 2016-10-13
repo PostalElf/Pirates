@@ -1,5 +1,4 @@
 ﻿Public Enum GoodType
-    Crew
     Grapplers
     Bullets
     Shot
