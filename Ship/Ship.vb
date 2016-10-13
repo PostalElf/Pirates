@@ -27,7 +27,7 @@
         Next
 
         For Each gt In [Enum].GetValues(GetType(GoodType))
-            Goods.Add(gt, 0)
+            Goods.Add(gt, Good.Generate(gt))
         Next
 
         'note: ties in heuristic distance are broken by how high the move is up in the list
@@ -181,43 +181,21 @@
 
 #Region "Goods"
     Protected HullSpace As Integer
-    Private Crates As New List(Of GoodCrate)
-    Private Function GetGoodCapacity(ByVal gt As GoodType) As Integer
-        Dim total As Integer = 0
-        For Each Crate In Crates
-            If Crate.GoodType = gt Then total += Crate.Capacity
-        Next
-        Return total
-    End Function
-    Public Function CheckAddCrate(ByVal crate As GoodCrate) As Boolean
-        If HullSpace - crate.HullCost < 0 Then Return False
+    Private Goods As New Dictionary(Of GoodType, Good)
+    Public Function CheckAddGood(ByVal good As Good) As Boolean
+        Dim total As Good = good + Goods(good.Type)
+        If total.TotalHullCost > HullSpace Then Return False
         Return True
     End Function
-    Public Sub AddCrate(ByVal crate As GoodCrate)
-        Crates.Add(crate)
-        HullSpace -= crate.HullCost
-    End Sub
-    Public Sub RemoveCrate(ByVal crate As GoodCrate)
-        If Crates.Contains(crate) = False Then Exit Sub
-        Crates.Remove(crate)
-        HullSpace += crate.HullCost
-    End Sub
-
-    Private Goods As New Dictionary(Of GoodType, Integer)
-    Public Function GetGood(ByVal gt As GoodType) As Integer
-        Return Goods(gt)
-    End Function
-    Public Function CheckAddGood(ByVal gt As GoodType, ByVal value As Integer) As Boolean
-        If Goods(gt) + value > GetGoodCapacity(gt) Then Return False
-        Return True
-    End Function
-    Public Sub AddGood(ByVal gt As GoodType, ByVal value As Integer)
-        Goods(gt) += value
-        Dev.Constrain(Goods(gt), 0, GetGoodCapacity(gt))
-    End Sub
     Public Sub AddGood(ByVal good As Good)
-        AddGood(good.Type, good.Qty)
+        Goods(good.Type) += good
     End Sub
+    Public Sub AddGood(ByVal gt As GoodType, ByVal qty As Integer)
+        AddGood(Good.Generate(gt, qty))
+    End Sub
+    Public Function GetGood(ByVal gt As GoodType) As Integer
+        Return Goods(gt).Qty
+    End Function
 #End Region
 
 #Region "Modules"

@@ -1,7 +1,7 @@
 ﻿Public Class ShipWeapon
     Public Name As String
     Public Damage As Damage
-    Public AmmoType As Good
+    Public AmmoUse As Good
     Public Range As Integer
     Public Ship As Ship
     Public Quarter As ShipQuarter
@@ -21,7 +21,7 @@
                 If Ship.GetCrews(Quarter, CrewSkill.Gunnery).Count < CrewCount Then Return False
             End If
             If IgnoresAmmo = False Then
-                If Ship.GetGood(AmmoType.Type) < AmmoType.Qty Then Return False
+                If Ship.GetGood(AmmoUse.Type) < AmmoUse.Qty Then Return False
             End If
             Return True
         End Get
@@ -59,19 +59,19 @@
 
     Public Sub New()
     End Sub
-    Public Sub New(ByVal aName As String, ByVal aShipDamage As Damage, ByVal aRange As Integer, ByVal aAmmoType As Good, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
+    Public Sub New(ByVal aName As String, ByVal aShipDamage As Damage, ByVal aRange As Integer, ByVal aAmmoType As GoodType, ByVal aAmmoPerShot As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
         Name = aName
         Damage = aShipDamage
         Damage.Sender = Name
         Range = aRange
-        AmmoType = aAmmoType
+        AmmoUse = Good.Generate(aAmmoType, aAmmoPerShot)
         CrewCount = aCrewCount
         CooldownMax = aCoolDown
     End Sub
     Public Sub New(ByVal aName As String, _
                    ByVal dShipDamage As Integer, ByVal dCrewDamage As Integer, ByVal dType As DamageType, _
-                   ByVal aRange As Integer, ByVal aAmmoType As Good, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
-        Me.New(aName, New Damage(dShipDamage, dCrewDamage, dType, aName), aRange, aAmmoType, aCrewCount, aCoolDown)
+                   ByVal aRange As Integer, ByVal aAmmoType As GoodType, ByVal aAmmoPerShot As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer)
+        Me.New(aName, New Damage(dShipDamage, dCrewDamage, dType, aName), aRange, aAmmoType, aAmmoPerShot, aCrewCount, aCoolDown)
     End Sub
     Public Overrides Function ToString() As String
         Return Name & " - Range " & Range & " - Damage " & Damage.ShipDamage
@@ -81,7 +81,7 @@
         With w
             .Name = Name
             .Damage = Damage.Clone
-            .AmmoType = AmmoType
+            .AmmoUse = AmmoUse
             .Range = Range
             .Ship = Ship
             .Quarter = Quarter
