@@ -51,6 +51,14 @@
         total = total.ToUpper
         Return total
     End Function
+    Protected Shared Function GenerateHullPoints(ByVal type As ShipType) As Integer
+        Dim total As Integer() = {0, 100, 120, 150, 200, 250}
+        Return total(type)
+    End Function
+    Protected Shared Function GenerateHullSpace(ByVal type As ShipType) As Integer
+        Dim total As Integer() = {25, 40, 75, 100, 150, 180}
+        Return total(type)
+    End Function
 
 #Region "Specials"
     Protected IgnoresJustTurned As Boolean = False

@@ -22,38 +22,26 @@
             .Name = GenerateName()
             .ID = GenerateID(.Name)
 
-            Dim hullpoints As Integer
-            Dim hullspace As Integer
             Select Case type
                 Case ShipType.Sloop
-                    hullpoints = 100
-                    hullspace = 25
                     GenerateWeapon(ship, cannons, ShipQuarter.Starboard)
                     GenerateWeapon(ship, swivel, ShipQuarter.Fore)
 
                 Case ShipType.Schooner
-                    hullpoints = 120
-                    hullspace = 30
                     GenerateWeapon(ship, cannons, ShipQuarter.Starboard)
                     GenerateWeapon(ship, cannons, ShipQuarter.Port)
                     GenerateWeapon(ship, hailshot, ShipQuarter.Fore)
 
                 Case ShipType.Brigantine
-                    hullpoints = 200
-                    hullspace = 50
                 Case ShipType.Brig
-                    hullpoints = 250
-                    hullspace = 100
                 Case ShipType.Frigate
-                    hullpoints = 300
-                    hullspace = 120
             End Select
 
-            .HullSpace = hullspace
+            .HullSpace = Pirates.Ship.GenerateHullSpace(.Type)
             .AddCrate(New GoodCrate("Standard Quarters", GoodType.Crew, 10, 5))
 
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
-                .HullPoints(q) = hullpoints
+                .HullPoints(q) = Pirates.Ship.GenerateHullPoints(.Type)
                 .AddCrew(q, Crew.Generate(.Race), CrewSkill.Sailing)
             Next
 
