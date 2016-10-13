@@ -50,7 +50,7 @@
         accuracy = Math.Round(accuracy / crews.Count, 0, MidpointRounding.AwayFromZero)
 
         attackTarget.Damage(Damage, targetQuarter, accuracy)
-        CooldownCounter = CooldownMax
+        CooldownCounter = CooldownMax + 1
     End Sub
     Public Sub Tick()
         Cooldown(1)
