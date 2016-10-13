@@ -3,5 +3,6 @@
     Grapplers
     Bullets
     Shot
+    Explosive
     Grapeshot
 End Enum

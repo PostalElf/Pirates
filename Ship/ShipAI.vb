@@ -5,18 +5,14 @@
         MyBase.New()
     End Sub
     Public Shared Function Generate(ByVal type As ShipType, Optional ByVal faction As Faction = Nothing, Optional ByVal race As CrewRace = Nothing) As Ship
-        Dim crate As New GoodCrate("Standard Shot Crate", GoodType.Shot, 50, 2)
-        Dim bCrate As New GoodCrate("Standard Bullets Crate", GoodType.Bullets, 100, 2)
-        Dim housing As New GoodCrate("Standard Quarters", GoodType.Crew, 10, 5)
         Dim cannons As New ShipWeapon("Cannons", 20, 10, DamageType.Cannon, 2, New Good(GoodType.Shot, 5), 2, 3)
-        Dim swivel As New ShipWeapon("Swivelgun", 10, 10, DamageType.Firearms, 1, New Good(GoodType.Bullets, 5), 1, 2)
         cannons.HullCost = 5
+        Dim swivel As New ShipWeapon("Swivelgun", 10, 10, DamageType.Firearms, 1, New Good(GoodType.Bullets, 5), 1, 2)
         swivel.HullCost = 3
-
-        Dim crewCount As New Dictionary(Of ShipQuarter, Integer)
-        For Each q In [Enum].GetValues(GetType(ShipQuarter))
-            crewCount.Add(q, 1)
-        Next
+        Dim hailshot As New ShipWeapon("Hailshot", 20, 0, DamageType.Cannon, 2, New Good(GoodType.Shot, 2), 2, 4)
+        hailshot.HullCost = 3
+        Dim bombard As New ShipWeapon("Bombard", 30, 10, DamageType.Cannon, 2, New Good(GoodType.Explosive, 10), 3, 5)
+        bombard.HullCost = 10
 
         Dim ship As New ShipAI
         With ship
@@ -32,20 +28,15 @@
                 Case ShipType.Sloop
                     hullpoints = 100
                     hullspace = 25
-                    .AddCrate(housing.Clone)
-                    .AddCrate(crate.Clone)
-                    .AddGood(GoodType.Shot, 50)
-                    .AddCrate(bCrate.Clone)
-                    .AddGood(GoodType.Bullets, 50)
-                    .AddWeapon(ShipQuarter.Starboard, cannons.Clone)
-                    crewCount(ShipQuarter.Starboard) += 2
-                    .AddWeapon(ShipQuarter.Fore, swivel.Clone)
-                    crewCount(ShipQuarter.Fore) += 1
+                    GenerateWeapon(ship, cannons, ShipQuarter.Starboard)
+                    GenerateWeapon(ship, swivel, ShipQuarter.Fore)
 
                 Case ShipType.Schooner
                     hullpoints = 120
                     hullspace = 30
-
+                    GenerateWeapon(ship, cannons, ShipQuarter.Starboard)
+                    GenerateWeapon(ship, cannons, ShipQuarter.Port)
+                    GenerateWeapon(ship, hailshot, ShipQuarter.Fore)
 
                 Case ShipType.Brigantine
                     hullpoints = 200
@@ -58,18 +49,39 @@
                     hullspace = 120
             End Select
 
+            .HullSpace = hullspace
+            .AddCrate(New GoodCrate("Standard Quarters", GoodType.Crew, 10, 5))
+
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
                 .HullPoints(q) = hullpoints
-                For n = 1 To crewCount(q)
-                    Dim role As CrewSkill = CrewSkill.Gunnery
-                    If n = 1 Then role = CrewSkill.Sailing
-                    .AddCrew(q, Crew.Generate(.Race), role)
+                .AddCrew(q, Crew.Generate(.Race), CrewSkill.Sailing)
+            Next
+
+            'add loot
+            For n = 1 To 3
+                For Each gt In [Enum].GetValues(GetType(GoodType))
+                    .AddCrate(New GoodCrate("Standard " & gt.ToString & " Crate", gt, 20, 1))
                 Next
             Next
-            .HullSpace = hullspace
         End With
         Return ship
     End Function
+    Private Shared Sub GenerateWeapon(ByRef ship As ShipAI, ByVal weaponTemplate As ShipWeapon, ByVal quarter As ShipQuarter)
+        Dim weapon As ShipWeapon = weaponTemplate.Clone
+        ship.AddWeapon(quarter, weapon)
+
+        Const ammoAmt As Integer = 50
+        Dim ammoType As GoodType = weapon.AmmoType.Type
+        Dim crate As New GoodCrate("Standard " & ammoType.ToString & " Crate", ammoType, ammoAmt, 5)
+        ship.AddCrate(crate)
+        ship.AddGood(ammoType, ammoAmt)
+
+        If weapon.CrewCount > 0 Then
+            For n = 1 To weapon.CrewCount
+                ship.AddCrew(quarter, Crew.Generate(ship.Race), CrewSkill.Gunnery)
+            Next
+        End If
+    End Sub
 
 #Region "Movement"
     Public Overloads Sub Tick(ByVal playerShip As ShipPlayer)
