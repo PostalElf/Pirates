@@ -21,10 +21,13 @@
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
             For Each weapon In GetWeapons(quarter)
                 If weapon.IsReady = False Then Continue For
-                Dim targetSquare As Battlesquare = start.GetSubjectiveAdjacent(Facing, quarter, weapon.Range)
-                If targetSquare.Equals(playershipSquare) Then
-                    total.Add(weapon)
-                End If
+                Dim targetSquares As Queue(Of Battlesquare) = start.GetSubjectiveAdjacents(Facing, quarter, weapon.Range)
+                While targetSquares.Count > 0
+                    If targetSquares.Dequeue.Equals(playershipSquare) Then
+                        total.Add(weapon)
+                        Continue For
+                    End If
+                End While
             Next
         Next
         Return total

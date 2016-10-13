@@ -156,7 +156,7 @@
 
 #Region "Goods"
     Private HullSpace As Integer
-    Private Crates As New List(Of Crate)
+    Private Crates As New List(Of GoodCrate)
     Private Function GetCarryingCapacity(ByVal gt As GoodType) As Integer
         Dim total As Integer = 0
         For Each Crate In Crates
@@ -164,15 +164,15 @@
         Next
         Return total
     End Function
-    Public Function CheckAddCrate(ByVal crate As Crate) As Boolean
+    Public Function CheckAddCrate(ByVal crate As GoodCrate) As Boolean
         If HullSpace - crate.HullCost < 0 Then Return False
         Return True
     End Function
-    Public Sub AddCrate(ByVal crate As Crate)
+    Public Sub AddCrate(ByVal crate As GoodCrate)
         Crates.Add(crate)
         HullSpace -= crate.HullCost
     End Sub
-    Public Sub RemoveCrate(ByVal crate As Crate)
+    Public Sub RemoveCrate(ByVal crate As GoodCrate)
         If Crates.Contains(crate) = False Then Exit Sub
         Crates.Remove(crate)
         HullSpace += crate.HullCost
@@ -193,22 +193,6 @@
     Public Sub AddGood(ByVal good As Good)
         AddGood(good.Type, good.Qty)
     End Sub
-
-    Public Class Crate
-        Public Name As String
-        Public GoodType As GoodType
-        Public Capacity As Integer
-        Public HullCost As Integer
-
-        Public Function Clone() As Crate
-            Dim c As New Crate
-            c.Name = Name
-            c.GoodType = GoodType
-            c.Capacity = Capacity
-            c.HullCost = HullCost
-            Return c
-        End Function
-    End Class
 #End Region
 
 #Region "Crew"

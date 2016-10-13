@@ -49,6 +49,7 @@
     End Sub
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
         Dim battlefield As Battlefield = battlefield.Generate(15, 15, 3)
+        Dim crate As New GoodCrate("Large Shot Crate", GoodType.Shot, 100, 0)
         Dim hooks As New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, New Good(GoodType.Grapplers, 1), 1, 1)
         Dim cannon As New ShipWeapon("Cannons", 30, 10, DamageType.Cannon, 2, New Good(GoodType.Shot, 1), 1, 3)
         Dim grapeshot As New ShipWeapon("Grapeshot", 10, 25, DamageType.Firearms, 1, New Good(GoodType.Grapeshot, 1), 2, 5)
@@ -77,6 +78,8 @@
             .Name = "Her Majesty's Rook"
             .AddWeapon(ShipQuarter.Port, cannon.Clone)
             .AddWeapon(ShipQuarter.Starboard, cannon.Clone)
+            .AddCrate(crate.Clone)
+            .AddGood(GoodType.Shot, 100)
             .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
         End With
@@ -88,6 +91,8 @@
             .Name = "His Lordship's Mistress"
             .AddWeapon(ShipQuarter.Port, cannon.Clone)
             .AddWeapon(ShipQuarter.Starboard, cannon.Clone)
+            .AddCrate(crate.Clone)
+            .AddGood(GoodType.Shot, 100)
             .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
         End With
