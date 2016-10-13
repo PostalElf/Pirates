@@ -370,9 +370,9 @@
         Console.WriteLine("[" & ID & "] " & Name)
         Dim sus(2) As String
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
-            sus(0) &= DamageSustained(q).ToString("000") & "/"
-            sus(1) &= HullPoints(q).ToString("000") & "/"
-            sus(2) &= GetCrews(q, Nothing).Count.ToString("000") & "/"
+            sus(0) &= DamageSustained(q).ToString("  0") & "/"
+            sus(1) &= HullPoints(q).ToString("  0") & "/"
+            sus(2) &= GetCrews(q, Nothing).Count.ToString("  0") & "/"
         Next
         For n = 0 To sus.Length - 1
             sus(n) = sus(n).Remove(sus(n).Length - 1, 1)

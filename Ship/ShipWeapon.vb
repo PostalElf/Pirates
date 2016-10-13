@@ -25,8 +25,8 @@
             Return True
         End Get
     End Property
-    Private CooldownCounter As Integer
-    Private CooldownMax As Integer
+    Public CooldownCounter As Integer
+    Public CooldownMax As Integer
 
 #Region "Cheaterbug"
     Private IgnoresCooldown As Boolean = False

@@ -160,6 +160,16 @@
             Next
             Console.WriteLine()
         Next
+        Console.WriteLine("Weapons:")
+        For Each q In quarters
+            For Each weapon In ship.GetWeapons(q)
+                Console.Write(s & Dev.vbTab(q.ToString & ":", t) & weapon.Name & " - ")
+                If weapon.Damage.ShipDamage > 0 Then Console.Write(weapon.Damage.ShipDamage & " " & weapon.Damage.Type.ToString & " ship - ")
+                If weapon.Damage.CrewDamage > 0 Then Console.Write(weapon.Damage.CrewDamage & " " & weapon.Damage.Type.ToString & " crew - ")
+                If weapon.CooldownCounter <= 0 Then Console.Write("OK") Else Console.Write("Reloading in " & weapon.CooldownCounter)
+                Console.WriteLine()
+            Next
+        Next
 
         Select Case Menu.getListChoice(New List(Of String) From {"Move Crew", "Examine Crew"}, 0)
             Case "Move Crew" : MoveCrew(ship)
