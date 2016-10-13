@@ -4,10 +4,7 @@
     Private _ID As String
     Public Property ID As String
         Get
-            If _ID = Nothing Then
-                _ID = Name.Remove(3, Name.Length - 3)
-                _ID = _ID.ToUpper
-            End If
+            If _ID = Nothing Then _ID = GenerateID(Name)
             Return _ID
         End Get
         Set(ByVal value As String)
@@ -15,6 +12,8 @@
             _ID = value
         End Set
     End Property
+    Protected Type As ShipType
+    Protected Race As CrewRace
     Public Faction As faction
 
     Public Sub New()
@@ -37,6 +36,21 @@
         _AvailableMoves.Add({BattleMove.Forward})
         _AvailableMoves.Add({BattleMove.Halt})
     End Sub
+    Private Shared NamePrefixes As New List(Of String)
+    Private Shared NameSuffixes As New List(Of String)
+    Protected Shared Function GenerateName() As String
+        If NamePrefixes.Count = 0 Then NamePrefixes = IO.SimpleFilegetAll("shipPrefixes.txt")
+        If NameSuffixes.Count = 0 Then NameSuffixes = IO.SimpleFilegetAll("shipSuffixes.txt")
+
+        Dim prefix As String = Dev.GetRandom(NamePrefixes)
+        Dim suffix As String = Dev.GetRandom(NameSuffixes)
+        Return prefix & " " & suffix
+    End Function
+    Protected Shared Function GenerateID(ByVal aName As String) As String
+        Dim total As String = aName.Remove(3, aName.Length - 3)
+        total = total.ToUpper
+        Return total
+    End Function
 
 #Region "Specials"
     Protected IgnoresJustTurned As Boolean = False
@@ -132,9 +146,11 @@
         BattleSquare.Contents = Me
     End Sub
     Public Function MovedInto(ByRef bo As BattlefieldObject) As Boolean Implements BattlefieldObject.MovedInto
+        'prevent running into self
+        If bo.Equals(Me) Then Return False
+
         'bo is the attacker
         'this ship is the defender
-
         Dim rammedDamage As New Damage(20, 0, DamageType.Ramming, bo.Name)
         Dim attackDirection As BattleDirection
         For Each direction In [Enum].GetValues(GetType(BattleDirection))
@@ -155,7 +171,7 @@
 #End Region
 
 #Region "Goods"
-    Private HullSpace As Integer
+    Protected HullSpace As Integer
     Private Crates As New List(Of GoodCrate)
     Private Function GetCarryingCapacity(ByVal gt As GoodType) As Integer
         Dim total As Integer = 0
@@ -197,6 +213,15 @@
 
 #Region "Crew"
     Private Crews As New Dictionary(Of ShipQuarter, List(Of Crew))
+    Public Function CheckAddCrew(ByVal quarter As ShipQuarter, ByVal crew As Crew, Optional ByVal role As CrewSkill = Nothing) As Boolean
+        Dim crewCount As Integer = 0
+        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+            crewCount += GetCrews(q, Nothing).Count
+        Next
+        If crewCount + 1 > GetCarryingCapacity(GoodType.Crew) Then Return False
+
+        Return True
+    End Function
     Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, Optional ByVal role As CrewSkill = Nothing)
         Crews(quarter).Add(crew)
         crew.Ship = Me
@@ -231,10 +256,22 @@
 
 #Region "Attack"
     Protected Weapons As New Dictionary(Of ShipQuarter, List(Of ShipWeapon))
+    Public Function CheckAddWeapon(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon) As Boolean
+        If weapon.HullCost > HullSpace Then Return False
+
+        Return True
+    End Function
     Public Sub AddWeapon(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon)
         weapon.Ship = Me
         weapon.Quarter = quarter
         Weapons(quarter).Add(weapon)
+        HullSpace -= weapon.HullCost
+    End Sub
+    Public Sub RemoveWeapon(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon)
+        weapon.Ship = Nothing
+        weapon.Quarter = Nothing
+        Weapons(quarter).Remove(weapon)
+        HullSpace += weapon.HullCost
     End Sub
     Public Function GetWeapons(ByVal quarter As ShipQuarter) As List(Of ShipWeapon)
         Return Weapons(quarter)
@@ -321,7 +358,7 @@
 
     Public InMelee As Boolean = False
     Private DamageSustained As New Dictionary(Of ShipQuarter, Integer)
-    Private HullPoints As New Dictionary(Of ShipQuarter, Integer)
+    Protected HullPoints As New Dictionary(Of ShipQuarter, Integer)
     Private DamageLog As New List(Of Damage)
     Private Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
         If damage.ShipDamage > 0 Then

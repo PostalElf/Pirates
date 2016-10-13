@@ -62,40 +62,22 @@
             .AddWeapon(ShipQuarter.Starboard, grapeshot.Clone)
             .AddWeapon(ShipQuarter.Port, hooks.Clone)
             .AddWeapon(ShipQuarter.Starboard, hooks.Clone)
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Sailing)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Sailing)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Sailing)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewSkill.Gunnery)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewSkill.Gunnery)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewSkill.Gunnery)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
             .Cheaterbug()
         End With
         battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
 
-        Dim ai1 As New ShipAI
-        With ai1
-            .ConsoleColour = ConsoleColor.Green
-            .Name = "Her Majesty's Rook"
-            .AddWeapon(ShipQuarter.Port, cannon.Clone)
-            .AddWeapon(ShipQuarter.Starboard, cannon.Clone)
-            .AddCrate(crate.Clone)
-            .AddGood(GoodType.Shot, 100)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-        End With
+        Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop)
+        ai1.ConsoleColour = ConsoleColor.Green
         battlefield.AddCombatant(ai1, 1, 1, BattleDirection.East)
 
-        Dim ai2 As New ShipAI
-        With ai2
-            .ConsoleColour = ConsoleColor.Green
-            .Name = "His Lordship's Mistress"
-            .AddWeapon(ShipQuarter.Port, cannon.Clone)
-            .AddWeapon(ShipQuarter.Starboard, cannon.Clone)
-            .AddCrate(crate.Clone)
-            .AddGood(GoodType.Shot, 100)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-        End With
+        Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop)
+        ai2.ConsoleColour = ConsoleColor.Green
         battlefield.AddCombatant(ai2, 8, 8, BattleDirection.North)
 
         Return battlefield

@@ -6,6 +6,7 @@
     Public Ship As Ship
     Public Quarter As ShipQuarter
     Public CrewCount As Integer
+    Public HullCost As Integer
 
     Private Sub Cooldown(ByVal value As Integer)
         CooldownCounter -= value
@@ -85,6 +86,7 @@
             .Ship = Ship
             .Quarter = Quarter
             .CrewCount = CrewCount
+            .HullCost = HullCost
 
             .CooldownCounter = CooldownCounter
             .CooldownMax = CooldownMax

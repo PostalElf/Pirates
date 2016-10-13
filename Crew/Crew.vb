@@ -38,28 +38,18 @@
         If NamePrefixes.Count = 0 Then NamePrefixes = IO.SimpleFilegetAll("namePrefixes.txt")
         If NameSuffixes.Count = 0 Then NameSuffixes = IO.SimpleFilegetAll("nameSuffixes.txt")
 
-        Dim prefix As String = GetNamePart(NamePrefixes, rng)
-        Dim suffix As String = GetNamePart(NameSuffixes, rng)
+        Dim prefix As String = Dev.GetRandom(Of String)(NamePrefixes)
+        Dim suffix As String = Dev.GetRandom(Of String)(NameSuffixes)
         Return prefix & " " & suffix
     End Function
     Private Shared NamePrefixes As New List(Of String)
     Private Shared NameSuffixes As New List(Of String)
-    Private Shared Function GetNamePart(ByRef targetList As List(Of String), ByRef rng As Random) As String
-        Dim roll As Integer = rng.Next(targetList.Count)
-        GetNamePart = targetList(roll)
-        targetList.RemoveAt(roll)
-    End Function
     Public Overrides Function ToString() As String
         Return Name
     End Function
 
     Public Name As String
     Private Race As CrewRace
-    Public Enum CrewRace
-        Human
-        Seatouched
-        Ghost
-    End Enum
 
 #Region "Bonuses"
     Private Scars As New List(Of CrewBonus)

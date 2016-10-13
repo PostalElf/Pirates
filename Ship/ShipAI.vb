@@ -4,6 +4,72 @@
     Public Sub New()
         MyBase.New()
     End Sub
+    Public Shared Function Generate(ByVal type As ShipType, Optional ByVal faction As Faction = Nothing, Optional ByVal race As CrewRace = Nothing) As Ship
+        Dim crate As New GoodCrate("Standard Shot Crate", GoodType.Shot, 50, 2)
+        Dim bCrate As New GoodCrate("Standard Bullets Crate", GoodType.Bullets, 100, 2)
+        Dim housing As New GoodCrate("Standard Quarters", GoodType.Crew, 10, 5)
+        Dim cannons As New ShipWeapon("Cannons", 20, 10, DamageType.Cannon, 2, New Good(GoodType.Shot, 5), 2, 3)
+        Dim swivel As New ShipWeapon("Swivelgun", 10, 10, DamageType.Firearms, 1, New Good(GoodType.Bullets, 5), 1, 2)
+        cannons.HullCost = 5
+        swivel.HullCost = 3
+
+        Dim crewCount As New Dictionary(Of ShipQuarter, Integer)
+        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+            crewCount.Add(q, 1)
+        Next
+
+        Dim ship As New ShipAI
+        With ship
+            If race = Nothing Then .Race = Dev.Rng.Next(1, 4) Else .Race = race
+            .Faction = faction
+            .Type = type
+            .Name = GenerateName()
+            .ID = GenerateID(.Name)
+
+            Dim hullpoints As Integer
+            Dim hullspace As Integer
+            Select Case type
+                Case ShipType.Sloop
+                    hullpoints = 100
+                    hullspace = 25
+                    .AddCrate(housing.Clone)
+                    .AddCrate(crate.Clone)
+                    .AddGood(GoodType.Shot, 50)
+                    .AddCrate(bCrate.Clone)
+                    .AddGood(GoodType.Bullets, 50)
+                    .AddWeapon(ShipQuarter.Starboard, cannons.Clone)
+                    crewCount(ShipQuarter.Starboard) += 2
+                    .AddWeapon(ShipQuarter.Fore, swivel.Clone)
+                    crewCount(ShipQuarter.Fore) += 1
+
+                Case ShipType.Schooner
+                    hullpoints = 120
+                    hullspace = 30
+
+
+                Case ShipType.Brigantine
+                    hullpoints = 200
+                    hullspace = 50
+                Case ShipType.Brig
+                    hullpoints = 250
+                    hullspace = 100
+                Case ShipType.Frigate
+                    hullpoints = 300
+                    hullspace = 120
+            End Select
+
+            For Each q In [Enum].GetValues(GetType(ShipQuarter))
+                .HullPoints(q) = hullpoints
+                For n = 1 To crewCount(q)
+                    Dim role As CrewSkill = CrewSkill.Gunnery
+                    If n = 1 Then role = CrewSkill.Sailing
+                    .AddCrew(q, Crew.Generate(.Race), role)
+                Next
+            Next
+            .HullSpace = hullspace
+        End With
+        Return ship
+    End Function
 
 #Region "Movement"
     Public Overloads Sub Tick(ByVal playerShip As ShipPlayer)
@@ -58,6 +124,7 @@
         Dim targetFirstPosition As BattlePosition() = Nothing
         Dim targetPathCost As Integer = Integer.MaxValue
         Dim targetMoves As BattleMove() = Nothing
+        Dim targetMoves2 As BattleMove() = Nothing
         For Each fp As BattlePosition() In firstPositions
             For Each sp In secondPositions(fp)
                 Dim pathCost As Integer = GetHeuristicDistance(fp, sp(sp.Length - 1).Square) + GetHeuristicDistance(sp, goal)
@@ -65,9 +132,15 @@
                     targetFirstPosition = fp
                     targetPathCost = pathCost
                     targetMoves = fp(0).ParentMove
+                    targetMoves2 = sp(0).ParentMove
                 End If
             Next
         Next
+
+        'check to make sure that it's not halting randomly
+        If targetMoves(0) = BattleMove.Halt Then
+            If targetMoves2(0) <> BattleMove.Halt Then targetMoves = targetMoves2
+        End If
 
         ExecuteMoves(targetMoves)
     End Sub
