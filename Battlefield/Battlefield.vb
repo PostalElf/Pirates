@@ -98,6 +98,8 @@
             Case Else : combatant.EnterCombat(Me, Combatants)
         End Select
     End Sub
+    Public IsOver As Boolean
+    Public PlayerWins As Boolean
 
     Public Sub ConsoleWrite()
         For y = 0 To MaxY
@@ -118,6 +120,22 @@
         CleanDeadCrew()
         CleanDeadObjects()
         CleanDeadMelees()
+
+        Dim player As ShipPlayer = Nothing
+        Dim aiCount As Integer = 0
+        For Each combatant In Combatants
+            If TypeOf combatant Is ShipPlayer Then player = combatant
+            If TypeOf combatant Is ShipAI Then aiCount += 1
+        Next
+        If player Is Nothing Then
+            'player dead
+            IsOver = True
+            PlayerWins = False
+        ElseIf aiCount = 0 Then
+            'player wins
+            IsOver = True
+            PlayerWins = True
+        End If
     End Sub
     Private Sub CleanDeadObjects()
         For n = DeadObjects.Count - 1 To 0 Step -1

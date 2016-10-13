@@ -13,7 +13,7 @@
             If TypeOf Ship Is ShipPlayer Then playerShip = Ship
         Next
 
-        While True
+        While battlefield.IsOver = False
             Console.Clear()
             battlefield.ConsoleWrite()
             Console.WriteLine()
@@ -37,6 +37,15 @@
 
             battlefield.CleanUp()
         End While
+
+        Console.Clear()
+        battlefield.ConsoleWrite()
+        Console.WriteLine()
+        Report.ConsoleReport()
+        Console.WriteLine()
+        Console.ForegroundColor = ConsoleColor.Red
+        Console.WriteLine("WINNER WINNER CHICKEN DINNER")
+        Console.ReadKey()
     End Sub
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
         Dim battlefield As Battlefield = battlefield.Generate(15, 15, 3)
@@ -76,15 +85,13 @@
         Dim ai2 As New ShipAI
         With ai2
             .ConsoleColour = ConsoleColor.Green
-            .Facing = BattleDirection.North
             .Name = "His Lordship's Mistress"
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
             .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
             .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
-            .SetSquare(battlefield(2, 2))
         End With
-        battlefield.AddCombatant(ai2, 2, 2, BattleDirection.North)
+        battlefield.AddCombatant(ai2, 8, 8, BattleDirection.North)
 
         Return battlefield
     End Function

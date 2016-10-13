@@ -79,7 +79,7 @@
 
         'consider ship position; facing with ready weapon is more valuable
         For Each weapon In CheckTarget(start.Square, goal)
-            raw -= 2
+            raw -= 5
         Next
 
         Return raw
