@@ -12,13 +12,13 @@
         Type = pType
         Sender = pSender
     End Sub
-    Public Shared Function Clone(ByRef shipDamage As Damage) As Damage
+    Public Function Clone() As Damage
         Dim d As New Damage
-        With shipDamage
-            d.ShipDamage = .ShipDamage
-            d.CrewDamage = .CrewDamage
-            d.Type = .Type
-            d.Sender = .Sender
+        With d
+            .ShipDamage = ShipDamage
+            .CrewDamage = CrewDamage
+            .Type = Type
+            .Sender = Sender
         End With
         Return d
     End Function

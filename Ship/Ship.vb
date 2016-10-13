@@ -199,6 +199,15 @@
         Public GoodType As GoodType
         Public Capacity As Integer
         Public HullCost As Integer
+
+        Public Function Clone() As Crate
+            Dim c As New Crate
+            c.Name = Name
+            c.GoodType = GoodType
+            c.Capacity = Capacity
+            c.HullCost = HullCost
+            Return c
+        End Function
     End Class
 #End Region
 
@@ -338,7 +347,7 @@
         End If
         If damage.CrewDamage > 0 Then
             For Each Crew In GetCrews(targetQuarter, Nothing)
-                Crew.ShipAttack(accuracy, damage.Clone(damage))
+                Crew.ShipAttack(accuracy, damage.Clone())
             Next
         End If
 

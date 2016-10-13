@@ -57,10 +57,10 @@
         With ship
             .ConsoleColour = ConsoleColor.White
             .Name = "Baron's Spear"
-            .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
-            .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(grapeshot))
-            .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(hooks))
-            .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(hooks))
+            .AddWeapon(ShipQuarter.Port, cannon.Clone)
+            .AddWeapon(ShipQuarter.Starboard, grapeshot.Clone)
+            .AddWeapon(ShipQuarter.Port, hooks.Clone)
+            .AddWeapon(ShipQuarter.Starboard, hooks.Clone)
             .AddCrew(ShipQuarter.Fore, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Sailing)
             .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
             .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Sailing)
@@ -75,8 +75,8 @@
         With ai1
             .ConsoleColour = ConsoleColor.Green
             .Name = "Her Majesty's Rook"
-            .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
-            .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
+            .AddWeapon(ShipQuarter.Port, cannon.Clone)
+            .AddWeapon(ShipQuarter.Starboard, cannon.Clone)
             .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
         End With
@@ -86,8 +86,8 @@
         With ai2
             .ConsoleColour = ConsoleColor.Green
             .Name = "His Lordship's Mistress"
-            .AddWeapon(ShipQuarter.Port, ShipWeapon.Clone(cannon))
-            .AddWeapon(ShipQuarter.Starboard, ShipWeapon.Clone(cannon))
+            .AddWeapon(ShipQuarter.Port, cannon.Clone)
+            .AddWeapon(ShipQuarter.Starboard, cannon.Clone)
             .AddCrew(ShipQuarter.Port, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(Crew.CrewRace.Human, rng), CrewSkill.Gunnery)
         End With

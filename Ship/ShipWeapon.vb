@@ -75,17 +75,19 @@
     Public Overrides Function ToString() As String
         Return Name & " - Range " & Range & " - Damage " & Damage.ShipDamage
     End Function
-    Public Shared Function Clone(ByRef weapon As ShipWeapon) As ShipWeapon
+    Public Function Clone() As ShipWeapon
         Dim w As New ShipWeapon
-        With weapon
-            w.Name = .Name
-            w.Damage = Damage.Clone(.Damage)
-            w.AmmoType = .AmmoType
-            w.Range = .Range
-            w.Ship = .Ship
-            w.Quarter = .Quarter
-            w.CrewCount = .CrewCount
-            w.CooldownMax = .CooldownMax
+        With w
+            .Name = Name
+            .Damage = Damage.Clone
+            .AmmoType = AmmoType
+            .Range = Range
+            .Ship = Ship
+            .Quarter = Quarter
+            .CrewCount = CrewCount
+
+            .CooldownCounter = CooldownCounter
+            .CooldownMax = CooldownMax
         End With
         Return w
     End Function
