@@ -1,9 +1,11 @@
 ﻿Public Enum CrewSkill
     Leadership = 1
-    Sailing
     Navigation
+    Sailing
     Gunnery
     Bracing
+    Cooking
+    Logistics
 
     Firearms = 101
     Melee

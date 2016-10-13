@@ -23,6 +23,7 @@
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 100)
             Crews.Add(quarter, New List(Of Crew))
+            Modules.Add(quarter, New List(Of ShipModule))
         Next
 
         For Each gt In [Enum].GetValues(GetType(GoodType))
@@ -216,6 +217,28 @@
     End Sub
     Public Sub AddGood(ByVal good As Good)
         AddGood(good.Type, good.Qty)
+    End Sub
+#End Region
+
+#Region "Modules"
+    Private Modules As New Dictionary(Of ShipQuarter, List(Of ShipModule))
+    Public Function CheckAddModule(ByVal quarter As ShipQuarter, ByVal m As ShipModule) As Boolean
+        If m.HullCost > HullSpace Then Return False
+
+        Return True
+    End Function
+    Public Sub AddModule(ByVal quarter As ShipQuarter, ByVal m As ShipModule)
+        Modules(quarter).Add(m)
+        m.Quarter = quarter
+        m.Ship = Me
+        HullSpace -= m.HullCost
+    End Sub
+    Public Sub RemoveModule(ByVal quarter As ShipQuarter, ByRef m As ShipModule)
+        If Modules(quarter).Contains(m) = False Then Exit Sub
+        Modules(quarter).Remove(m)
+        m.Quarter = Nothing
+        m.Ship = Nothing
+        HullSpace += m.HullCost
     End Sub
 #End Region
 
