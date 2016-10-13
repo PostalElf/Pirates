@@ -233,6 +233,7 @@
     Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, Optional ByVal role As CrewSkill = Nothing)
         Crews(quarter).Add(crew)
         crew.Ship = Me
+        crew.shipquarter = quarter
         If role <> Nothing Then crew.Role = role
     End Sub
     Public Sub RemoveCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew)

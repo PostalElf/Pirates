@@ -12,7 +12,9 @@
 #Region "Move Tokens"
     Private MoveTokens As New List(Of BattleMove())
     Private MoveTokenProgress As New Dictionary(Of ShipQuarter, Integer)
+    Private AdvancedMoveTokenProgress As New Dictionary(Of ShipQuarter, Integer)
     Private Const MoveTokenThreshold As Integer = 5
+    Private Const AdvancedMoveTokenThreshold As Integer = 10
     Public Overrides ReadOnly Property AvailableMoves As System.Collections.Generic.List(Of BattleMove())
         Get
             If IgnoresJustTurned = False AndAlso JustTurned = True Then
@@ -52,6 +54,64 @@
             If m1(n) <> m2(n) Then Return False
         Next
         Return True
+    End Function
+    Private Sub AddMoveTokens()
+        Dim newMoves As New List(Of BattleMove())
+        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+            Dim sailTotal As Integer = 0
+            Dim advancedSailTotal As Integer = 0
+            For Each Crew In GetCrews(q, CrewSkill.Sailing)
+                Dim skill As Integer = Crew.GetSkill(CrewSkill.Sailing)
+                sailTotal += Dev.Constrain(skill, 1, 10)
+                If skill >= 3 Then advancedSailTotal += Dev.Constrain(skill, 1, 10)
+            Next
+
+            MoveTokenProgress(q) += sailTotal
+            While MoveTokenProgress(q) > MoveTokenThreshold
+                MoveTokenProgress(q) -= MoveTokenThreshold
+                Dim newMoveToken As BattleMove() = Nothing
+                Select Case q
+                    Case ShipQuarter.Fore : newMoveToken = {BattleMove.Forward, BattleMove.Forward}
+                    Case ShipQuarter.Starboard : newMoveToken = {BattleMove.Forward, BattleMove.TurnRight}
+                    Case ShipQuarter.Aft : newMoveToken = {BattleMove.Forward}
+                    Case ShipQuarter.Port : newMoveToken = {BattleMove.Forward, BattleMove.TurnLeft}
+                    Case Else : Throw New Exception("Unrecognised ship quarter")
+                End Select
+                If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
+            End While
+
+            AdvancedMoveTokenProgress(q) += advancedSailTotal
+            While AdvancedMoveTokenProgress(q) > AdvancedMoveTokenThreshold
+                AdvancedMoveTokenProgress(q) -= AdvancedMoveTokenThreshold
+                Dim newMoveToken As BattleMove() = Nothing
+                Select Case q
+                    Case ShipQuarter.Fore : newMoveToken = {BattleMove.Forward, BattleMove.Forward}
+                    Case ShipQuarter.Starboard : newMoveToken = {BattleMove.TurnRight}
+                    Case ShipQuarter.Aft : newMoveToken = {BattleMove.Backwards}
+                    Case ShipQuarter.Port : newMoveToken = {BattleMove.TurnLeft}
+                    Case Else : Throw New Exception("Unrecognised ship quarter")
+                End Select
+                If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
+            End While
+        Next
+
+        For Each newMoveToken In newMoves
+            MoveTokens.Add(newMoveToken)
+
+            Dim rep As String = Name & " gained a new sailing token: " & GetMoveTokenString(newMoveToken)
+            Report.Add(rep)
+        Next
+    End Sub
+    Private Function GetMoveTokenString(ByVal movetoken As BattleMove()) As String
+        If MovesMatch(movetoken, {BattleMove.Forward, BattleMove.Forward}) Then : Return "Full Sails"
+        ElseIf MovesMatch(movetoken, {BattleMove.Forward}) Then : Return "Half Sails"
+        ElseIf MovesMatch(movetoken, {BattleMove.Forward, BattleMove.TurnLeft}) Then : Return "Port"
+        ElseIf MovesMatch(movetoken, {BattleMove.Forward, BattleMove.TurnRight}) Then : Return "Starboard"
+        ElseIf MovesMatch(movetoken, {BattleMove.TurnLeft}) Then : Return "Hard to Port"
+        ElseIf MovesMatch(movetoken, {BattleMove.TurnRight}) Then : Return "Hard to Starboard"
+        ElseIf MovesMatch(movetoken, {BattleMove.Backwards}) Then : Return "Tack Aft"
+        Else : Return Nothing
+        End If
     End Function
 #End Region
 
@@ -103,43 +163,16 @@
         MoveTokens.Add({BattleMove.Forward, BattleMove.Forward})
 
         MoveTokenProgress.Clear()
+        AdvancedMoveTokenProgress.Clear()
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             MoveTokenProgress.Add(q, 0)
+            AdvancedMoveTokenProgress.Add(q, 0)
         Next
     End Sub
     Public Overloads Sub Tick()
         MyBase.Tick()
 
-        'add moveTokenProgress to gain move tokens
-        For Each q In [Enum].GetValues(GetType(ShipQuarter))
-            Dim sailTotal As Integer = 0
-            For Each Crew In GetCrews(q, CrewSkill.Sailing)
-                sailTotal += Dev.Constrain(Crew.GetSkill(CrewSkill.Sailing), 1, 10)
-            Next
-
-            MoveTokenProgress(q) += sailTotal
-            While MoveTokenProgress(q) > MoveTokenThreshold
-                MoveTokenProgress(q) -= MoveTokenThreshold
-                Dim newMoveToken As BattleMove() = Nothing
-                Select Case q
-                    Case ShipQuarter.Fore : newMoveToken = {BattleMove.Forward, BattleMove.Forward}
-                    Case ShipQuarter.Starboard : newMoveToken = {BattleMove.Forward, BattleMove.TurnRight}
-                    Case ShipQuarter.Aft : newMoveToken = {BattleMove.Forward}
-                    Case ShipQuarter.Port : newMoveToken = {BattleMove.Forward, BattleMove.TurnLeft}
-                    Case Else : Throw New Exception("Unrecognised ship quarter")
-                End Select
-                MoveTokens.Add(newMoveToken)
-
-                Dim rep As String = Name & " gained a new sailing token: "
-                For n = 0 To newMoveToken.Length - 1
-                    rep &= newMoveToken(n).ToString
-                    If n <> newMoveToken.Length - 1 Then rep &= " + "
-                Next
-                Report.Add(rep)
-            End While
-        Next
-
-        'execute commands
+        AddMoveTokens()
         RunCommands()
     End Sub
 End Class

@@ -225,7 +225,7 @@
 
 #Region "Movement"
     Public Ship As Ship
-    Private ShipQuarter As ShipQuarter
+    Public ShipQuarter As ShipQuarter
 
     Public Sub Move(ByVal quarter As ShipQuarter, Optional ByVal role As CrewSkill = Nothing)
         Dim keepShip As Ship = Ship
