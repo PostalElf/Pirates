@@ -100,8 +100,8 @@
             Case BattleMove.TurnLeft : f -= 1
             Case BattleMove.TurnRight : f += 1
         End Select
-        If f < 0 Then f = 3
-        If f > 3 Then f = 0
+        If f < 1 Then f = 4
+        If f > 4 Then f = 1
         Return f
     End Function
     Protected Function TurnFacing(ByVal moves As BattleMove(), Optional ByVal initialFacing As BattleDirection = Nothing) As BattleDirection

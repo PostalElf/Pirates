@@ -1,5 +1,5 @@
 ﻿Public Enum BattleMove
-    Forward
+    Forward = 1
     TurnRight
     TurnLeft
     Backwards

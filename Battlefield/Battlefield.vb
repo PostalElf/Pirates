@@ -1,4 +1,5 @@
 ﻿Public Class Battlefield
+    Public Wind As BattleDirection
     Private _MaxX As Integer
     Private _MaxY As Integer
     Public ReadOnly Property MaxX As Integer
@@ -58,13 +59,14 @@
         Next
     End Sub
     Private Shared BattlefieldObjects As Type() = {GetType(BF_Rock), GetType(BF_Tides)}
-    Public Shared Function Generate(ByVal X As Integer, ByVal Y As Integer, ByVal featureDensity As Integer) As Battlefield
+    Public Shared Function Generate(ByVal X As Integer, ByVal Y As Integer, ByVal featureDensity As Integer, Optional ByVal aWind As BattleDirection = Nothing) As Battlefield
         Dim rng As New Random(5)
         Dim battlefield As New Battlefield(X, Y)
         For n = 0 To featureDensity - 1
             Dim s As Battlesquare = battlefield.RandomSquare(True, rng)
             GenerateFeature(s, rng)
         Next
+        If aWind = Nothing Then battlefield.Wind = rng.Next(1, 5)
         Return battlefield
     End Function
     Private Shared Function GenerateFeature(ByRef square As Battlesquare, Optional ByRef rng As Random = Nothing)
@@ -89,15 +91,6 @@
         Return True
     End Function
 
-    Public Sub AddCombatant(ByRef combatant As Ship, ByVal x As Integer, ByVal y As Integer, ByVal facing As BattleDirection)
-        combatant.Facing = facing
-        combatant.SetSquare(Square(x, y))
-        Select Case combatant.GetType
-            Case GetType(ShipPlayer) : CType(combatant, ShipPlayer).EnterCombat(Me, Combatants)
-            Case GetType(ShipAI) : CType(combatant, ShipAI).EnterCombat(Me, Combatants)
-            Case Else : combatant.EnterCombat(Me, Combatants)
-        End Select
-    End Sub
     Public IsOver As Boolean
     Public PlayerWins As Boolean
 
@@ -112,8 +105,19 @@
         Next
     End Sub
 
+    Public Sub AddCombatant(ByRef combatant As Ship, ByVal x As Integer, ByVal y As Integer, ByVal facing As BattleDirection)
+        combatant.Facing = facing
+        combatant.SetSquare(Square(x, y))
+        Select Case combatant.GetType
+            Case GetType(ShipPlayer) : CType(combatant, ShipPlayer).EnterCombat(Me, Combatants)
+            Case GetType(ShipAI) : CType(combatant, ShipAI).EnterCombat(Me, Combatants)
+            Case Else : combatant.EnterCombat(Me, Combatants)
+        End Select
+    End Sub
     Public Combatants As New List(Of Ship)
     Public Melees As New List(Of Melee)
+
+#Region "Death"
     Private DeadCrew As New List(Of Crew)
     Private DeadObjects As New List(Of BattlefieldObject)
     Public Sub AddDead(ByVal bfo As BattlefieldObject)
@@ -192,4 +196,5 @@
             End If
         Next
     End Sub
+#End Region
 End Class

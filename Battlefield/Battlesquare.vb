@@ -70,15 +70,15 @@
             Case ShipQuarter.Port : f -= 1
             Case ShipQuarter.Aft : f += 2
         End Select
-        If f < 0 Then f = 3
-        If f > 3 Then f = 0
+        If f < 1 Then f = 4
+        If f > 4 Then f = 1
         Return f
     End Function
     Public Shared Function ReverseDirection(ByVal direction As BattleDirection) As BattleDirection
         For n = 1 To 2
             direction += 1
-            If direction < 0 Then direction = 3
-            If direction > 3 Then direction = 0
+            If direction < 1 Then direction = 4
+            If direction > 4 Then direction = 1
         Next
         Return direction
     End Function
@@ -92,8 +92,8 @@
             Case BattleMove.Forward : current = current.GetSubjectiveAdjacent(f, ShipQuarter.Fore, 1)
             Case BattleMove.Backwards : current = current.GetSubjectiveAdjacent(f, ShipQuarter.Aft, 1)
         End Select
-        If f < 0 Then f = 3
-        If f > 3 Then f = 0
+        If f < 1 Then f = 4
+        If f > 4 Then f = 1
 
         Return New BattlePosition(current, f, {move})
     End Function
@@ -111,8 +111,8 @@
                 Case BattleMove.Backwards : current = current.GetSubjectiveAdjacent(f, ShipQuarter.Aft, 1)
             End Select
 
-            If f < 0 Then f = 3
-            If f > 3 Then f = 0
+            If f < 1 Then f = 4
+            If f > 4 Then f = 1
 
             Dim currentPosition As New BattlePosition(current, f, moves)
             total(n) = currentPosition
