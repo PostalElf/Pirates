@@ -83,7 +83,7 @@
 
 #Region "Movement"
     Protected JustTurned As Boolean = False
-    Private _AvailableMoves As New List(Of MoveToken)
+    Protected _AvailableMoves As New List(Of MoveToken)
     Public Overridable ReadOnly Property AvailableMoves As List(Of MoveToken)
         Get
             Dim turn As Boolean
