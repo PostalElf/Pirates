@@ -19,10 +19,25 @@
         Next
         Return -1
     End Function
+    Public Function Contains(ByVal bm As BattleMove) As Boolean
+        If IndexOf(bm) = -1 Then Return False Else Return True
+    End Function
 
     Public Sub New(ByVal bm As BattleMove())
         BattleMoves = bm
     End Sub
+    Public Overrides Function ToString() As String
+        If Me = {BattleMove.Forward, BattleMove.Forward} Then : Return "Full Sails"
+        ElseIf Me = {BattleMove.Forward} Then : Return "Half Sails"
+        ElseIf Me = {BattleMove.Forward, BattleMove.TurnLeft} Then : Return "Port"
+        ElseIf Me = {BattleMove.Forward, BattleMove.TurnRight} Then : Return "Starboard"
+        ElseIf Me = {BattleMove.TurnLeft} Then : Return "Hard to Port"
+        ElseIf Me = {BattleMove.TurnRight} Then : Return "Hard to Starboard"
+        ElseIf Me = {BattleMove.Backwards} Then : Return "Tack Aft"
+        ElseIf Me = {BattleMove.Halt} Then : Return "Halt"
+        Else : Return Nothing
+        End If
+    End Function
 
     Public Shared Operator =(ByVal mt1 As MoveToken, ByVal mt2 As MoveToken) As Boolean
         If mt1.Length <> mt2.Length Then Return False

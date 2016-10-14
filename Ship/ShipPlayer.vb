@@ -83,22 +83,9 @@
 
         For Each newMoveToken In newMoves
             MoveTokens.Add(newMoveToken)
-
-            Dim rep As String = Name & " gained a new sailing token: " & GetMoveTokenString(newMoveToken)
-            Report.Add(rep, ReportType.MoveToken)
+            Report.Add(Name & " gained a new sailing token: " & newMoveToken.ToString, ReportType.MoveToken)
         Next
     End Sub
-    Private Function GetMoveTokenString(ByVal movetoken As MoveToken) As String
-        If movetoken = {BattleMove.Forward, BattleMove.Forward} Then : Return "Full Sails"
-        ElseIf movetoken = {BattleMove.Forward} Then : Return "Half Sails"
-        ElseIf movetoken = {BattleMove.Forward, BattleMove.TurnLeft} Then : Return "Port"
-        ElseIf movetoken = {BattleMove.Forward, BattleMove.TurnRight} Then : Return "Starboard"
-        ElseIf movetoken = {BattleMove.TurnLeft} Then : Return "Hard to Port"
-        ElseIf movetoken = {BattleMove.TurnRight} Then : Return "Hard to Starboard"
-        ElseIf movetoken = {BattleMove.Backwards} Then : Return "Tack Aft"
-        Else : Return Nothing
-        End If
-    End Function
 #End Region
 
 #Region "Commands"

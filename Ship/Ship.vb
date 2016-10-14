@@ -37,6 +37,11 @@
         _AvailableMoves.Add(New MoveToken({BattleMove.Forward}))
         _AvailableMoves.Add(New MoveToken({BattleMove.Halt}))
     End Sub
+    Public Overrides Function ToString() As String
+        Dim total As String = Name
+        If TypeOf Me Is ShipAI Then total &= " (AI)"
+        Return total
+    End Function
     Private Shared NamePrefixes As New List(Of String)
     Private Shared NameSuffixes As New List(Of String)
     Protected Shared Function GenerateName() As String

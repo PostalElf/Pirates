@@ -111,11 +111,14 @@
             Dim fpReference As BattlePosition = firstPosition(firstPosition.Length - 1)
 
             Dim turn As Boolean = False
-            If fpReference.ParentMove.Length > 1 AndAlso (fpReference.ParentMove(1) = BattleMove.TurnLeft OrElse fpReference.ParentMove(1) = BattleMove.TurnRight) Then
-                turn = True
+            If IgnoresJustTurned = False Then
+                If fpReference.ParentMove.Length > 1 Then
+                    If fpReference.ParentMove.Contains(BattleMove.TurnLeft) OrElse fpReference.ParentMove.Contains(BattleMove.TurnRight) Then turn = True
+                End If
             End If
 
-            For Each mArray As MoveToken In TrimAvailableMoves(AvailableMoves, turn, Waterline)
+            Dim availableMovesTrimmed As List(Of MoveToken) = TrimAvailableMoves(AvailableMoves, turn, Waterline)
+            For Each mArray As MoveToken In availableMovesTrimmed
                 Dim secondPosition As BattlePosition() = fpReference.Square.GetPathables(fpReference.Facing, mArray)
                 secondPositions(firstPosition).Add(secondPosition)
             Next
