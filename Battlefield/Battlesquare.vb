@@ -12,12 +12,12 @@
     End Property
 #End Region
 
-    Private Function GetShiftedSquare(ByVal xShift As Integer, ByVal yShift As Integer) As Battlesquare
+    <DebuggerStepThrough()> Private Function GetShiftedSquare(ByVal xShift As Integer, ByVal yShift As Integer) As Battlesquare
         Dim pX As Integer = Dev.Constrain(X + xShift, 0, Battlefield.MaxX)
         Dim pY As Integer = Dev.Constrain(Y + yShift, 0, Battlefield.MaxY)
         Return Battlefield(pX, pY)
     End Function
-    Public Function GetAdjacent(ByVal direction As BattleDirection, ByVal distance As Integer) As Battlesquare
+    <DebuggerStepThrough()> Public Function GetAdjacent(ByVal direction As BattleDirection, ByVal distance As Integer) As Battlesquare
         Select Case direction
             Case BattleDirection.North : Return GetShiftedSquare(0, -distance)
             Case BattleDirection.South : Return GetShiftedSquare(0, distance)
@@ -28,7 +28,7 @@
                 Return Nothing
         End Select
     End Function
-    Public Function GetAdjacents(ByVal direction As BattleDirection, ByVal distance As Integer) As Queue(Of Battlesquare)
+    <DebuggerStepThrough()> Public Function GetAdjacents(ByVal direction As BattleDirection, ByVal distance As Integer) As Queue(Of Battlesquare)
         If distance <= 0 Then Return Nothing
 
         Dim total As New Queue(Of Battlesquare)
@@ -37,7 +37,7 @@
         Next
         Return total
     End Function
-    Public Function GetAdjacents(ByVal distance As Integer) As List(Of Battlesquare)
+    <DebuggerStepThrough()> Public Function GetAdjacents(ByVal distance As Integer) As List(Of Battlesquare)
         Dim total As New List(Of Battlesquare)
         For Each d As BattleDirection In [Enum].GetValues(GetType(BattleDirection))
             Dim sq As Battlesquare = GetAdjacent(d, distance)
@@ -45,13 +45,13 @@
         Next
         Return total
     End Function
-    Public Function GetSubjectiveAdjacent(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter, ByVal distance As Integer) As Battlesquare
+    <DebuggerStepThrough()> Public Function GetSubjectiveAdjacent(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter, ByVal distance As Integer) As Battlesquare
         'given facing, quarter and distance, return target square from current square
 
         Dim d As BattleDirection = GetSubjectiveDirection(facing, quarter)
         Return GetAdjacent(d, distance)
     End Function
-    Public Function GetSubjectiveAdjacents(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter, ByVal distance As Integer) As Queue(Of Battlesquare)
+    <DebuggerStepThrough()> Public Function GetSubjectiveAdjacents(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter, ByVal distance As Integer) As Queue(Of Battlesquare)
         If distance <= 0 Then Return Nothing
 
         Dim total As New Queue(Of Battlesquare)
@@ -61,7 +61,7 @@
         Next
         Return total
     End Function
-    Private Function GetSubjectiveDirection(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter) As BattleDirection
+    <DebuggerStepThrough()> Private Function GetSubjectiveDirection(ByVal facing As BattleDirection, ByVal quarter As ShipQuarter) As BattleDirection
         'given facing and quarter, get direction
 
         Dim f As BattleDirection = facing
@@ -74,7 +74,7 @@
         If f > 4 Then f = 1
         Return f
     End Function
-    Public Shared Function ReverseDirection(ByVal direction As BattleDirection) As BattleDirection
+    <DebuggerStepThrough()> Public Shared Function ReverseDirection(ByVal direction As BattleDirection) As BattleDirection
         For n = 1 To 2
             direction += 1
             If direction < 1 Then direction = 4
@@ -82,24 +82,10 @@
         Next
         Return direction
     End Function
-    Public Function GetPathable(ByVal facing As BattleDirection, ByVal move As BattleMove) As BattlePosition
-        Dim f As BattleDirection = facing
-        Dim current As Battlesquare = Me
-
-        Select Case move
-            Case BattleMove.TurnLeft : f -= 1
-            Case BattleMove.TurnRight : f += 1
-            Case BattleMove.Forward : current = current.GetSubjectiveAdjacent(f, ShipQuarter.Fore, 1)
-            Case BattleMove.Backwards : current = current.GetSubjectiveAdjacent(f, ShipQuarter.Aft, 1)
-        End Select
-        If f < 1 Then f = 4
-        If f > 4 Then f = 1
-
-        Return New BattlePosition(current, f, New MoveToken({move}))
-    End Function
     Public Function GetPathables(ByVal facing As BattleDirection, ByVal moves As MoveToken) As BattlePosition()
         Dim f As BattleDirection = facing
         Dim current As Battlesquare = Me
+        Dim addedPathingCost As Integer = 0
         Dim total(moves.Length - 1) As BattlePosition
 
         For n = 0 To moves.Length - 1
@@ -107,14 +93,22 @@
             Select Case move
                 Case BattleMove.TurnLeft : f -= 1
                 Case BattleMove.TurnRight : f += 1
-                Case BattleMove.Forward : current = current.GetSubjectiveAdjacent(f, ShipQuarter.Fore, 1)
-                Case BattleMove.Backwards : current = current.GetSubjectiveAdjacent(f, ShipQuarter.Aft, 1)
+                Case BattleMove.Forward
+                    'set nextSquare only if its pathingCost < 10
+                    'cost >= 10 indicates an obstacle
+                    Dim nextSquare As Battlesquare = current.GetSubjectiveAdjacent(f, ShipQuarter.Fore, 1)
+                    If nextSquare.PathingCost < 10 Then current = nextSquare Else addedPathingCost = nextSquare.PathingCost
+                Case BattleMove.Backwards
+                    Dim nextSquare As Battlesquare = current.GetSubjectiveAdjacent(f, ShipQuarter.Aft, 1)
+                    If nextSquare.PathingCost < 10 Then current = nextSquare Else addedPathingCost = nextSquare.PathingCost
             End Select
 
             If f < 1 Then f = 4
             If f > 4 Then f = 1
 
             Dim currentPosition As New BattlePosition(current, f, moves)
+            currentPosition.PathingCost = addedPathingCost
+            addedPathingCost = 0
             total(n) = currentPosition
         Next
 

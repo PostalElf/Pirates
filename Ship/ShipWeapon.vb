@@ -56,6 +56,18 @@
     Public Sub Tick()
         Cooldown(1)
     End Sub
+    Public ReadOnly Property Heuristic As Double
+        Get
+            Dim total As Double = Damage.CrewDamage + Damage.ShipDamage
+            Select Case Range
+                Case 1
+                Case 2 : total += 40
+                Case Is >= 3 : total += 100
+            End Select
+            total -= CooldownMax
+            Return total
+        End Get
+    End Property
 
     Public Sub New()
     End Sub

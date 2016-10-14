@@ -48,7 +48,7 @@
         Console.ReadKey()
     End Sub
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
-        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 3)
+        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0)
         Dim hooks As New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, GoodType.Grapplers, 5, 2, 5)
         Dim cannon As New ShipWeapon("Cannons", 30, 10, DamageType.Cannon, 2, GoodType.Shot, 3, 1, 3)
         Dim grapeshot As New ShipWeapon("Grapeshot", 10, 25, DamageType.Firearms, 1, GoodType.Grapeshot, 5, 2, 5)
@@ -67,18 +67,18 @@
             .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
             .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
-            .Cheaterbug()
+            .Cheaterbug(True, True, True)
         End With
         battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
 
         Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop)
         ai1.ConsoleColour = ConsoleColor.Green
-        ai1.Cheaterbug()
+        ai1.Cheaterbug(True, True, False)
         battlefield.AddCombatant(ai1, 1, 1, BattleDirection.East)
 
-        'Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop)
-        'ai2.ConsoleColour = ConsoleColor.Green
-        'battlefield.AddCombatant(ai2, 8, 8, BattleDirection.North)
+        Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop)
+        ai2.ConsoleColour = ConsoleColor.Green
+        battlefield.AddCombatant(ai2, 8, 8, BattleDirection.West)
 
         Return battlefield
     End Function

@@ -79,12 +79,14 @@
             Attack(weapon)
         Next
     End Sub
-    Private Function CheckTarget(ByVal start As Battlesquare, ByVal playershipSquare As Battlesquare) As List(Of ShipWeapon)
+    Private Function CheckTarget(ByVal start As Battlesquare, ByVal playershipSquare As Battlesquare, Optional ByVal aFacing As BattleDirection = Nothing) As List(Of ShipWeapon)
+        If aFacing = Nothing Then aFacing = Facing
+
         Dim total As New List(Of ShipWeapon)
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
             For Each weapon In GetWeapons(quarter)
                 If weapon.IsReady = False Then Continue For
-                Dim targetSquares As Queue(Of Battlesquare) = start.GetSubjectiveAdjacents(Facing, quarter, weapon.Range)
+                Dim targetSquares As Queue(Of Battlesquare) = start.GetSubjectiveAdjacents(aFacing, quarter, weapon.Range)
                 While targetSquares.Count > 0
                     If targetSquares.Dequeue.Equals(playershipSquare) Then
                         total.Add(weapon)
@@ -94,6 +96,10 @@
             Next
         Next
         Return total
+    End Function
+    Private Function CheckTarget(ByVal start As BattlePosition(), ByVal playershipSquare As Battlesquare) As List(Of ShipWeapon)
+        Dim bp As BattlePosition = start(start.Length - 1)
+        Return CheckTarget(bp.Square, playershipSquare, bp.Facing)
     End Function
     Private Sub PrimitiveRouting(ByVal goal As Battlesquare)
         Dim firstPositions As New List(Of BattlePosition())
@@ -123,12 +129,12 @@
         'once found, work back up the chain to get first-order position
         'from first-order position, get the move required
         Dim targetFirstPosition As BattlePosition() = Nothing
-        Dim targetPathCost As Integer = Integer.MaxValue
+        Dim targetPathCost As Double = Integer.MaxValue
         Dim targetMoves As MoveToken = Nothing
         Dim targetMoves2 As MoveToken = Nothing
         For Each fp As BattlePosition() In firstPositions
             For Each sp In secondPositions(fp)
-                Dim pathCost As Integer = GetHeuristicDistance(fp, sp(sp.Length - 1).Square) + GetHeuristicDistance(sp, goal)
+                Dim pathCost As Double = GetHeuristicDistance(fp, sp, goal)
                 If pathCost < targetPathCost Then
                     targetFirstPosition = fp
                     targetPathCost = pathCost
@@ -149,26 +155,46 @@
         'manhattan distance as base
         Dim dx As Integer = Math.Abs(start.Square.X - goal.X)
         Dim dy As Integer = Math.Abs(start.Square.Y - goal.Y)
-        Dim raw As Integer = dx + dy
+        Dim raw As Integer = (dx + dy) * 2
 
         'add terrain cost
-        raw += start.Square.PathingCost + goal.PathingCost
+        raw += start.PathingCost + goal.PathingCost
 
-        'consider ship position; facing with ready weapon is more valuable
-        For Each weapon In CheckTarget(start.Square, goal)
-            raw -= 10
-        Next
-
-        Return raw
+        Return raw * 2
     End Function
-    Private Function GetHeuristicDistance(ByVal start As BattlePosition(), ByVal goal As Battlesquare) As Double
-        Dim total As Integer = 0
-        For Each bp In start
-            total += GetHeuristicDistance(bp, goal)
+    Private Function GetHeuristicDistance(ByVal fp As BattlePosition(), ByVal sp As BattlePosition(), ByVal goal As Battlesquare) As Double
+        Dim total As Double = 0
+        Dim chain As New Queue(Of BattlePosition)
+        For Each bp In fp
+            chain.Enqueue(bp)
+        Next
+        For Each bp In sp
+            chain.Enqueue(bp)
+        Next
+        Dim chainLength As Integer = chain.Count
+        If fp(0).ParentMove = {BattleMove.Halt} Then chainLength -= 1
+        If sp(0).ParentMove = {BattleMove.Halt} Then chainLength -= 1
+        If chainLength <= 0 Then chainLength = 1
+
+        While chain.Count > 1
+            Dim current As BattlePosition = chain.Dequeue
+            Dim nextCurrent As BattlePosition = chain.Peek
+            total += GetHeuristicDistance(current, nextCurrent.Square)
+        End While
+        total += GetHeuristicDistance(chain.Dequeue, goal)
+        total += (GetHeuristicDistance(fp(fp.Length - 1), goal) / 3)
+
+        'consider ship position at the end of each move
+        'facing with ready weapon is more valuable
+        Dim weaponDiscount As Double = 0
+        For Each weapon In CheckTarget(fp, goal)
+            weaponDiscount += weapon.Heuristic
+        Next
+        For Each weapon In CheckTarget(sp, goal)
+            weaponDiscount += weapon.Heuristic
         Next
 
-        If start.Length = 1 Then total *= 2
-        Return total
+        Return (total - weaponDiscount) / chainLength
     End Function
     Private Sub ExecuteMoves(ByVal targetMoves As MoveToken)
         If targetMoves.Length = 0 Then Exit Sub

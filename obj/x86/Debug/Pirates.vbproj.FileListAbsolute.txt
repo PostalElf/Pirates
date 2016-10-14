@@ -6,11 +6,11 @@ C:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.vbproj.GenerateR
 C:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.exe
 C:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.xml
 C:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.pdb
-D:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.exe
-D:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.xml
-D:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.pdb
 D:\Visual Studio Projects\Pirates\Pirates\bin\Debug\Pirates.exe
 D:\Visual Studio Projects\Pirates\Pirates\bin\Debug\Pirates.pdb
 D:\Visual Studio Projects\Pirates\Pirates\bin\Debug\Pirates.xml
 D:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.Resources.resources
 D:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.vbproj.GenerateResource.Cache
+D:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.exe
+D:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.xml
+D:\Visual Studio Projects\Pirates\Pirates\obj\x86\Debug\Pirates.pdb

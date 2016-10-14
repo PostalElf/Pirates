@@ -70,12 +70,12 @@
     Protected IgnoresJustTurned As Boolean = False
     Protected IgnoresWaterline As Boolean = False
 
-    Public Sub Cheaterbug()
-        IgnoresJustTurned = True
-        IgnoresWaterline = True
+    Public Sub Cheaterbug(ByVal turn As Boolean, ByVal waterline As Boolean, ByVal weapon As Boolean)
+        IgnoresJustTurned = turn
+        IgnoresWaterline = waterline
         For Each wlist In Weapons.Values
             For Each w In wlist
-                w.Cheaterbug()
+                If weapon = True Then w.Cheaterbug()
             Next
         Next
     End Sub
@@ -88,7 +88,7 @@
         Get
             Dim turn As Boolean
             Dim wline As ShipWaterline
-            If IgnoresJustTurned = True Then turn = True Else turn = JustTurned
+            If IgnoresJustTurned = True Then turn = False Else turn = JustTurned
             If IgnoresWaterline = True Then wline = ShipWaterline.Unladen Else wline = Waterline
             Return TrimAvailableMoves(_AvailableMoves, turn, wline)
         End Get
@@ -129,7 +129,7 @@
     End Function
     Public ReadOnly Property PathingCost As Integer Implements BattlefieldObject.PathingCost
         Get
-            Return 10
+            Return 100
         End Get
     End Property
 
