@@ -1,15 +1,9 @@
 ﻿Public Class Report
-    Private Shared Reports As New Dictionary(Of ReportType, List(Of Report))
+    Private Shared Reports As New List(Of Report)
     Private Shared Ignores As New List(Of ReportType)
     Public Shared Sub Add(ByVal s As String, ByVal type As ReportType)
-        If Reports.Keys.Count = 0 Then
-            For Each k In [Enum].GetValues(GetType(ReportType))
-                Reports.Add(k, New List(Of Report))
-            Next
-        End If
-
         Dim report As New Report(s, type)
-        Reports(type).Add(report)
+        Reports.Add(report)
     End Sub
     Public Shared Sub ToggleIgnore(ByVal t As ReportType)
         If Ignores.Contains(t) Then
@@ -19,15 +13,10 @@
         End If
     End Sub
     Public Shared Sub ConsoleReport()
-        For Each k In Reports.Keys
-            Dim repList As List(Of Report) = Reports(k)
-            If Ignores.Contains(k) = False Then
-                For Each Report In repList
-                    Report.ConsoleWrite()
-                Next
-            End If
-            repList.Clear()
+        For Each Report In Reports
+            If Ignores.Contains(Report.Type) = False Then Report.ConsoleWrite()
         Next
+        Reports.Clear()
     End Sub
 
     Private Value As String

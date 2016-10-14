@@ -55,7 +55,7 @@
 
         Dim ship As New ShipPlayer
         With ship
-            .ConsoleColour = ConsoleColor.White
+            .ConsoleColour = ConsoleColor.Cyan
             .Name = "Baron's Spear"
             .AddWeapon(ShipQuarter.Port, cannon.Clone)
             .AddWeapon(ShipQuarter.Starboard, grapeshot.Clone)
