@@ -55,8 +55,13 @@
         Next
         Return True
     End Function
-    Private Sub AddMoveTokens()
+    Private Sub GainMoveTokens()
+        Dim bf As Battlefield = BattleSquare.Battlefield
         Dim newMoves As New List(Of BattleMove())
+
+        'generate wind progress
+        If Facing = bf.Wind Then MoveTokenProgress(ShipQuarter.Aft) += Battlefield.WindMoveTokenProgress
+
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             Dim sailTotal As Integer = 0
             Dim advancedSailTotal As Integer = 0
@@ -172,7 +177,7 @@
     Public Overloads Sub Tick()
         MyBase.Tick()
 
-        AddMoveTokens()
+        GainMoveTokens()
         RunCommands()
     End Sub
 End Class

@@ -1,5 +1,4 @@
 ﻿Public Class Battlefield
-    Public Wind As BattleDirection
     Private _MaxX As Integer
     Private _MaxY As Integer
     Public ReadOnly Property MaxX As Integer
@@ -93,6 +92,9 @@
 
     Public IsOver As Boolean
     Public PlayerWins As Boolean
+
+    Public Wind As BattleDirection
+    Public Const WindMoveTokenProgress = 3
 
     Public Sub ConsoleWrite()
         For y = 0 To MaxY
