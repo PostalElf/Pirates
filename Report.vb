@@ -2,8 +2,13 @@
     Private Shared Reports As New Dictionary(Of ReportType, List(Of Report))
     Private Shared Ignores As New List(Of ReportType)
     Public Shared Sub Add(ByVal s As String, ByVal type As ReportType)
+        If Reports.Keys.Count = 0 Then
+            For Each k In [Enum].GetValues(GetType(ReportType))
+                Reports.Add(k, New List(Of Report))
+            Next
+        End If
+
         Dim report As New Report(s, type)
-        If Reports.ContainsKey(type) = False Then Reports.Add(type, New List(Of Report))
         Reports(type).Add(report)
     End Sub
     Public Shared Sub ToggleIgnore(ByVal t As ReportType)
@@ -27,11 +32,21 @@
 
     Private Value As String
     Private Type As ReportType
+    Private ReadOnly Property ConsoleColour As ConsoleColor
+        Get
+            Select Case Type
+                Case ReportType.EnemyShipAttack, ReportType.PlayerShipAttack : Return ConsoleColor.DarkRed
+                Case ReportType.ShipDeath, ReportType.CrewDeath : Return ConsoleColor.Red
+                Case Else : Return ConsoleColor.Gray
+            End Select
+        End Get
+    End Property
     Private Sub New(ByVal s As String, ByVal t As ReportType)
         Value = s
         Type = t
     End Sub
     Private Sub ConsoleWrite()
+        Console.ForegroundColor = ConsoleColour
         Console.WriteLine(Value)
     End Sub
 End Class
@@ -42,7 +57,10 @@ Public Enum ReportType
     Melee
     CrewMove
     CrewAttack
+    CrewDamage
     CrewDeath
+    EnemyCrewDamage
+    EnemyCrewDeath
 
     PlayerShipAttack
     EnemyShipAttack

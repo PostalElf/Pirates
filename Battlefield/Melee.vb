@@ -62,7 +62,7 @@
                 Dim c As Crew = Dev.GetRandom(Of Crew)(offenders)
                 If c Is Nothing = False Then
                     destination.Add(c)
-                    Report.Add(c.Name & " joins the melee.", ReportType.Melee)
+                    Report.Add("[" & c.Ship.ID & "] " & c.Name & " joins the melee.", ReportType.Melee)
                 End If
             Next
         End If

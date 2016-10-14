@@ -213,12 +213,15 @@
 
         DamageSustained += damage.CrewDamage
         DamageLog.Add(damage)
-        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.CrewDamage & " damage by " & damage.Sender & ".", ReportType.CrewAttack)
+        Dim repType As ReportType
+        If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDamage Else repType = ReportType.EnemyCrewDamage
+        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.CrewDamage & " damage by " & damage.Sender & ".", repType)
 
         If DamageSustained >= Health Then
             Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
             battlefield.AddDead(Me)
-            Report.Add("[" & Ship.ID & "] " & Name & " has perished in battle!", ReportType.CrewDeath)
+            If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDeath Else repType = ReportType.EnemyCrewDeath
+            Report.Add("[" & Ship.ID & "] " & Name & " has perished in battle!", repType)
         End If
     End Sub
 #End Region
