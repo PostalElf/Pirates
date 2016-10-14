@@ -113,6 +113,7 @@
     <Compile Include="Ship\Ship.vb" />
     <Compile Include="Ship\ShipAI.vb" />
     <Compile Include="Ship\ShipType.vb" />
+    <Compile Include="Ship\ShipWaterline.vb" />
     <Compile Include="Ship\ShipWeapon.vb" />
   </ItemGroup>
   <ItemGroup>

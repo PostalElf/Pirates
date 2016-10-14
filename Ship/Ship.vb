@@ -63,9 +63,11 @@
 
 #Region "Specials"
     Protected IgnoresJustTurned As Boolean = False
+    Protected IgnoresWaterline As Boolean = False
 
     Public Sub Cheaterbug()
         IgnoresJustTurned = True
+        IgnoresWaterline = True
         For Each wlist In Weapons.Values
             For Each w In wlist
                 w.Cheaterbug()
@@ -79,18 +81,22 @@
     Private _AvailableMoves As New List(Of BattleMove())
     Public Overridable ReadOnly Property AvailableMoves As List(Of BattleMove())
         Get
-            If IgnoresJustTurned = False AndAlso JustTurned = True Then
-                'if just turned, can only move one step
-                Dim total As New List(Of BattleMove())
-                For Each moves In _AvailableMoves
-                    If moves.Length = 1 Then total.Add(moves)
-                Next
-                Return total
-            Else
-                Return _AvailableMoves
-            End If
+            Dim turn As Boolean
+            Dim wline As String
+            If IgnoresJustTurned = True Then turn = True Else turn = JustTurned
+            If IgnoresWaterline = True Then wline = "Unladen" Else wline = Waterline
+            Return TrimAvailableMoves(_AvailableMoves, turn, wline)
         End Get
     End Property
+    Protected Shared Function TrimAvailableMoves(ByVal targetList As List(Of BattleMove()), ByVal aJustTurned As Boolean, ByVal aWaterline As ShipWaterline) As List(Of BattleMove())
+        Dim total As New List(Of BattleMove())
+        For Each moves In targetList
+            If aJustTurned = True OrElse aWaterline = ShipWaterline.Overladen Then
+                If moves.Length = 1 Then total.Add(moves)
+            End If
+        Next
+        Return total
+    End Function
 
     Public Property Facing As BattleDirection Implements BattlefieldObject.Facing
     Protected Function TurnFacing(ByVal move As BattleMove, Optional ByVal initialFacing As BattleDirection = Nothing) As BattleDirection
@@ -183,8 +189,7 @@
     Protected HullSpace As Integer
     Private Goods As New Dictionary(Of GoodType, Good)
     Public Function CheckAddGood(ByVal good As Good) As Boolean
-        Dim total As Good = good + Goods(good.Type)
-        If total.TotalHullCost > HullSpace Then Return False
+        If FreeHullSpace - good.TotalHullCost < 0 Then Return False
         Return True
     End Function
     Public Sub AddGood(ByVal good As Good)
@@ -196,6 +201,29 @@
     Public Function GetGood(ByVal gt As GoodType) As Integer
         Return Goods(gt).Qty
     End Function
+
+    Public ReadOnly Property FreeHullSpace As Double
+        Get
+            Dim total As Double = 0
+            For Each t In Goods.Keys
+                total += Goods(t).TotalHullCost
+            Next
+            Return HullSpace - total
+        End Get
+    End Property
+    Protected ReadOnly Property Waterline As ShipWaterline
+        Get
+            If FreeHullSpace < 0 Then Throw New Exception
+            Select Case FreeHullSpace / HullSpace
+                Case Is <= 0.1 : Return ShipWaterline.Overladen
+                Case Is <= 0.25 : Return ShipWaterline.Heavy
+                Case Is <= 0.5 : Return ShipWaterline.Medium
+                Case Is <= 0.75 : Return ShipWaterline.Light
+                Case Is <= 1.0 : Return ShipWaterline.Unladen
+                Case Else : Throw New Exception
+            End Select
+        End Get
+    End Property
 #End Region
 
 #Region "Modules"
@@ -243,7 +271,7 @@
     Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, Optional ByVal role As CrewSkill = Nothing)
         Crews(quarter).Add(crew)
         crew.Ship = Me
-        crew.shipquarter = quarter
+        crew.ShipQuarter = quarter
         If role <> Nothing Then crew.Role = role
     End Sub
     Public Sub RemoveCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew)

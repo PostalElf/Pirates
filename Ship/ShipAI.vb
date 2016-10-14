@@ -109,14 +109,15 @@
         'for all first-order positions, get second-order positions
         For Each firstPosition In firstPositions
             secondPositions.Add(firstPosition, New List(Of BattlePosition()))
-            For Each mArray As BattleMove() In AvailableMoves
-                'check for movement restrictions
-                If IgnoresJustTurned = False Then
-                    If mArray.Length > 1 Then Continue For
-                End If
+            Dim fpReference As BattlePosition = firstPosition(firstPosition.Length - 1)
 
-                Dim firstPositionReference As BattlePosition = firstPosition(firstPosition.Length - 1)
-                Dim secondPosition As BattlePosition() = firstPositionReference.Square.GetPathables(firstPositionReference.Facing, mArray)
+            Dim turn As Boolean = False
+            If fpReference.ParentMove.Length >= 1 AndAlso (fpReference.ParentMove(1) = BattleMove.TurnLeft OrElse fpReference.ParentMove(1) = BattleMove.TurnRight) Then
+                turn = True
+            End If
+
+            For Each mArray As BattleMove() In TrimAvailableMoves(AvailableMoves, turn, Waterline)
+                Dim secondPosition As BattlePosition() = fpReference.Square.GetPathables(fpReference.Facing, mArray)
                 secondPositions(firstPosition).Add(secondPosition)
             Next
         Next

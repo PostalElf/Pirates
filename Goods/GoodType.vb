@@ -1,5 +1,5 @@
 ﻿Public Enum GoodType
-    Grapplers
+    Grapplers = 1
     Bullets
     Shot
     Explosive
