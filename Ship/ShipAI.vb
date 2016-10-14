@@ -47,9 +47,8 @@
 
             'add loot
             For n = 1 To 3
-                For Each gt In [Enum].GetValues(GetType(GoodType))
-                    .AddGood(Good.Generate(gt, Dev.Rng.Next(10, 30)))
-                Next
+                Dim gt As GoodType = Dev.Rng.Next(1, [Enum].GetValues(GetType(GoodType)).Length)
+                .AddGood(Good.Generate(gt, Dev.Rng.Next(10, 30)))
             Next
         End With
         Return ship
@@ -60,7 +59,7 @@
 
         Const ammoAmt As Integer = 50
         Dim ammoType As GoodType = weapon.AmmoUse.Type
-        ship.AddGood(ammoType, ammoAmt)
+        If ammoType <> Nothing Then ship.AddGood(ammoType, ammoAmt)
 
         If weapon.CrewCount > 0 Then
             For n = 1 To weapon.CrewCount
@@ -101,7 +100,7 @@
         Dim secondPositions As New Dictionary(Of BattlePosition(), List(Of BattlePosition()))
 
         'get all first-order positions (eg squares the ship can reach in one move)
-        For Each mArray As BattleMove() In AvailableMoves
+        For Each mArray As MoveToken In AvailableMoves
             Dim firstPosition As BattlePosition() = BattleSquare.GetPathables(Facing, mArray)
             firstPositions.Add(firstPosition)
         Next
@@ -112,11 +111,11 @@
             Dim fpReference As BattlePosition = firstPosition(firstPosition.Length - 1)
 
             Dim turn As Boolean = False
-            If fpReference.ParentMove.Length >= 1 AndAlso (fpReference.ParentMove(1) = BattleMove.TurnLeft OrElse fpReference.ParentMove(1) = BattleMove.TurnRight) Then
+            If fpReference.ParentMove.Length > 1 AndAlso (fpReference.ParentMove(1) = BattleMove.TurnLeft OrElse fpReference.ParentMove(1) = BattleMove.TurnRight) Then
                 turn = True
             End If
 
-            For Each mArray As BattleMove() In TrimAvailableMoves(AvailableMoves, turn, Waterline)
+            For Each mArray As MoveToken In TrimAvailableMoves(AvailableMoves, turn, Waterline)
                 Dim secondPosition As BattlePosition() = fpReference.Square.GetPathables(fpReference.Facing, mArray)
                 secondPositions(firstPosition).Add(secondPosition)
             Next
@@ -127,8 +126,8 @@
         'from first-order position, get the move required
         Dim targetFirstPosition As BattlePosition() = Nothing
         Dim targetPathCost As Integer = Integer.MaxValue
-        Dim targetMoves As BattleMove() = Nothing
-        Dim targetMoves2 As BattleMove() = Nothing
+        Dim targetMoves As MoveToken = Nothing
+        Dim targetMoves2 As MoveToken = Nothing
         For Each fp As BattlePosition() In firstPositions
             For Each sp In secondPositions(fp)
                 Dim pathCost As Integer = GetHeuristicDistance(fp, sp(sp.Length - 1).Square) + GetHeuristicDistance(sp, goal)
@@ -173,17 +172,17 @@
         If start.Length = 1 Then total *= 2
         Return total
     End Function
-    Private Sub ExecuteMoves(ByVal targetMoves As BattleMove())
-        If targetMoves Is Nothing = False Then
-            Dim moveReport As String = ""
-            For n = 0 To targetMoves.Length - 1
-                Dim m As BattleMove = targetMoves(n)
-                moveReport &= m.ToString
-                If n < targetMoves.Length - 1 Then moveReport &= " + "
-            Next
-            Debug.Print(Name & ": " & moveReport)
-            MyBase.Move(targetMoves)
-        End If
+    Private Sub ExecuteMoves(ByVal targetMoves As MoveToken)
+        If targetMoves.Length = 0 Then Exit Sub
+
+        Dim moveReport As String = ""
+        For n = 0 To targetMoves.Length - 1
+            Dim m As BattleMove = targetMoves(n)
+            moveReport &= m.ToString
+            If n < targetMoves.Length - 1 Then moveReport &= " + "
+        Next
+        Debug.Print(Name & ": " & moveReport)
+        MyBase.Move(targetMoves)
     End Sub
 #End Region
 End Class

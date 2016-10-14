@@ -84,18 +84,18 @@
     Private Function PlayerInput(ByRef ship As ShipPlayer, ByRef battlefield As Battlefield) As Boolean
         'return true when player ends turn
 
-        Dim targetMove As BattleMove() = Nothing
+        Dim targetMove As MoveToken = Nothing
         Dim input As ConsoleKeyInfo = Console.ReadKey()
         Select Case input.Key
             Case ConsoleKey.NumPad3, ConsoleKey.L : GetPlayerAttack(ship, ShipQuarter.Starboard)
             Case ConsoleKey.NumPad1, ConsoleKey.J : GetPlayerAttack(ship, ShipQuarter.Port)
-            Case ConsoleKey.NumPad8, ConsoleKey.I : targetMove = {BattleMove.Forward, BattleMove.Forward}
-            Case ConsoleKey.NumPad5, ConsoleKey.K : targetMove = {BattleMove.Forward}
-            Case ConsoleKey.NumPad9, ConsoleKey.O : targetMove = {BattleMove.Forward, BattleMove.TurnRight}
-            Case ConsoleKey.NumPad7, ConsoleKey.U : targetMove = {BattleMove.Forward, BattleMove.TurnLeft}
-            Case ConsoleKey.NumPad4 : targetMove = {BattleMove.TurnLeft}
-            Case ConsoleKey.NumPad6 : targetMove = {BattleMove.TurnRight}
-            Case ConsoleKey.NumPad2, ConsoleKey.OemComma : targetMove = {BattleMove.Backwards}
+            Case ConsoleKey.NumPad8, ConsoleKey.I : targetMove = New MoveToken({BattleMove.Forward, BattleMove.Forward})
+            Case ConsoleKey.NumPad5, ConsoleKey.K : targetMove = New MoveToken({BattleMove.Forward})
+            Case ConsoleKey.NumPad9, ConsoleKey.O : targetMove = New MoveToken({BattleMove.Forward, BattleMove.TurnRight})
+            Case ConsoleKey.NumPad7, ConsoleKey.U : targetMove = New MoveToken({BattleMove.Forward, BattleMove.TurnLeft})
+            Case ConsoleKey.NumPad4 : targetMove = New MoveToken({BattleMove.TurnLeft})
+            Case ConsoleKey.NumPad6 : targetMove = New MoveToken({BattleMove.TurnRight})
+            Case ConsoleKey.NumPad2, ConsoleKey.OemComma : targetMove = New MoveToken({BattleMove.Backwards})
             Case ConsoleKey.V
                 ViewBattlefield(battlefield)
                 Return False

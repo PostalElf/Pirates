@@ -1,5 +1,5 @@
 ﻿Public Enum ShipQuarter
-    Fore = 0
+    Fore = 1
     Starboard
     Aft
     Port

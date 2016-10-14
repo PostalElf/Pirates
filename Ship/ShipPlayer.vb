@@ -10,54 +10,32 @@
 #End Region
 
 #Region "Move Tokens"
-    Private MoveTokens As New List(Of BattleMove())
+    Private MoveTokens As New List(Of MoveToken)
     Private MoveTokenProgress As New Dictionary(Of ShipQuarter, Integer)
     Private AdvancedMoveTokenProgress As New Dictionary(Of ShipQuarter, Integer)
     Private Const MoveTokenThreshold As Integer = 5
     Private Const AdvancedMoveTokenThreshold As Integer = 10
-    Public Overrides ReadOnly Property AvailableMoves As System.Collections.Generic.List(Of BattleMove())
-        Get
-            If IgnoresJustTurned = False AndAlso JustTurned = True Then
-                'if just turned, can only move one step
-                Dim total As New List(Of BattleMove())
-                For Each moves In MoveTokens
-                    If moves.Length = 1 Then total.Add(moves)
-                Next
-                Return total
-            Else
-                Return MoveTokens
-            End If
-        End Get
-    End Property
 
-    Public Function CheckSpendMoveToken(ByVal moveToken As BattleMove()) As Boolean
+    Public Function CheckSpendMoveToken(ByVal moveToken As MoveToken) As Boolean
         If IgnoresMoveTokens = True Then Return True
         If MovesIndexOf(MoveTokens, moveToken) = -1 Then Return False
         Return True
     End Function
-    Public Sub SpendMoveToken(ByVal moveToken As BattleMove())
+    Public Sub SpendMoveToken(ByVal moveToken As MoveToken)
         If CheckSpendMoveToken(moveToken) = False Then Exit Sub
         If IgnoresMoveTokens = False Then MoveTokens.RemoveAt(MovesIndexOf(MoveTokens, moveToken))
         Move(moveToken)
     End Sub
-    Private Function MovesIndexOf(ByVal m1 As List(Of BattleMove()), ByVal m2 As BattleMove()) As Integer
+    Private Function MovesIndexOf(ByVal m1 As List(Of MoveToken), ByVal m2 As MoveToken) As Integer
         For n = 0 To m1.Count - 1
             Dim mm = m1(n)
-            If MovesMatch(mm, m2) Then Return n
+            If mm = m2 Then Return n
         Next
         Return -1
     End Function
-    Private Function MovesMatch(ByVal m1 As BattleMove(), ByVal m2 As BattleMove()) As Boolean
-        If m1.Length <> m2.Length Then Return False
-
-        For n = 0 To m1.Length - 1
-            If m1(n) <> m2(n) Then Return False
-        Next
-        Return True
-    End Function
     Private Sub GainMoveTokens()
         Dim bf As Battlefield = BattleSquare.Battlefield
-        Dim newMoves As New List(Of BattleMove())
+        Dim newMoves As New List(Of MoveToken)
 
         'generate wind progress
         If Facing = bf.Wind Then
@@ -77,12 +55,12 @@
             MoveTokenProgress(q) += sailTotal
             While MoveTokenProgress(q) > MoveTokenThreshold
                 MoveTokenProgress(q) -= MoveTokenThreshold
-                Dim newMoveToken As BattleMove() = Nothing
+                Dim newMoveToken As MoveToken = Nothing
                 Select Case q
-                    Case ShipQuarter.Fore : newMoveToken = {BattleMove.Forward, BattleMove.Forward}
-                    Case ShipQuarter.Starboard : newMoveToken = {BattleMove.Forward, BattleMove.TurnRight}
-                    Case ShipQuarter.Aft : newMoveToken = {BattleMove.Forward}
-                    Case ShipQuarter.Port : newMoveToken = {BattleMove.Forward, BattleMove.TurnLeft}
+                    Case ShipQuarter.Fore : newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.Forward})
+                    Case ShipQuarter.Starboard : newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.TurnRight})
+                    Case ShipQuarter.Aft : newMoveToken = New MoveToken({BattleMove.Forward})
+                    Case ShipQuarter.Port : newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.TurnLeft})
                     Case Else : Throw New Exception("Unrecognised ship quarter")
                 End Select
                 If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
@@ -91,12 +69,12 @@
             AdvancedMoveTokenProgress(q) += advancedSailTotal
             While AdvancedMoveTokenProgress(q) > AdvancedMoveTokenThreshold
                 AdvancedMoveTokenProgress(q) -= AdvancedMoveTokenThreshold
-                Dim newMoveToken As BattleMove() = Nothing
+                Dim newMoveToken As MoveToken = Nothing
                 Select Case q
-                    Case ShipQuarter.Fore : newMoveToken = {BattleMove.Forward, BattleMove.Forward}
-                    Case ShipQuarter.Starboard : newMoveToken = {BattleMove.TurnRight}
-                    Case ShipQuarter.Aft : newMoveToken = {BattleMove.Backwards}
-                    Case ShipQuarter.Port : newMoveToken = {BattleMove.TurnLeft}
+                    Case ShipQuarter.Fore : newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.Forward})
+                    Case ShipQuarter.Starboard : newMoveToken = New MoveToken({BattleMove.TurnRight})
+                    Case ShipQuarter.Aft : newMoveToken = New MoveToken({BattleMove.Backwards})
+                    Case ShipQuarter.Port : newMoveToken = New MoveToken({BattleMove.TurnLeft})
                     Case Else : Throw New Exception("Unrecognised ship quarter")
                 End Select
                 If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
@@ -110,14 +88,14 @@
             Report.Add(rep, ReportType.MoveToken)
         Next
     End Sub
-    Private Function GetMoveTokenString(ByVal movetoken As BattleMove()) As String
-        If MovesMatch(movetoken, {BattleMove.Forward, BattleMove.Forward}) Then : Return "Full Sails"
-        ElseIf MovesMatch(movetoken, {BattleMove.Forward}) Then : Return "Half Sails"
-        ElseIf MovesMatch(movetoken, {BattleMove.Forward, BattleMove.TurnLeft}) Then : Return "Port"
-        ElseIf MovesMatch(movetoken, {BattleMove.Forward, BattleMove.TurnRight}) Then : Return "Starboard"
-        ElseIf MovesMatch(movetoken, {BattleMove.TurnLeft}) Then : Return "Hard to Port"
-        ElseIf MovesMatch(movetoken, {BattleMove.TurnRight}) Then : Return "Hard to Starboard"
-        ElseIf MovesMatch(movetoken, {BattleMove.Backwards}) Then : Return "Tack Aft"
+    Private Function GetMoveTokenString(ByVal movetoken As MoveToken) As String
+        If movetoken = {BattleMove.Forward, BattleMove.Forward} Then : Return "Full Sails"
+        ElseIf movetoken = {BattleMove.Forward} Then : Return "Half Sails"
+        ElseIf movetoken = {BattleMove.Forward, BattleMove.TurnLeft} Then : Return "Port"
+        ElseIf movetoken = {BattleMove.Forward, BattleMove.TurnRight} Then : Return "Starboard"
+        ElseIf movetoken = {BattleMove.TurnLeft} Then : Return "Hard to Port"
+        ElseIf movetoken = {BattleMove.TurnRight} Then : Return "Hard to Starboard"
+        ElseIf movetoken = {BattleMove.Backwards} Then : Return "Tack Aft"
         Else : Return Nothing
         End If
     End Function
@@ -164,11 +142,11 @@
 
         MoveTokens.Clear()
         For n = 1 To 2
-            MoveTokens.Add({BattleMove.Forward})
-            MoveTokens.Add({BattleMove.Forward, BattleMove.TurnLeft})
-            MoveTokens.Add({BattleMove.Forward, BattleMove.TurnRight})
+            MoveTokens.Add(New MoveToken({BattleMove.Forward}))
+            MoveTokens.Add(New MoveToken({BattleMove.Forward, BattleMove.TurnLeft}))
+            MoveTokens.Add(New MoveToken({BattleMove.Forward, BattleMove.TurnRight}))
         Next
-        MoveTokens.Add({BattleMove.Forward, BattleMove.Forward})
+        MoveTokens.Add(New MoveToken({BattleMove.Forward, BattleMove.Forward}))
 
         MoveTokenProgress.Clear()
         AdvancedMoveTokenProgress.Clear()

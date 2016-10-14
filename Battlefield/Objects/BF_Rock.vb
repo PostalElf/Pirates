@@ -16,7 +16,7 @@
     End Property
     Public Property BattleSquare As Battlesquare Implements BattlefieldObject.BattleSquare
     Public Property Facing As BattleDirection Implements BattlefieldObject.Facing
-    Public Sub Move(ByVal move() As BattleMove) Implements BattlefieldObject.Move
+    Public Sub Move(ByVal move As MoveToken) Implements BattlefieldObject.Move
         'do nothing
     End Sub
     Public Function MovedInto(ByRef bo As BattlefieldObject) As Boolean Implements BattlefieldObject.MovedInto

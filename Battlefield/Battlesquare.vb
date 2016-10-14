@@ -95,9 +95,9 @@
         If f < 1 Then f = 4
         If f > 4 Then f = 1
 
-        Return New BattlePosition(current, f, {move})
+        Return New BattlePosition(current, f, New MoveToken({move}))
     End Function
-    Public Function GetPathables(ByVal facing As BattleDirection, ByVal moves As BattleMove()) As BattlePosition()
+    Public Function GetPathables(ByVal facing As BattleDirection, ByVal moves As MoveToken) As BattlePosition()
         Dim f As BattleDirection = facing
         Dim current As Battlesquare = Me
         Dim total(moves.Length - 1) As BattlePosition

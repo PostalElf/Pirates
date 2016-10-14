@@ -170,12 +170,6 @@
                 Next
             End If
 
-            For Each m In Melees
-                If m.Contains(DeadObjects(n)) = True Then
-                    m.IsOver = True
-                End If
-            Next
-
             DeadObjects(n) = Nothing
             DeadObjects.RemoveAt(n)
         Next
@@ -185,6 +179,9 @@
             If DeadCrew(n).Ship Is Nothing = False Then
                 DeadCrew(n).Ship.RemoveCrew(DeadCrew(n))
             End If
+            For Each Melee In Melees
+                If Melee.Contains(DeadCrew(n)) Then Melee.remove(DeadCrew(n))
+            Next
             DeadCrew(n) = Nothing
             DeadCrew.RemoveAt(n)
         Next

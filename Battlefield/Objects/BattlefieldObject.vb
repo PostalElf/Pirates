@@ -3,7 +3,7 @@
     Property BattleSquare As Battlesquare
     ReadOnly Property PathingCost As Integer
     Property Facing As BattleDirection
-    Sub Move(ByVal move As BattleMove())
+    Sub Move(ByVal move As MoveToken)
     Function MovedInto(ByRef target As BattlefieldObject) As Boolean                'return false to stop all queued movement
 
     Sub ConsoleWrite()

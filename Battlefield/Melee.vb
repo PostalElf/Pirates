@@ -70,6 +70,15 @@
     Public Function Contains(ByVal ship As Ship) As Boolean
         If AttackerShip.Equals(ship) OrElse DefenderShip.Equals(ship) Then Return True Else Return False
     End Function
+    Public Function Contains(ByVal crew As Crew) As Boolean
+        If Attackers.Contains(crew) Then Return True
+        If Defenders.Contains(crew) Then Return True
+        Return False
+    End Function
+    Public Sub Remove(ByVal crew As Crew)
+        If Attackers.Contains(crew) Then Attackers.Remove(crew)
+        If Defenders.Contains(crew) Then Defenders.Remove(crew)
+    End Sub
     Public Sub Lose(ByVal ship As Ship)
         Report.Add(ship.Name & " has been sunk in the melee!", ReportType.ShipDeath)
         Battlefield.AddDead(ship)

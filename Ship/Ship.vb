@@ -31,11 +31,11 @@
         Next
 
         'note: ties in heuristic distance are broken by how high the move is up in the list
-        _AvailableMoves.Add({BattleMove.Forward, BattleMove.Forward})
-        _AvailableMoves.Add({BattleMove.Forward, BattleMove.TurnLeft})
-        _AvailableMoves.Add({BattleMove.Forward, BattleMove.TurnRight})
-        _AvailableMoves.Add({BattleMove.Forward})
-        _AvailableMoves.Add({BattleMove.Halt})
+        _AvailableMoves.Add(New MoveToken({BattleMove.Forward, BattleMove.Forward}))
+        _AvailableMoves.Add(New MoveToken({BattleMove.Forward, BattleMove.TurnLeft}))
+        _AvailableMoves.Add(New MoveToken({BattleMove.Forward, BattleMove.TurnRight}))
+        _AvailableMoves.Add(New MoveToken({BattleMove.Forward}))
+        _AvailableMoves.Add(New MoveToken({BattleMove.Halt}))
     End Sub
     Private Shared NamePrefixes As New List(Of String)
     Private Shared NameSuffixes As New List(Of String)
@@ -78,21 +78,23 @@
 
 #Region "Movement"
     Protected JustTurned As Boolean = False
-    Private _AvailableMoves As New List(Of BattleMove())
-    Public Overridable ReadOnly Property AvailableMoves As List(Of BattleMove())
+    Private _AvailableMoves As New List(Of MoveToken)
+    Public Overridable ReadOnly Property AvailableMoves As List(Of MoveToken)
         Get
             Dim turn As Boolean
-            Dim wline As String
+            Dim wline As ShipWaterline
             If IgnoresJustTurned = True Then turn = True Else turn = JustTurned
-            If IgnoresWaterline = True Then wline = "Unladen" Else wline = Waterline
+            If IgnoresWaterline = True Then wline = ShipWaterline.Unladen Else wline = Waterline
             Return TrimAvailableMoves(_AvailableMoves, turn, wline)
         End Get
     End Property
-    Protected Shared Function TrimAvailableMoves(ByVal targetList As List(Of BattleMove()), ByVal aJustTurned As Boolean, ByVal aWaterline As ShipWaterline) As List(Of BattleMove())
-        Dim total As New List(Of BattleMove())
+    Protected Shared Function TrimAvailableMoves(ByVal targetList As List(Of MoveToken), ByVal aJustTurned As Boolean, ByVal aWaterline As ShipWaterline) As List(Of MoveToken)
+        Dim total As New List(Of MoveToken)
         For Each moves In targetList
             If aJustTurned = True OrElse aWaterline = ShipWaterline.Overladen Then
                 If moves.Length = 1 Then total.Add(moves)
+            Else
+                total.Add(moves)
             End If
         Next
         Return total
@@ -110,11 +112,12 @@
         If f > 4 Then f = 1
         Return f
     End Function
-    Protected Function TurnFacing(ByVal moves As BattleMove(), Optional ByVal initialFacing As BattleDirection = Nothing) As BattleDirection
+    Protected Function TurnFacing(ByVal moves As MoveToken, Optional ByVal initialFacing As BattleDirection = Nothing) As BattleDirection
         Dim f As BattleDirection = Facing
         If initialFacing <> Nothing Then f = initialFacing
 
-        For Each m In moves
+        For n = 0 To moves.Length - 1
+            Dim m As BattleMove = moves(n)
             f = TurnFacing(m, f)
         Next
         Return f
@@ -126,9 +129,10 @@
     End Property
 
     Public Property BattleSquare As Battlesquare Implements BattlefieldObject.BattleSquare
-    Public Sub Move(ByVal move As BattleMove()) Implements BattlefieldObject.Move
+    Public Sub Move(ByVal move As MoveToken) Implements BattlefieldObject.Move
         Dim turn As Boolean = False
-        For Each d In move
+        For n = 0 To move.Length - 1
+            Dim d As BattleMove = move(n)
             Dim continueMovement As Boolean = True
 
             'turn if necessary

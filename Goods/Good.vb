@@ -18,6 +18,11 @@
         Return New Good(g1.Type, g1.Qty + g2.Qty, g1.HullCost)
     End Operator
     Public Shared Function Generate(ByVal gt As GoodType, Optional ByVal aQty As Integer = 0) As Good
+        Dim hc As Double
+        Select Case gt
+            Case Else : hc = 0.1
+        End Select
 
+        Return New Good(gt, aQty, hc)
     End Function
 End Structure

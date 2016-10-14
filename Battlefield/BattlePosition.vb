@@ -1,10 +1,10 @@
 ﻿Public Class BattlePosition
     Public Square As Battlesquare
     Public Facing As BattleDirection
-    Public ParentMove As BattleMove()
+    Public ParentMove As MoveToken
     Public PathingParent As BattlePosition
 
-    Public Sub New(ByVal sq As Battlesquare, ByVal f As BattleDirection, ByVal moves As BattleMove())
+    Public Sub New(ByVal sq As Battlesquare, ByVal f As BattleDirection, ByVal moves As MoveToken)
         Square = sq
         Facing = f
         ParentMove = moves
