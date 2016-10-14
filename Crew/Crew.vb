@@ -191,7 +191,7 @@
             End If
         Else
             'miss
-            Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off an attack from " & Name & ".")
+            Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off an attack from " & Name & ".", ReportType.CrewAttack)
         End If
     End Sub
     Public Sub ShipAttack(ByVal accuracy As Integer, ByVal damage As Damage)
@@ -213,12 +213,12 @@
 
         DamageSustained += damage.CrewDamage
         DamageLog.Add(damage)
-        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.CrewDamage & " damage by " & damage.Sender & ".")
+        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.CrewDamage & " damage by " & damage.Sender & ".", ReportType.CrewAttack)
 
         If DamageSustained >= Health Then
             Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
             battlefield.AddDead(Me)
-            Report.Add("[" & Ship.ID & "] " & Name & " has perished in battle!")
+            Report.Add("[" & Ship.ID & "] " & Name & " has perished in battle!", ReportType.CrewDeath)
         End If
     End Sub
 #End Region

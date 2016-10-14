@@ -60,7 +60,10 @@
         Dim newMoves As New List(Of BattleMove())
 
         'generate wind progress
-        If Facing = bf.Wind Then MoveTokenProgress(ShipQuarter.Aft) += Battlefield.WindMoveTokenProgress
+        If Facing = bf.Wind Then
+            MoveTokenProgress(ShipQuarter.Aft) += Battlefield.WindMoveTokenProgress
+            Report.Add(Name & " is facing the wind!", ReportType.WindMoveToken)
+        End If
 
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             Dim sailTotal As Integer = 0
@@ -104,7 +107,7 @@
             MoveTokens.Add(newMoveToken)
 
             Dim rep As String = Name & " gained a new sailing token: " & GetMoveTokenString(newMoveToken)
-            Report.Add(rep)
+            Report.Add(rep, ReportType.MoveToken)
         Next
     End Sub
     Private Function GetMoveTokenString(ByVal movetoken As BattleMove()) As String

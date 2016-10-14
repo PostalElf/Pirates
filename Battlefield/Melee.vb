@@ -62,7 +62,7 @@
                 Dim c As Crew = Dev.GetRandom(Of Crew)(offenders)
                 If c Is Nothing = False Then
                     destination.Add(c)
-                    Report.Add(c.Name & " joins the melee.")
+                    Report.Add(c.Name & " joins the melee.", ReportType.Melee)
                 End If
             Next
         End If
@@ -71,7 +71,7 @@
         If AttackerShip.Equals(ship) OrElse DefenderShip.Equals(ship) Then Return True Else Return False
     End Function
     Public Sub Lose(ByVal ship As Ship)
-        Report.Add(ship.Name & " has been sunk in the melee!")
+        Report.Add(ship.Name & " has been sunk in the melee!", ReportType.ShipDeath)
         Battlefield.AddDead(ship)
         IsOver = True
     End Sub

@@ -323,7 +323,9 @@
             End While
         Next
 
-        Report.Add(Name & " fires its " & quarter.ToString & " " & weapon.Name & ".")
+        Dim repType As ReportType
+        If TypeOf Me Is ShipPlayer Then repType = ReportType.PlayerShipAttack Else repType = ReportType.EnemyShipAttack
+        Report.Add(Name & " fires its " & quarter.ToString & " " & weapon.Name & ".", repType)
 
         If weapon.Name <> "Grappling Hooks" Then
             weapon.Attack(attackDirection, attackTarget, GetCrews(quarter, CrewSkill.Gunnery))
@@ -337,7 +339,7 @@
             melee.Battlefield = battlefield
             battlefield.Melees.Add(melee)
 
-            Report.Add(Name & " (" & GetCrews(quarter, Nothing).Count & ") and " & attackTarget.Name & " (" & attackShip.GetCrews(attackQuarter, Nothing).Count & ") are joined in melee!")
+            Report.Add(Name & " and " & attackTarget.Name & " are joined in melee!", ReportType.Melee)
         End If
     End Sub
     Private Function GetTargetQuarter(ByVal attackDirection As BattleDirection) As ShipQuarter Implements BattlefieldObject.GetTargetQuarter
@@ -383,7 +385,7 @@
     Private DamageLog As New List(Of Damage)
     Private Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
         If damage.ShipDamage > 0 Then
-            Report.Add(Name & " suffered " & damage.ShipDamage & " damage (" & targetQuarter.ToString & ").")
+            Report.Add(Name & " suffered " & damage.ShipDamage & " damage (" & targetQuarter.ToString & ").", ReportType.ShipDamage)
             DamageSustained(targetQuarter) += damage.ShipDamage
             DamageLog.Add(damage)
         End If
@@ -395,7 +397,7 @@
 
         If DamageSustained(targetQuarter) >= HullPoints(targetQuarter) Then
             BattleSquare.Battlefield.AddDead(Me)
-            Report.Add(Name & " has been destroyed!")
+            Report.Add(Name & " has been destroyed!", ReportType.ShipDeath)
         End If
     End Sub
     Public Sub EnterCombat(ByRef battlefield As Battlefield, ByRef combatantList As List(Of Ship))
