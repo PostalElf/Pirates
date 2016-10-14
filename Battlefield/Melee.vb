@@ -37,26 +37,8 @@
     End Sub
 
     Public Sub Tick()
-        Dim winner As Ship = Nothing
-        Dim loser As Ship = Nothing
-        If Attackers.Count = 0 Then
-            winner = DefenderShip
-            loser = AttackerShip
-        ElseIf Defenders.Count = 0 Then
-            'attackers win
-            winner = AttackerShip
-            loser = DefenderShip
-        End If
-        If winner Is Nothing = False Then
-            Report.Add(loser.Name & " has been sunk in the melee!")
-            winner.InMelee = False
-            loser.InMelee = False
-            Battlefield.DeadObjects.Add(loser)
-
-            IsOver = True
-            Exit Sub
-        End If
-
+        If Attackers.Count = 0 Then Lose(AttackerShip) : Exit Sub
+        If Defenders.Count = 0 Then Lose(DefenderShip) : Exit Sub
 
         'attackers attack
         Attack(Attackers, Defenders)
@@ -75,7 +57,7 @@
     End Sub
     Private Sub Reinforce(ByRef offenders As List(Of Crew), ByRef destination As List(Of Crew))
         Const ReinforcementCount As Integer = 2
-        If offenders.Count < 0 Then
+        If offenders.Count > 0 Then
             For n = 1 To ReinforcementCount
                 Dim c As Crew = Dev.GetRandom(Of Crew)(offenders)
                 If c Is Nothing = False Then
@@ -88,4 +70,9 @@
     Public Function Contains(ByVal ship As Ship) As Boolean
         If AttackerShip.Equals(ship) OrElse DefenderShip.Equals(ship) Then Return True Else Return False
     End Function
+    Public Sub Lose(ByVal ship As Ship)
+        Report.Add(ship.Name & " has been sunk in the melee!")
+        Battlefield.AddDead(ship)
+        IsOver = True
+    End Sub
 End Class

@@ -114,8 +114,14 @@
 
     Public Combatants As New List(Of Ship)
     Public Melees As New List(Of Melee)
-    Public DeadCrew As New List(Of Crew)
-    Public DeadObjects As New List(Of BattlefieldObject)
+    Private DeadCrew As New List(Of Crew)
+    Private DeadObjects As New List(Of BattlefieldObject)
+    Public Sub AddDead(ByVal bfo As BattlefieldObject)
+        If DeadObjects.Contains(bfo) = False Then DeadObjects.Add(bfo)
+    End Sub
+    Public Sub AddDead(ByVal crew As Crew)
+        If DeadCrew.Contains(crew) = False Then DeadCrew.Add(crew)
+    End Sub
     Public Sub CleanUp()
         CleanDeadCrew()
         CleanDeadObjects()
@@ -146,6 +152,9 @@
 
             If TypeOf DeadObjects(n) Is Ship Then
                 Dim ship As Ship = CType(DeadObjects(n), Ship)
+                For Each Melee In Melees
+                    If Melee.Contains(ship) Then Melee.Lose(ship)
+                Next
                 Combatants.Remove(ship)
                 For Each q In [Enum].GetValues(GetType(ShipQuarter))
                     For Each Crew In ship.GetCrews(q, Nothing)

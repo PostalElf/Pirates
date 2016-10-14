@@ -323,6 +323,8 @@
             End While
         Next
 
+        Report.Add(Name & " fires its " & quarter.ToString & " " & weapon.Name & ".")
+
         If weapon.Name <> "Grappling Hooks" Then
             weapon.Attack(attackDirection, attackTarget, GetCrews(quarter, CrewSkill.Gunnery))
         Else
@@ -381,7 +383,7 @@
     Private DamageLog As New List(Of Damage)
     Private Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
         If damage.ShipDamage > 0 Then
-            Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.")
+            Report.Add(Name & " suffered " & damage.ShipDamage & " damage (" & targetQuarter.ToString & ").")
             DamageSustained(targetQuarter) += damage.ShipDamage
             DamageLog.Add(damage)
         End If
@@ -392,7 +394,7 @@
         End If
 
         If DamageSustained(targetQuarter) >= HullPoints(targetQuarter) Then
-            BattleSquare.Battlefield.DeadObjects.Add(Me)
+            BattleSquare.Battlefield.AddDead(Me)
             Report.Add(Name & " has been destroyed!")
         End If
     End Sub

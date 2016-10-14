@@ -217,7 +217,7 @@
 
         If DamageSustained >= Health Then
             Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
-            battlefield.DeadCrew.Add(Me)
+            battlefield.AddDead(Me)
             Report.Add("[" & Ship.ID & "] " & Name & " has perished in battle!")
         End If
     End Sub

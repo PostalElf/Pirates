@@ -110,6 +110,11 @@
         For Each firstPosition In firstPositions
             secondPositions.Add(firstPosition, New List(Of BattlePosition()))
             For Each mArray As BattleMove() In AvailableMoves
+                'check for movement restrictions
+                If IgnoresJustTurned = False Then
+                    If mArray.Length > 1 Then Continue For
+                End If
+
                 Dim firstPositionReference As BattlePosition = firstPosition(firstPosition.Length - 1)
                 Dim secondPosition As BattlePosition() = firstPositionReference.Square.GetPathables(firstPositionReference.Facing, mArray)
                 secondPositions(firstPosition).Add(secondPosition)

@@ -214,6 +214,6 @@
         Next
 
         Console.ReadLine()
-        battlefield.DeadObjects.Add(target)
+        battlefield.AddDead(target)
     End Sub
 End Module
