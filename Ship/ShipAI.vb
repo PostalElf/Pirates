@@ -71,7 +71,7 @@
 #Region "Movement"
     Public Overloads Sub Tick(ByVal playerShip As ShipPlayer)
         MyBase.Tick()
-        AStarRouting(playerShip.BattleSquare)
+        PrimitiveRouting(playerShip.BattleSquare)
         PrimitiveAttack(playerShip)
     End Sub
     Private Sub PrimitiveAttack(ByRef playership As Ship)
@@ -128,7 +128,7 @@
         Dim targetMoves2 As MoveToken = Nothing
         For Each fp As BattlePosition() In firstPositions
             For Each sp In secondPositions(fp)
-                Dim pathCost As Integer = GetHeuristicDistance(fp, goal) + GetHeuristicDistance(sp, goal)
+                Dim pathCost As Integer = GetHeuristicDistance(fp, sp(sp.Length - 1).Square) + GetHeuristicDistance(sp, goal)
                 If pathCost < targetPathCost Then
                     targetFirstPosition = fp
                     targetPathCost = pathCost
@@ -144,45 +144,6 @@
         End If
 
         ExecuteMoves(targetMoves)
-    End Sub
-    Private Sub AStarRouting(ByVal goal As Battlesquare)
-        Dim path As New List(Of BattlePosition)
-        Dim open As New List(Of BattlePosition)
-        Dim closed As New List(Of BattlePosition)
-        open.Add(New BattlePosition(BattleSquare, Facing, Nothing))
-
-        While open.Count > 0
-            Dim current = open(0)
-            open.RemoveAt(0)
-
-            If current.Square.Equals(goal) Then
-                While current.PathingParent Is Nothing = False
-                    current = current.PathingParent
-                    path.Add(current)
-                End While
-                Exit While
-            End If
-
-            closed.Add(current)
-            For Each mt As MoveToken In AvailableMoves
-                Dim neighbours As BattlePosition() = current.Square.GetPathables(current.Facing, mt)
-                Dim n As BattlePosition = neighbours(neighbours.Length - 1)
-
-                Dim cost As Integer = current.gCost + current.Square.PathingCost + n.Square.PathingCost
-                If open.Contains(n) AndAlso cost < n.gCost Then open.Remove(n)
-                If closed.Contains(n) AndAlso cost < n.gCost Then closed.Remove(n)
-                If open.Contains(n) = False AndAlso closed.Contains(n) = False Then
-                    n.gCost = cost
-                    open.Add(n)
-                    n.PathingParent = current
-                    n.ParentMove = mt
-                End If
-            Next
-        End While
-
-        If path.Count > 0 Then
-            Move(path(0).ParentMove)
-        End If
     End Sub
     Private Function GetHeuristicDistance(ByVal start As BattlePosition, ByVal goal As Battlesquare) As Double
         'manhattan distance as base
@@ -206,7 +167,7 @@
             total += GetHeuristicDistance(bp, goal)
         Next
 
-        If start.Length = 1 AndAlso start(0).ParentMove <> {BattleMove.Halt} Then total *= 2
+        If start.Length = 1 Then total *= 2
         Return total
     End Function
     Private Sub ExecuteMoves(ByVal targetMoves As MoveToken)

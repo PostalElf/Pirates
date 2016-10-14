@@ -88,7 +88,7 @@
         Get
             Dim turn As Boolean
             Dim wline As ShipWaterline
-            If IgnoresJustTurned = True Then turn = False Else turn = JustTurned
+            If IgnoresJustTurned = True Then turn = True Else turn = JustTurned
             If IgnoresWaterline = True Then wline = ShipWaterline.Unladen Else wline = Waterline
             Return TrimAvailableMoves(_AvailableMoves, turn, wline)
         End Get

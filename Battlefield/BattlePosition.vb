@@ -3,7 +3,6 @@
     Public Facing As BattleDirection
     Public ParentMove As MoveToken
     Public PathingParent As BattlePosition
-    Public gCost As Integer
 
     Public Sub New(ByVal sq As Battlesquare, ByVal f As BattleDirection, ByVal moves As MoveToken)
         Square = sq
