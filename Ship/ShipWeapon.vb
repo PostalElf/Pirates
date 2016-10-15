@@ -87,7 +87,7 @@
         Me.New(aName, New Damage(dShipDamage, dCrewDamage, dType, aName), aRange, aAmmoType, aAmmoPerShot, aCrewCount, aCoolDown)
     End Sub
     Public Overrides Function ToString() As String
-        Return Name & " - Range " & Range & " - Damage " & Damage.ShipDamage
+        Return Name & " - Range " & Range & " - Damage " & Damage.ShipDamage & "/" & Damage.CrewDamage
     End Function
     Public Function Clone() As ShipWeapon
         Dim w As New ShipWeapon

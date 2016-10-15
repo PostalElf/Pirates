@@ -131,9 +131,7 @@
         For Each q In quarters
             For Each weapon In ship.GetWeapons(q)
                 With weapon
-                    Console.Write(s & Dev.vbTab(q.ToString & ":", t) & .Name & " - ")
-                    If .Damage.ShipDamage > 0 Then Console.Write(.Damage.ShipDamage & " " & .Damage.Type.ToString & " [Ship] - ")
-                    If .Damage.CrewDamage > 0 Then Console.Write(.Damage.CrewDamage & " " & .Damage.Type.ToString & " [Crew] - ")
+                    Console.Write(s & Dev.vbTab(q.ToString & ":", t) & weapon.ToString & " - ")
                     If .CooldownCounter <= 0 Then Console.Write("OK") Else Console.Write("Reloading in " & .CooldownCounter)
                     Console.WriteLine()
                 End With
