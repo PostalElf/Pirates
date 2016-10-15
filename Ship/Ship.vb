@@ -22,6 +22,7 @@
 
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 100)
+            MaxHullUse.Add(quarter, 0)
             Crews.Add(quarter, New List(Of Crew))
             Modules.Add(quarter, New List(Of ShipModule))
         Next
@@ -198,6 +199,7 @@
 
 #Region "Goods"
     Protected HullSpace As Integer
+    Protected MaxHullUse As New Dictionary(Of ShipQuarter, Integer)
     Private Goods As New Dictionary(Of GoodType, Good)
     Public Function CheckAddGood(ByVal good As Good) As Boolean
         If FreeHullSpace - good.TotalHullCost < 0 Then Return False
@@ -241,6 +243,7 @@
     Private Modules As New Dictionary(Of ShipQuarter, List(Of ShipModule))
     Public Function CheckAddModule(ByVal quarter As ShipQuarter, ByVal m As ShipModule) As Boolean
         If m.HullCost > HullSpace Then Return False
+        If MaxHullUse(quarter) < m.HullCost Then Return False
 
         Return True
     End Function
@@ -249,6 +252,7 @@
         m.Quarter = quarter
         m.Ship = Me
         HullSpace -= m.HullCost
+        MaxHullUse(quarter) -= m.HullCost
     End Sub
     Public Sub RemoveModule(ByVal quarter As ShipQuarter, ByRef m As ShipModule)
         If Modules(quarter).Contains(m) = False Then Exit Sub
@@ -256,6 +260,7 @@
         m.Quarter = Nothing
         m.Ship = Nothing
         HullSpace += m.HullCost
+        MaxHullUse(quarter) += m.HullCost
     End Sub
     Public Function GetModuleCapacity(ByVal type As ShipModule.ModuleType) As Integer
         Dim total As Integer = 0
@@ -316,6 +321,7 @@
     Protected Weapons As New Dictionary(Of ShipQuarter, List(Of ShipWeapon))
     Public Function CheckAddWeapon(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon) As Boolean
         If weapon.HullCost > HullSpace Then Return False
+        If MaxHullUse(quarter) < weapon.HullCost Then Return False
 
         Return True
     End Function
@@ -324,12 +330,14 @@
         weapon.Quarter = quarter
         Weapons(quarter).Add(weapon)
         HullSpace -= weapon.HullCost
+        MaxHullUse(quarter) -= weapon.HullCost
     End Sub
     Public Sub RemoveWeapon(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon)
         weapon.Ship = Nothing
         weapon.Quarter = Nothing
         Weapons(quarter).Remove(weapon)
         HullSpace += weapon.HullCost
+        MaxHullUse(quarter) += weapon.HullCost
     End Sub
     Public Function GetWeapons(ByVal quarter As ShipQuarter) As List(Of ShipWeapon)
         Return Weapons(quarter)

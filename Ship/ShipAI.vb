@@ -42,6 +42,7 @@
 
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
                 .HullPoints(q) = Pirates.Ship.GenerateHullPoints(.Type)
+                .maxhulluse(q) = 10000
                 .AddCrew(q, Crew.Generate(.Race), CrewSkill.Sailing)
             Next
 
