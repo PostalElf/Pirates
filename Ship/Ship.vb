@@ -283,7 +283,9 @@
         If GetWeapons(quarter).Count > 0 Then total.Add(CrewRole.Gunner)
         If GetModules(ShipModule.ModuleType.Kitchen, quarter).Count > 0 Then total.Add(CrewRole.Cook)
         If GetModules(ShipModule.ModuleType.Maproom, quarter).Count > 0 Then total.Add(CrewRole.Navigator)
-        If GetModules(ShipModule.ModuleType.Helm, quarter).Count > 0 Then total.AddRange({CrewRole.Captain, CrewRole.Helmsman})
+        If GetModules(ShipModule.ModuleType.Helm, quarter).Count > 0 Then total.AddRange({CrewRole.Helmsman, CrewRole.FirstMate})
+        If GetModules(ShipModule.ModuleType.Quarterdeck, quarter).Count > 0 Then total.Add(CrewRole.Captain)
+        Return total
     End Function
     Public Function CheckAddCrew(ByVal quarter As ShipQuarter, ByVal crew As Crew, Optional ByVal role As CrewRole = Nothing) As Boolean
         Dim crewCount As Integer = 0
@@ -400,8 +402,7 @@
 
             Dim melee As New Melee(Me, quarter, attackShip, attackQuarter)
             Dim battlefield As Battlefield = BattleSquare.Battlefield
-            melee.Battlefield = battlefield
-            battlefield.Melees.Add(melee)
+            battlefield.AddMelee(melee)
 
             Report.Add(Name & " and " & attackTarget.Name & " are joined in melee!", ReportType.Melee)
         End If

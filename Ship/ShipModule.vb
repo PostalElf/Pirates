@@ -18,6 +18,7 @@
 
     Public Enum ModuleType
         Crew = 1
+        Quarterdeck
         Helm
         Maproom
         Kitchen

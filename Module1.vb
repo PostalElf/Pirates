@@ -9,10 +9,7 @@
     Private Sub Battle()
         Dim rng As New Random(5)
         Dim battlefield As Battlefield = SetupBattlefield(rng)
-        Dim playerShip As ShipPlayer = Nothing
-        For Each Ship In battlefield.Combatants
-            If TypeOf Ship Is ShipPlayer Then playerShip = Ship
-        Next
+        Dim playerShip As ShipPlayer = battlefield.playership
 
         While battlefield.IsOver = False
             Console.Clear()
@@ -22,21 +19,7 @@
             Console.WriteLine()
 
             Dim AITurn As Boolean = PlayerInput(playerShip, battlefield)
-            If AITurn = True Then
-                For Each combatant In battlefield.Combatants
-                    If combatant.InMelee = True Then Continue For
-                    If TypeOf combatant Is ShipAI Then : CType(combatant, ShipAI).Tick(playerShip)
-                    ElseIf TypeOf combatant Is ShipPlayer Then : CType(combatant, ShipPlayer).Tick()
-                    Else : combatant.Tick()
-                    End If
-                Next
-
-                For Each Melee In battlefield.Melees
-                    Melee.Tick()
-                Next
-            End If
-
-            battlefield.CleanUp()
+            battlefield.Tick(AITurn)
         End While
 
         Console.Clear()
@@ -119,13 +102,7 @@
     End Function
     Private Sub ViewBattlefield(ByVal battlefield As Battlefield)
         Console.WriteLine()
-        For Each combatant In battlefield.Combatants
-            If TypeOf combatant Is Ship Then
-                Dim ship As Ship = CType(combatant, Ship)
-                ship.ConsoleReport()
-            End If
-            Console.WriteLine()
-        Next
+        battlefield.consoleReportCombatants()
         Console.ReadKey()
     End Sub
     Private Sub ViewSelf(ByVal ship As ShipPlayer)
@@ -135,13 +112,19 @@
         Console.WriteLine()
 
         For Each role In [Enum].GetValues(GetType(CrewRole))
-            Console.WriteLine(role.ToString & ":")
+            Dim crews As New List(Of Crew)
             For Each q In quarters
-                For Each Crew In ship.GetCrews(q, role)
-                    Console.WriteLine(s & Dev.vbTab(q.ToString & ":", t) & Crew.Name & " (" & Crew.GetSkill(role) & ")")
-                Next
+                Dim cList As List(Of Crew) = ship.GetCrews(q, role)
+                If cList.Count > 0 Then crews.AddRange(cList)
             Next
-            Console.WriteLine()
+
+            If crews.Count > 0 Then
+                Console.WriteLine(role.ToString & ":")
+                For Each Crew In crews
+                    Console.WriteLine(s & Dev.vbTab(Crew.ShipQuarter.ToString & ":", t) & Crew.Name & " (" & Crew.GetSkillFromRole() & ")")
+                Next
+                Console.WriteLine()
+            End If
         Next
         Console.WriteLine("Weapons:")
         For Each q In quarters
@@ -153,6 +136,7 @@
                 Console.WriteLine()
             Next
         Next
+        Console.WriteLine()
 
         Select Case Menu.getListChoice(New List(Of String) From {"Move Crew", "Examine Crew"}, 0)
             Case "Move Crew" : MoveCrew(ship)

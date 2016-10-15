@@ -82,6 +82,7 @@
     <Compile Include="Crew\Crew.vb" />
     <Compile Include="Crew\CrewBonus.vb" />
     <Compile Include="Crew\CrewRace.vb" />
+    <Compile Include="Crew\CrewRole.vb" />
     <Compile Include="Crew\CrewSkill.vb" />
     <Compile Include="Dev\IO.vb" />
     <Compile Include="Dev\Menu.vb" />

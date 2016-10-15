@@ -14,7 +14,7 @@
     Public ReadOnly Property IsReady As Boolean
         Get
             If Ship Is Nothing Then Return False
-            If Ship.justfired(Quarter) = False Then Return False
+            If Ship.JustFired(Quarter) = True Then Return False
             If IgnoresCooldown = False Then
                 If CooldownCounter > 0 Then Return False
             End If

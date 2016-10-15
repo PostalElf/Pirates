@@ -123,6 +123,18 @@
         Next
         Return bestSkill
     End Function
+    Public Function GetSkillFromRole() As Integer
+        Dim cs As CrewSkill = Nothing
+        Select Case role
+            Case CrewRole.Captain, CrewRole.FirstMate : cs = CrewSkill.Leadership
+            Case CrewRole.Cook : cs = CrewSkill.Cooking
+            Case CrewRole.Gunner : cs = CrewSkill.Gunnery
+            Case CrewRole.Sailor, CrewRole.Helmsman : cs = CrewSkill.Sailing
+            Case CrewRole.Navigator : cs = CrewSkill.Navigation
+        End Select
+        If cs = Nothing Then Return -1
+        Return GetSkill(cs)
+    End Function
     Private Function GetBestWeapon() As CrewBonus
         Dim bestWeapon As CrewBonus = Nothing
         Dim bestWeaponValue As Integer = -1

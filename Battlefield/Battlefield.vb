@@ -106,18 +106,55 @@
             Console.WriteLine()
         Next
     End Sub
+    Public Sub ConsoleReportCombatants()
+        For Each combatant In Combatants
+            If TypeOf combatant Is Ship Then
+                Dim ship As Ship = CType(combatant, Ship)
+                ship.ConsoleReport()
+            End If
+            Console.WriteLine()
+        Next
+    End Sub
 
+    Private Combatants As New List(Of Ship)
+    Public PlayerShip As ShipPlayer
+    Private Melees As New List(Of Melee)
     Public Sub AddCombatant(ByRef combatant As Ship, ByVal x As Integer, ByVal y As Integer, ByVal facing As BattleDirection)
         combatant.Facing = facing
         combatant.SetSquare(Square(x, y))
         Select Case combatant.GetType
-            Case GetType(ShipPlayer) : CType(combatant, ShipPlayer).EnterCombat(Me, Combatants)
-            Case GetType(ShipAI) : CType(combatant, ShipAI).EnterCombat(Me, Combatants)
-            Case Else : combatant.EnterCombat(Me, Combatants)
+            Case GetType(ShipPlayer)
+                CType(combatant, ShipPlayer).EnterCombat(Me, Combatants)
+                PlayerShip = combatant
+
+            Case GetType(ShipAI)
+                CType(combatant, ShipAI).EnterCombat(Me, Combatants)
+
+            Case Else
+                combatant.EnterCombat(Me, Combatants)
         End Select
     End Sub
-    Public Combatants As New List(Of Ship)
-    Public Melees As New List(Of Melee)
+    Public Sub AddMelee(ByVal melee As Melee)
+        melee.Battlefield = Me
+        Melees.Add(melee)
+    End Sub
+    Public Sub Tick(ByVal AITurn As Boolean)
+        If AITurn = True Then
+            For Each combatant In Combatants
+                If combatant.InMelee = True Then Continue For
+                If TypeOf combatant Is ShipAI Then : CType(combatant, ShipAI).Tick(PlayerShip)
+                ElseIf TypeOf combatant Is ShipPlayer Then : CType(combatant, ShipPlayer).Tick()
+                Else : combatant.Tick()
+                End If
+            Next
+
+            For Each Melee In Melees
+                Melee.Tick()
+            Next
+        End If
+
+        CleanUp()
+    End Sub
 
 #Region "Death"
     Private DeadCrew As New List(Of Crew)
@@ -128,7 +165,7 @@
     Public Sub AddDead(ByVal crew As Crew)
         If DeadCrew.Contains(crew) = False Then DeadCrew.Add(crew)
     End Sub
-    Public Sub CleanUp()
+    Private Sub CleanUp()
         CleanDeadCrew()
         CleanDeadObjects()
         CleanDeadMelees()
