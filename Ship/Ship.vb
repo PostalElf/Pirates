@@ -25,6 +25,7 @@
             MaxHullUse.Add(quarter, 0)
             Crews.Add(quarter, New List(Of Crew))
             Modules.Add(quarter, New List(Of ShipModule))
+            JustFired.Add(quarter, False)
         Next
 
         For Each gt In [Enum].GetValues(GetType(GoodType))
@@ -318,6 +319,7 @@
 #End Region
 
 #Region "Attack"
+    Public JustFired As New Dictionary(Of ShipQuarter, Boolean)
     Protected Weapons As New Dictionary(Of ShipQuarter, List(Of ShipWeapon))
     Public Function CheckAddWeapon(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon) As Boolean
         If weapon.HullCost > HullSpace Then Return False
@@ -373,6 +375,7 @@
         Dim repType As ReportType
         If TypeOf Me Is ShipPlayer Then repType = ReportType.PlayerShipAttack Else repType = ReportType.EnemyShipAttack
         Report.Add(Name & " fires its " & quarter.ToString & " " & weapon.Name & ".", repType)
+        JustFired(quarter) = True
 
         If weapon.Name <> "Grappling Hooks" Then
             weapon.Attack(attackDirection, attackTarget, GetCrews(quarter, CrewSkill.Gunnery))
@@ -457,6 +460,7 @@
             For Each w In Weapons(q)
                 w.Tick()
             Next
+            JustFired(q) = False
         Next
     End Sub
 #End Region
