@@ -71,6 +71,7 @@
         'return true when player ends turn
 
         Dim targetMove As MoveToken = Nothing
+        Console.ResetColor()
         Dim input As ConsoleKeyInfo = Console.ReadKey()
         Select Case input.Key
             Case ConsoleKey.NumPad3, ConsoleKey.L : GetPlayerAttack(ship, ShipQuarter.Starboard)
@@ -129,11 +130,13 @@
         Console.WriteLine("Weapons:")
         For Each q In quarters
             For Each weapon In ship.GetWeapons(q)
-                Console.Write(s & Dev.vbTab(q.ToString & ":", t) & weapon.Name & " - ")
-                If weapon.Damage.ShipDamage > 0 Then Console.Write(weapon.Damage.ShipDamage & " " & weapon.Damage.Type.ToString & " ship - ")
-                If weapon.Damage.CrewDamage > 0 Then Console.Write(weapon.Damage.CrewDamage & " " & weapon.Damage.Type.ToString & " crew - ")
-                If weapon.CooldownCounter <= 0 Then Console.Write("OK") Else Console.Write("Reloading in " & weapon.CooldownCounter)
-                Console.WriteLine()
+                With weapon
+                    Console.Write(s & Dev.vbTab(q.ToString & ":", t) & .Name & " - ")
+                    If .Damage.ShipDamage > 0 Then Console.Write(.Damage.ShipDamage & " " & .Damage.Type.ToString & " [Ship] - ")
+                    If .Damage.CrewDamage > 0 Then Console.Write(.Damage.CrewDamage & " " & .Damage.Type.ToString & " [Crew] - ")
+                    If .CooldownCounter <= 0 Then Console.Write("OK") Else Console.Write("Reloading in " & .CooldownCounter)
+                    Console.WriteLine()
+                End With
             Next
         Next
         Console.WriteLine()
