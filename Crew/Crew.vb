@@ -91,7 +91,7 @@
 #End Region
 
 #Region "Skills"
-    Public Role As CrewSkill
+    Public Role As CrewRole
     Private Skills As New Dictionary(Of CrewSkill, Integer)
     Private SkillsXP As New Dictionary(Of CrewSkill, Integer)
     Private Shared SkillThresholds As Integer() = {0, 100, 300, 600, 1000, 1500}
@@ -230,7 +230,7 @@
     Public Ship As Ship
     Public ShipQuarter As ShipQuarter
 
-    Public Sub Move(ByVal quarter As ShipQuarter, Optional ByVal role As CrewSkill = Nothing)
+    Public Sub Move(ByVal quarter As ShipQuarter, Optional ByVal role As CrewRole = Nothing)
         Dim keepShip As Ship = Ship
         Ship.RemoveCrew(ShipQuarter, Me)
         keepShip.AddCrew(quarter, Me)

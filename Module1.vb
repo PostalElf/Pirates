@@ -62,12 +62,12 @@
             .AddWeapon(ShipQuarter.Starboard, grapeshot.Clone)
             .AddWeapon(ShipQuarter.Port, hooks.Clone)
             .AddWeapon(ShipQuarter.Starboard, hooks.Clone)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewSkill.Gunnery)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewSkill.Gunnery)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewSkill.Gunnery)
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
             .Cheaterbug(True, True, True, True)
         End With
         battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
@@ -134,8 +134,7 @@
         Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
         Console.WriteLine()
 
-        Dim roles As CrewSkill() = {CrewSkill.Sailing, CrewSkill.Gunnery}
-        For Each role In roles
+        For Each role In [Enum].GetValues(GetType(CrewRole))
             Console.WriteLine(role.ToString & ":")
             For Each q In quarters
                 For Each Crew In ship.GetCrews(q, role)
@@ -164,12 +163,7 @@
     Private Sub MoveCrew(ByRef ship As ShipPlayer)
         Dim target As Crew = GetCrew(ship)
         Dim destination As ShipQuarter = Menu.getListChoice(Of ShipQuarter)(quarters, 0, "To where?")
-        Dim newrole As CrewSkill = Nothing
-        If Menu.confirmChoice(0, "Keep role? ") = True Then
-            newrole = target.Role
-        Else
-            newrole = Menu.getListChoice(New List(Of CrewSkill) From {CrewSkill.Sailing, CrewSkill.Gunnery}, 0, "Select new role:")
-        End If
+        Dim newrole As CrewRole = Menu.getListChoice(ship.GetAvailableRoles(destination), 0, "Select new role:")
         ship.AddCommand("Move", target, destination, newrole)
     End Sub
     Private Sub ExamineCrew(ByRef ship As ShipPlayer)
@@ -180,7 +174,8 @@
         Console.ReadKey()
     End Sub
     Private Function GetCrew(ByRef ship As ShipPlayer) As Crew
-        Dim role As CrewSkill = Menu.getListChoice(Of CrewSkill)(New List(Of CrewSkill)({CrewSkill.Sailing, CrewSkill.Gunnery}), 0, "From which role?")
+        Dim roles As New List(Of CrewRole)([Enum].GetValues(GetType(CrewRole)))
+        Dim role As CrewRole = Menu.getListChoice(Of CrewRole)(roles, 0, "From which role?")
         Dim choiceList As New List(Of Crew)
         For Each q In quarters
             choiceList.AddRange(ship.GetCrews(q, role))

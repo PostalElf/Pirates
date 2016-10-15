@@ -46,7 +46,7 @@
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             Dim sailTotal As Integer = 0
             Dim advancedSailTotal As Integer = 0
-            For Each Crew In GetCrews(q, CrewSkill.Sailing)
+            For Each Crew In GetCrews(q, CrewRole.Sailor)
                 Dim skill As Integer = Crew.GetSkill(CrewSkill.Sailing)
                 sailTotal += Dev.Constrain(skill, 1, 10)
                 If skill >= 3 Then advancedSailTotal += Dev.Constrain(skill, 1, 10)
@@ -101,7 +101,7 @@
                     Case "Move"
                         Dim crew As Crew = CType(.Target, Crew)
                         Dim quarter As ShipQuarter = CType(.Destination, ShipQuarter)
-                        Dim role As CrewSkill = CType(.Secondary, CrewSkill)
+                        Dim role As CrewRole = CType(.Secondary, CrewRole)
                         crew.Move(quarter, role)
                 End Select
             End With

@@ -19,7 +19,7 @@
                 If CooldownCounter > 0 Then Return False
             End If
             If IgnoresCrewCount = False Then
-                If Ship.GetCrews(Quarter, CrewSkill.Gunnery).Count < CrewCount Then Return False
+                If Ship.GetCrews(Quarter, CrewRole.Gunner).Count < CrewCount Then Return False
             End If
             If IgnoresAmmo = False Then
                 If Ship.GetGood(AmmoUse.Type) < AmmoUse.Qty Then Return False

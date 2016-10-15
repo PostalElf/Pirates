@@ -38,12 +38,12 @@
             End Select
 
             .HullSpace = Pirates.Ship.GenerateHullSpace(.Type)
-            .AddModule(ShipQuarter.Fore, New ShipModule("Quarters", ShipModule.ModuleType.Crew, 5, 1))
+            .AddModule(ShipQuarter.Fore, New ShipModule("Quarters", ShipModule.ModuleType.Crew, 5, 1, False))
 
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
                 .HullPoints(q) = Pirates.Ship.GenerateHullPoints(.Type)
                 .maxhulluse(q) = 10000
-                .AddCrew(q, Crew.Generate(.Race), CrewSkill.Sailing)
+                .AddCrew(q, Crew.Generate(.Race), CrewRole.Sailor)
             Next
 
             'add loot
@@ -64,7 +64,7 @@
 
         If weapon.CrewCount > 0 Then
             For n = 1 To weapon.CrewCount
-                ship.AddCrew(quarter, Crew.Generate(ship.Race), CrewSkill.Gunnery)
+                ship.AddCrew(quarter, Crew.Generate(ship.Race), CrewRole.Gunner)
             Next
         End If
     End Sub

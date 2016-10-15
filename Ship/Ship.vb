@@ -263,12 +263,14 @@
         HullSpace += m.HullCost
         MaxHullUse(quarter) += m.HullCost
     End Sub
-    Public Function GetModuleCapacity(ByVal type As ShipModule.ModuleType) As Integer
-        Dim total As Integer = 0
-        For Each q In [Enum].GetValues(GetType(ShipQuarter))
-            For Each m In Modules(q)
-                If m.Type = type Then total += m.Capacity
-            Next
+    Public Function GetModules(ByVal type As ShipModule.ModuleType, Optional ByVal quarter As ShipQuarter = Nothing) As List(Of ShipModule)
+        Dim total As New List(Of ShipModule)
+        For Each q In Modules.Keys
+            If quarter = Nothing OrElse quarter = q Then
+                For Each m In Modules(q)
+                    If m.Type = type Then total.Add(m)
+                Next
+            End If
         Next
         Return total
     End Function
@@ -276,16 +278,28 @@
 
 #Region "Crew"
     Private Crews As New Dictionary(Of ShipQuarter, List(Of Crew))
-    Public Function CheckAddCrew(ByVal quarter As ShipQuarter, ByVal crew As Crew, Optional ByVal role As CrewSkill = Nothing) As Boolean
+    Public Function GetAvailableRoles(ByVal quarter As ShipQuarter) As List(Of CrewRole)
+        Dim total As New List(Of CrewRole) From {CrewRole.Sailor}
+        If GetWeapons(quarter).Count > 0 Then total.Add(CrewRole.Gunner)
+        If GetModules(ShipModule.ModuleType.Kitchen, quarter).Count > 0 Then total.Add(CrewRole.Cook)
+        If GetModules(ShipModule.ModuleType.Maproom, quarter).Count > 0 Then total.Add(CrewRole.Navigator)
+        If GetModules(ShipModule.ModuleType.Helm, quarter).Count > 0 Then total.AddRange({CrewRole.Captain, CrewRole.Helmsman})
+    End Function
+    Public Function CheckAddCrew(ByVal quarter As ShipQuarter, ByVal crew As Crew, Optional ByVal role As CrewRole = Nothing) As Boolean
         Dim crewCount As Integer = 0
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             crewCount += GetCrews(q, Nothing).Count
         Next
-        If crewCount + 1 > GetModuleCapacity(ShipModule.ModuleType.Crew) Then Return False
+
+        Dim moduleCapacity As Integer = 0
+        For Each m In GetModules(ShipModule.ModuleType.Crew)
+            moduleCapacity += m.Capacity
+        Next
+        If crewCount + 1 > moduleCapacity Then Return False
 
         Return True
     End Function
-    Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, Optional ByVal role As CrewSkill = Nothing)
+    Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, Optional ByVal role As CrewRole = Nothing)
         Crews(quarter).Add(crew)
         crew.Ship = Me
         crew.ShipQuarter = quarter
@@ -307,7 +321,7 @@
             End If
         Next
     End Sub
-    Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As CrewSkill) As List(Of Crew)
+    Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As CrewRole) As List(Of Crew)
         If role = Nothing Then Return Crews(quarter)
 
         Dim total As New List(Of Crew)
