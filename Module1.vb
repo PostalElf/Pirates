@@ -2,6 +2,7 @@
     Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
 
     Sub Main()
+        Console.SetWindowSize(Console.WindowWidth, 50)
         Battle()
     End Sub
 
@@ -67,17 +68,18 @@
             .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
             .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewSkill.Sailing)
-            .Cheaterbug(True, True, True)
+            .Cheaterbug(True, True, True, True)
         End With
         battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
 
         Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop)
         ai1.ConsoleColour = ConsoleColor.Green
-        ai1.Cheaterbug(True, True, False)
+        'ai1.Cheaterbug(True, True, False, False)
         battlefield.AddCombatant(ai1, 1, 1, BattleDirection.East)
 
         Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop)
         ai2.ConsoleColour = ConsoleColor.Green
+        ai2.Cheaterbug(True, True, False, False)
         battlefield.AddCombatant(ai2, 8, 8, BattleDirection.West)
 
         Return battlefield

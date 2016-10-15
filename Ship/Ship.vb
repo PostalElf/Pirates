@@ -69,10 +69,12 @@
 #Region "Specials"
     Protected IgnoresJustTurned As Boolean = False
     Protected IgnoresWaterline As Boolean = False
+    Protected IgnoresDamage As Boolean = False
 
-    Public Sub Cheaterbug(ByVal turn As Boolean, ByVal waterline As Boolean, ByVal weapon As Boolean)
+    Public Sub Cheaterbug(ByVal turn As Boolean, ByVal waterline As Boolean, ByVal damage As Boolean, ByVal weapon As Boolean)
         IgnoresJustTurned = turn
         IgnoresWaterline = waterline
+        IgnoresDamage = damage
         For Each wlist In Weapons.Values
             For Each w In wlist
                 If weapon = True Then w.Cheaterbug()
@@ -421,6 +423,8 @@
     Protected HullPoints As New Dictionary(Of ShipQuarter, Integer)
     Private DamageLog As New List(Of Damage)
     Private Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
+        If IgnoresDamage = True Then Exit Sub
+
         If damage.ShipDamage > 0 Then
             Report.Add(Name & " suffered " & damage.ShipDamage & " damage (" & targetQuarter.ToString & ").", ReportType.ShipDamage)
             DamageSustained(targetQuarter) += damage.ShipDamage

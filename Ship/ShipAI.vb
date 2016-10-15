@@ -181,8 +181,6 @@
             Dim nextCurrent As BattlePosition = chain.Peek
             total += GetHeuristicDistance(current, nextCurrent.Square)
         End While
-        total += GetHeuristicDistance(chain.Dequeue, goal)
-        total += (GetHeuristicDistance(fp(fp.Length - 1), goal) / 3)
 
         'consider ship position at the end of each move
         'facing with ready weapon is more valuable
@@ -193,8 +191,17 @@
         For Each weapon In CheckTarget(sp, goal)
             weaponDiscount += weapon.Heuristic
         Next
+        total -= weaponDiscount
 
-        Return (total - weaponDiscount) / chainLength
+        'divide total by chainlength, then...
+        total /= chainLength
+        total += GetHeuristicDistance(chain.Dequeue, goal)                  'add heuristic for sp(last)
+        total += (GetHeuristicDistance(fp(fp.Length - 1), goal) / 3)        'and add heuristic for fp(last)
+
+        'previous calculations divided at the end, which diminished the importance of the actual distance to the goal
+        'by adding after the divison, the heuristic is on average 4x more imporant, as it should be
+
+        Return total
     End Function
     Private Sub ExecuteMoves(ByVal targetMoves As MoveToken)
         If targetMoves.Length = 0 Then Exit Sub

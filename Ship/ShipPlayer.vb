@@ -3,8 +3,8 @@
 
 #Region "Specials"
     Protected IgnoresMoveTokens As Boolean = False
-    Public Overloads Sub Cheaterbug(ByVal turn As Boolean, ByVal waterline As Boolean, ByVal weapon As Boolean)
-        MyBase.Cheaterbug(turn, waterline, weapon)
+    Public Overloads Sub Cheaterbug(ByVal turn As Boolean, ByVal waterline As Boolean, ByVal damage As Boolean, ByVal weapon As Boolean)
+        MyBase.Cheaterbug(turn, waterline, Damage, weapon)
         IgnoresMoveTokens = True
     End Sub
 #End Region
