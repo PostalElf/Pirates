@@ -353,6 +353,28 @@
         End If
         Return total
     End Function
+
+    Protected Function GetSkill(ByVal skill As CrewSkill) As Integer
+        Dim total As Integer = 0
+        Select Case skill
+            Case CrewSkill.Leadership
+                For Each c In GetCrews(Nothing, CrewRole.Captain)
+                    total += c.GetSkillFromRole * 2
+                Next
+                For Each c In GetCrews(Nothing, CrewRole.FirstMate)
+                    total += c.GetSkillFromRole
+                Next
+            Case Else
+                Dim role As CrewRole = Crew.ConvertSkillToRole(skill)
+                For Each c In GetCrews(Nothing, role)
+                    total += c.GetSkillFromRole
+                Next
+        End Select
+        Return total
+    End Function
+    Protected Function GetCrewMorale() As Integer
+
+    End Function
 #End Region
 
 #Region "Attack"
@@ -522,6 +544,11 @@
             Console.Write("Damage " & DamageSustained(q) & "/" & HullPoints(q))
             Console.Write(" - Sails " & GetCrews(q, CrewRole.Sailor).Count)
             Console.Write(" - Guns " & GetCrews(q, CrewRole.Gunner).Count)
+            Dim commandCount As Integer = 0
+            For Each r In {CrewRole.Captain, CrewRole.FirstMate, CrewRole.Helmsman}
+                commandCount += GetCrews(q, r).Count
+            Next
+            Console.Write(" - Command " & commandCount)
             Console.WriteLine()
         Next
     End Sub

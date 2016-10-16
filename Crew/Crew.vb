@@ -124,15 +124,7 @@
         Return bestSkill
     End Function
     Public Function GetSkillFromRole() As Integer
-        Dim cs As CrewSkill = Nothing
-        Select Case role
-            Case CrewRole.Captain, CrewRole.FirstMate : cs = CrewSkill.Leadership
-            Case CrewRole.Cook : cs = CrewSkill.Cooking
-            Case CrewRole.Gunner : cs = CrewSkill.Gunnery
-            Case CrewRole.Sailor, CrewRole.Helmsman : cs = CrewSkill.Sailing
-            Case CrewRole.Navigator : cs = CrewSkill.Navigation
-            Case CrewRole.Alchemist : cs = CrewSkill.Alchemy
-        End Select
+        Dim cs As CrewSkill = ConvertRoleToSkill(Role)
         If cs = Nothing Then Return -1
         Return GetSkill(cs)
     End Function
@@ -168,6 +160,29 @@
             End If
         Next
     End Sub
+
+    Public Shared Function ConvertSkillToRole(ByVal skill As CrewSkill) As CrewRole
+        Select Case skill
+            Case CrewSkill.Leadership : Return CrewRole.Captain
+            Case CrewSkill.Cooking : Return CrewRole.Cook
+            Case CrewSkill.Gunnery : Return CrewRole.Gunner
+            Case CrewSkill.Sailing : Return CrewRole.Sailor
+            Case CrewSkill.Navigation : Return CrewRole.Navigator
+            Case CrewSkill.Alchemy : Return CrewRole.Alchemist
+            Case Else : Return Nothing
+        End Select
+    End Function
+    Public Shared Function ConvertRoleToSkill(ByVal role As CrewRole) As CrewSkill
+        Select Case role
+            Case CrewRole.Captain, CrewRole.FirstMate : Return CrewSkill.Leadership
+            Case CrewRole.Cook : Return CrewSkill.Cooking
+            Case CrewRole.Gunner : Return CrewSkill.Gunnery
+            Case CrewRole.Sailor, CrewRole.Helmsman : Return CrewSkill.Sailing
+            Case CrewRole.Navigator : Return CrewSkill.Navigation
+            Case CrewRole.Alchemist : Return CrewSkill.Alchemy
+            Case Else : Return Nothing
+        End Select
+    End Function
 #End Region
 
 #Region "Combat"
