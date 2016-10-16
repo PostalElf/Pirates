@@ -6,16 +6,9 @@
     End Sub
     Public Shared Function Generate(ByVal type As ShipType, Optional ByVal faction As Faction = Nothing, Optional ByVal race As CrewRace = Nothing, Optional ByRef rng As Random = Nothing) As Ship
         If rng Is Nothing Then rng = New Random
-        Dim cannons As New ShipWeapon("Cannons", 20, 10, DamageType.Cannon, 2, GoodType.Shot, 5, 2, 3)
-        cannons.HullCost = 5
-        Dim swivel As New ShipWeapon("Swivelgun", 10, 10, DamageType.Firearms, 1, GoodType.Bullets, 5, 1, 2)
-        swivel.HullCost = 3
-        Dim hailshot As New ShipWeapon("Hailshot", 20, 0, DamageType.Cannon, 2, GoodType.Shot, 2, 2, 4)
-        hailshot.HullCost = 3
-        Dim bombard As New ShipWeapon("Bombard", 30, 10, DamageType.Cannon, 2, GoodType.Explosive, 10, 3, 5)
-        bombard.HullCost = 10
         Dim races As CrewRace() = [Enum].GetValues(GetType(CrewRace))
         Dim factions As Faction() = [Enum].GetValues(GetType(Faction))
+        Dim newCrews As New List(Of CrewPosition)
 
         Dim ship As New ShipAI
         With ship
@@ -27,27 +20,26 @@
 
             Select Case type
                 Case ShipType.Sloop
-                    GenerateWeapon(ship, cannons, ShipQuarter.Starboard)
-                    GenerateWeapon(ship, swivel, ShipQuarter.Fore)
+                    GenerateWeapon(ship, "cannon", ShipQuarter.Starboard, newCrews)
+                    GenerateWeapon(ship, "swivel", ShipQuarter.Fore, newCrews)
 
                 Case ShipType.Schooner
-                    GenerateWeapon(ship, cannons, ShipQuarter.Starboard)
-                    GenerateWeapon(ship, cannons, ShipQuarter.Port)
-                    GenerateWeapon(ship, hailshot, ShipQuarter.Fore)
+                    GenerateWeapon(ship, "cannons", ShipQuarter.Starboard, newCrews)
+                    GenerateWeapon(ship, "cannons", ShipQuarter.Port, newCrews)
+                    GenerateWeapon(ship, "hailshot", ShipQuarter.Fore, newCrews)
 
                 Case ShipType.Brigantine
                 Case ShipType.Brig
                 Case ShipType.Frigate
             End Select
 
-            .HullSpace = Pirates.Ship.GenerateHullSpace(.Type)
+            .HullSpaceMax = Pirates.Ship.GenerateHullSpace(.Type)
             .TonnageMax = Pirates.Ship.GenerateTonnageMax(.Type)
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
                 .HullPoints(q) = Pirates.Ship.GenerateHullPoints(.Type)
-                .MaxHullUse(q) = 10000
-                .AddCrew(q, Crew.Generate(.Race), CrewRole.Sailor)
+                newCrews.Add(New CrewPosition(q, CrewRole.Sailor))
             Next
-            GenerateStandardModules(ship, rng)
+            GenerateStandardModules(ship, newCrews, rng)
 
             'add loot
             For n = 1 To 3
@@ -56,32 +48,37 @@
         End With
         Return ship
     End Function
-    Private Shared Sub GenerateStandardModules(ByRef ship As ShipAI, ByRef rng As Random)
+    Private Shared Sub GenerateStandardModules(ByRef ship As ShipAI, ByRef newCrews As List(Of CrewPosition), ByRef rng As Random)
         With ship
-            Dim crewCount As Integer = ship.GetCrews(Nothing, Nothing).Count + 3
+            If rng.Next(1, 3) = 1 Then
+                .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, 1, .Race))
+                newCrews.Add(New CrewPosition(ShipQuarter.Aft, CrewRole.Captain))
+                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Helm, 1, .Race))
+                newCrews.Add(New CrewPosition(ShipQuarter.Fore, CrewRole.Helmsman))
+            Else
+                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, 1, .Race))
+                newCrews.Add(New CrewPosition(ShipQuarter.Fore, CrewRole.Captain))
+                .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Helm, 1, .Race))
+                newCrews.Add(New CrewPosition(ShipQuarter.Aft, CrewRole.Helmsman))
+            End If
+
+            Dim q As ShipQuarter = rng.Next(1, 5)
+            .AddModule(q, ShipModule.Generate(ShipModule.ModuleType.Maproom, 1, .Race))
+            newCrews.Add(New CrewPosition(q, CrewRole.Navigator))
+
+            Dim crewCount As Integer = newCrews.Count
             For n = 1 To Math.Ceiling(crewCount / 5)
                 Dim quarter As ShipQuarter = rng.Next(1, 5)
                 .AddModule(quarter, ShipModule.Generate(ShipModule.ModuleType.Crew, 1, .Race))
             Next
-
-            If rng.Next(1, 3) = 1 Then
-                .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, 1, .Race))
-                .AddCrew(ShipQuarter.Aft, Crew.Generate(ship.Race, rng), CrewRole.Captain)
-                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Helm, 1, .Race))
-                .AddCrew(ShipQuarter.Fore, Crew.Generate(ship.Race, rng), CrewRole.Helmsman)
-            Else
-                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, 1, .Race))
-                .AddCrew(ShipQuarter.Fore, Crew.Generate(ship.Race, rng), CrewRole.Captain)
-                .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Helm, 1, .Race))
-                .AddCrew(ShipQuarter.Aft, Crew.Generate(ship.Race, rng), CrewRole.Helmsman)
-            End If
-
-            .AddModule(rng.Next(1, 5), ShipModule.Generate(ShipModule.ModuleType.Maproom, 1, .Race))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(ship.Race, rng), CrewRole.Navigator)
+            For Each cp In newCrews
+                .AddCrew(cp.quarter, Crew.Generate(.Race), .GetModulesFree(ShipModule.ModuleType.Crew)(0), cp.role)
+            Next
+            newCrews.Clear()
         End With
     End Sub
-    Private Shared Sub GenerateWeapon(ByRef ship As ShipAI, ByVal weaponTemplate As ShipWeapon, ByVal quarter As ShipQuarter)
-        Dim weapon As ShipWeapon = weaponTemplate.Clone
+    Private Shared Sub GenerateWeapon(ByRef ship As ShipAI, ByVal weaponTemplate As String, ByVal quarter As ShipQuarter, ByRef newCrews As List(Of CrewPosition))
+        Dim weapon As ShipWeapon = ShipWeapon.Generate(weaponTemplate)
         ship.AddWeapon(quarter, weapon)
 
         Dim ammoAmt As Integer = weapon.AmmoUse.Qty * 10
@@ -90,7 +87,7 @@
 
         If weapon.CrewCount > 0 Then
             For n = 1 To weapon.CrewCount
-                ship.AddCrew(quarter, Crew.Generate(ship.Race), CrewRole.Gunner)
+                newCrews.Add(New CrewPosition(quarter, CrewRole.Gunner))
             Next
         End If
     End Sub
@@ -99,6 +96,14 @@
         Dim gt As GoodType = Dev.GetRandom(Of GoodType)(goods, rng)
         ship.AddGood(Good.Generate(gt, rng.Next(10, 30)))
     End Sub
+    Private Class CrewPosition
+        Public quarter As ShipQuarter
+        Public role As CrewRole
+        Public Sub New(ByVal aQuarter As ShipQuarter, ByVal aRole As CrewRole)
+            quarter = aQuarter
+            role = aRole
+        End Sub
+    End Class
 
 #Region "Movement"
     Public Overloads Sub CombatTick(ByVal playerShip As ShipPlayer)

@@ -276,20 +276,12 @@
 #Region "Movement"
     Public Ship As Ship
     Public ShipQuarter As ShipQuarter
-
-    Public Sub Move(ByVal quarter As ShipQuarter, Optional ByVal role As CrewRole = Nothing)
-        Dim keepShip As Ship = Ship
-        Ship.RemoveCrew(ShipQuarter, Me)
-        keepShip.AddCrew(quarter, Me)
-        ShipQuarter = quarter
-        If role <> Nothing Then Me.Role = role
-    End Sub
+    Public Quarters As ShipModule
+    Public Shrine As ShipModule
 #End Region
 
 #Region "Morale"
     Public Morale As Integer
-    Public Quarters As ShipModule
-    Public Shrine As ShipModule
     Public ReadOnly Property MoraleLevel As CrewMorale
         Get
             Select Case Morale

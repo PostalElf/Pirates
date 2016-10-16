@@ -3,6 +3,7 @@
 
     Sub Main()
         Console.SetWindowSize(Console.WindowWidth, 50)
+        TestSnippet()
         Battle()
     End Sub
 
@@ -31,26 +32,40 @@
         Console.WriteLine("WINNER WINNER CHICKEN DINNER")
         Console.ReadKey()
     End Sub
-    Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
-        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0)
-        Dim hooks As New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, GoodType.Grapples, 5, 2, 5)
-        Dim cannon As New ShipWeapon("Cannons", 30, 10, DamageType.Cannon, 2, GoodType.Shot, 3, 1, 3)
-        Dim grapeshot As New ShipWeapon("Grapeshot", 10, 25, DamageType.Firearms, 1, GoodType.Grapeshot, 5, 2, 5)
-
+    Private Function SetupPlayerShip(ByRef rng As Random) As ShipPlayer
         Dim ship As New ShipPlayer
         With ship
             .ConsoleColour = ConsoleColor.Cyan
             .Name = "Baron's Spear"
-            .AddWeapon(ShipQuarter.Port, cannon.Clone)
-            .AddWeapon(ShipQuarter.Starboard, grapeshot.Clone)
-            .AddWeapon(ShipQuarter.Port, hooks.Clone)
-            .AddWeapon(ShipQuarter.Starboard, hooks.Clone)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
+
+            Dim quarters1 = ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Poor, CrewRace.Human)
+            .AddModule(ShipQuarter.Aft, quarters1)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Gunner)
+
+            Dim quarters2 = ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Poor, CrewRace.Human)
+            .AddModule(ShipQuarter.Aft, quarters2)
+            .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, ShipModule.ModuleQuality.Average, CrewRace.Human))
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters2, CrewRole.Captain)
+            .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Maproom, ShipModule.ModuleQuality.Average, CrewRace.Human))
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters2, CrewRole.Navigator)
+            .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Helm, ShipModule.ModuleQuality.Average, CrewRace.Human))
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters2, CrewRole.Helmsman)
+
+            .AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("cannon"))
+            '.Cheaterbug(True, True, True, True)
+        End With
+        Return ship
+    End Function
+    Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
+        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0)
+        Dim ship As ShipPlayer = SetupPlayerShip(rng)
+        With ship
+            .ConsoleColour = ConsoleColor.Cyan
+            .Name = "Baron's Spear"
             .Cheaterbug(True, True, True, True)
         End With
         battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
@@ -178,25 +193,8 @@
         If target Is Nothing Then Exit Sub
         ship.Attack(target)
     End Sub
-    Private Sub TestSnippet(ByVal battlefield As Battlefield)
-        Dim targetSquare As Battlesquare = battlefield(4, 4)
-        Dim target As New ShipPlayer
-        With target
-            .SetSquare(targetSquare)
-        End With
+    Private Sub TestSnippet()
+        Dim ship = SetupPlayerShip((New Random(5)))
 
-        For Each facing In [Enum].GetValues(GetType(BattleDirection))
-            target.Facing = facing
-            Console.WriteLine("Facing " & facing.ToString)
-            For Each direction In [Enum].GetValues(GetType(BattleDirection))
-                Dim t As BattlefieldObject = target
-                Dim targetQuarter As ShipQuarter = t.GetTargetQuarter(direction)
-                Console.WriteLine("  " & direction.ToString & ": " & targetQuarter.ToString)
-            Next
-            Console.WriteLine()
-        Next
-
-        Console.ReadLine()
-        battlefield.AddDead(target)
     End Sub
 End Module

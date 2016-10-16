@@ -3,6 +3,11 @@
     Public Type As ModuleType
     Public Quality As ModuleQuality
     Public Capacity As Integer
+    Public ReadOnly Property CapacityFree As Integer
+        Get
+            Return Capacity - Crews.Count
+        End Get
+    End Property
     Public HullCost As Integer
     Public IsExclusive As Boolean = False
 
@@ -17,7 +22,7 @@
 
         Return True
     End Function
-    Public Sub AddCrew(ByVal Crew As Crew)
+    Public Sub AddCrew(ByRef Crew As Crew)
         Crews.Add(Crew)
         Select Case Type
             Case ModuleType.Crew
@@ -26,10 +31,24 @@
                 Crew.Shrine = Me
         End Select
     End Sub
+    Public Sub RemoveCrew(ByRef crew As Crew)
+        If Crews.Contains(crew) = False Then Exit Sub
+
+        Crews.Remove(crew)
+        Select Case Type
+            Case ModuleType.Crew
+                crew.Quarters = Nothing
+            Case ModuleType.Shrine
+                crew.Shrine = Nothing
+        End Select
+    End Sub
     Public Race As CrewRace
 
     Private Sub New()
     End Sub
+    Public Overrides Function ToString() As String
+        Return Name
+    End Function
     Public Shared Function Generate(ByVal type As ModuleType, ByVal quality As ModuleQuality, ByVal race As CrewRace) As ShipModule
         quality = Dev.Constrain(quality, 0, 5)
         Dim total As New ShipModule

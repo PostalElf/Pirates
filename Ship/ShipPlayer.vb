@@ -165,7 +165,7 @@
                         Dim crew As Crew = CType(.Target, Crew)
                         Dim quarter As ShipQuarter = CType(.Destination, ShipQuarter)
                         Dim role As CrewRole = CType(.Secondary, CrewRole)
-                        crew.Move(quarter, role)
+                        MoveCrew(crew, quarter, role)
                 End Select
             End With
             Commands.RemoveAt(0)
