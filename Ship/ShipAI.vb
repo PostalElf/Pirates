@@ -100,8 +100,8 @@
     End Sub
 
 #Region "Movement"
-    Public Overloads Sub Tick(ByVal playerShip As ShipPlayer)
-        MyBase.Tick()
+    Public Overloads Sub CombatTick(ByVal playerShip As ShipPlayer)
+        MyBase.CombatTick()
         PrimitiveRouting(playerShip.BattleSquare)
         PrimitiveAttack(playerShip)
     End Sub

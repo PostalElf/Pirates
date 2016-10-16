@@ -19,7 +19,7 @@
             Console.WriteLine()
 
             Dim AITurn As Boolean = PlayerInput(playerShip, battlefield)
-            battlefield.Tick(AITurn)
+            battlefield.CombatTick(AITurn)
         End While
 
         Console.Clear()

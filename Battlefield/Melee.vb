@@ -36,7 +36,7 @@
         Next
     End Sub
 
-    Public Sub Tick()
+    Public Sub CombatTick()
         If Attackers.Count = 0 Then Lose(AttackerShip) : Exit Sub
         If Defenders.Count = 0 Then Lose(DefenderShip) : Exit Sub
 

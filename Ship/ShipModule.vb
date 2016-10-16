@@ -24,6 +24,7 @@
         Maproom
         Kitchen
         Laboratory
+        Shrine
         Hold
     End Enum
 End Class

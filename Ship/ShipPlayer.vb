@@ -143,8 +143,8 @@
             AdvancedMoveTokenProgress.Add(q, 0)
         Next
     End Sub
-    Public Overloads Sub Tick()
-        MyBase.Tick()
+    Public Overloads Sub CombatTick()
+        MyBase.CombatTick()
 
         GainMoveTokens()
         RunCommands()

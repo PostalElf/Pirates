@@ -30,6 +30,7 @@
 
         For Each gt In [Enum].GetValues(GetType(GoodType))
             Goods.Add(gt, Good.Generate(gt))
+            GoodsConsume.Add(gt, False)
         Next
 
         'note: ties in heuristic distance are broken by how high the move is up in the list
@@ -202,6 +203,7 @@
     Protected HullSpace As Integer
     Protected MaxHullUse As New Dictionary(Of ShipQuarter, Integer)
     Private Goods As New Dictionary(Of GoodType, Good)
+    Public GoodsConsume As New Dictionary(Of GoodType, Boolean)
     Public Function CheckAddGood(ByVal good As Good) As Boolean
         If FreeHullSpace - good.TotalHullCost < 0 Then Return False
         Return True
@@ -353,8 +355,17 @@
         End If
         Return total
     End Function
+    Public Function GetCrewsByRace(ByVal r As CrewRace) As List(Of Crew)
+        Dim total As New List(Of Crew)
+        For Each crewlist In Crews.Values
+            For Each Crew In crewlist
+                If Crew.Race = r Then total.Add(Crew)
+            Next
+        Next
+        Return total
+    End Function
 
-    Protected Function GetSkill(ByVal quarter As ShipQuarter, ByVal skill As CrewSkill) As Integer
+    Public Function GetSkill(ByVal quarter As ShipQuarter, ByVal skill As CrewSkill) As Integer
         Dim total As Integer = 0
         Select Case skill
             Case CrewSkill.Leadership
@@ -372,6 +383,13 @@
         End Select
         Return total
     End Function
+    Public Sub Tick()
+        For Each CrewList In Crews.Values
+            For Each Crew In CrewList
+                Crew.tick()
+            Next
+        Next
+    End Sub
 #End Region
 
 #Region "Attack"
@@ -503,10 +521,10 @@
     Public Sub EnterCombat(ByRef battlefield As Battlefield, ByRef combatantList As List(Of Ship))
         combatantList.Add(Me)
     End Sub
-    Public Sub Tick() Implements BattlefieldObject.Tick
+    Public Sub CombatTick() Implements BattlefieldObject.CombatTick
         For Each q In Weapons.Keys
             For Each w In Weapons(q)
-                w.Tick()
+                w.CombatTick()
             Next
             JustFired(q) = False
         Next

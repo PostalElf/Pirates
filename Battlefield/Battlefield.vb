@@ -138,18 +138,18 @@
         melee.Battlefield = Me
         Melees.Add(melee)
     End Sub
-    Public Sub Tick(ByVal AITurn As Boolean)
+    Public Sub CombatTick(ByVal AITurn As Boolean)
         If AITurn = True Then
             For Each combatant In Combatants
                 If combatant.InMelee = True Then Continue For
-                If TypeOf combatant Is ShipAI Then : CType(combatant, ShipAI).Tick(PlayerShip)
-                ElseIf TypeOf combatant Is ShipPlayer Then : CType(combatant, ShipPlayer).Tick()
-                Else : combatant.Tick()
+                If TypeOf combatant Is ShipAI Then : CType(combatant, ShipAI).CombatTick(PlayerShip)
+                ElseIf TypeOf combatant Is ShipPlayer Then : CType(combatant, ShipPlayer).CombatTick()
+                Else : combatant.CombatTick()
                 End If
             Next
 
             For Each Melee In Melees
-                Melee.Tick()
+                Melee.CombatTick()
             Next
         End If
 

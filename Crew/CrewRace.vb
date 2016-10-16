@@ -1,5 +1,6 @@
 ﻿Public Enum CrewRace
     Human = 1
+    Unrelinquished
+    Windsworn
     Seatouched
-    Ghost
 End Enum

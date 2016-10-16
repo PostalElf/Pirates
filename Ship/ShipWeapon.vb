@@ -66,7 +66,7 @@
         End While
         Return attackTarget
     End Function
-    Public Sub Tick()
+    Public Sub CombatTick()
         Cooldown(1)
     End Sub
     Public ReadOnly Property Heuristic As Double

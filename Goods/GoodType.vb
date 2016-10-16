@@ -7,14 +7,17 @@
 
     Coin = 101
     Jewellery
+    Silk
     Liqour
-    Blackspice
-    Shadeweed
-    Spidersilk
-    NReagents
-    SReagents
-    EReagents
-    WReagents
+    Coffee
+    Spice
+    Tobacco
+    Artificery
+
+    Boricus
+    Triaicus
+    Incantus
+    Mordicus
 
     Rations
     Water

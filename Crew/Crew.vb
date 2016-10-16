@@ -49,7 +49,7 @@
     End Function
 
     Public Name As String
-    Private Race As CrewRace
+    Public Race As CrewRace
 
 #Region "Bonuses"
     Private Scars As New List(Of CrewBonus)
@@ -265,6 +265,81 @@
         ShipQuarter = quarter
         If role <> Nothing Then Me.Role = role
     End Sub
+#End Region
+
+#Region "Morale"
+    Public Morale As Integer
+    Public ReadOnly Property MoraleLevel As CrewMorale
+        Get
+            Select Case Morale
+                Case Is <= 10 : Return CrewMorale.Mutinous
+                Case Is <= 25 : Return CrewMorale.Unhappy
+                Case Is <= 50 : Return CrewMorale.Neutral
+                Case Is <= 75 : Return CrewMorale.Content
+                Case Else : Return CrewMorale.Motivated
+            End Select
+        End Get
+    End Property
+    Public Sub Tick()
+        MoraleTick()
+    End Sub
+    Private Sub MoraleTick()
+        'morale ranges from 1 to 100
+        Dim change As Integer = 0
+
+        Select Case Race
+            Case CrewRace.Human
+                'humans need rations and water; desire coffee and liqour
+                change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
+                change += ConsumeGoods(GoodType.Water, 1, 0, -10)
+                If change > -10 Then
+                    change += ConsumeGoods(GoodType.Coffee, 1, 1, 0)
+                    change += ConsumeGoods(GoodType.Liqour, 1, 2, 0)
+                End If
+
+            Case CrewRace.Seatouched
+                'seatouched need rations and water; desire prayer
+                change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
+                change += ConsumeGoods(GoodType.Water, 1, 0, -10)
+                If change > -10 Then
+                    Dim prayCapacity As Integer = 0
+                    For Each shrine In Ship.GetModules(ShipModule.ModuleType.Shrine)
+                        prayCapacity += shrine.Capacity
+                    Next
+                    If prayCapacity >= Ship.GetCrewsByRace(CrewRace.Seatouched).Count Then change -= 5 Else change += 1
+                End If
+
+            Case CrewRace.Windsworn
+                'windsworn need rations and water; desire tobacco and spice
+                change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
+                change += ConsumeGoods(GoodType.Water, 1, 0, -5)
+                If change > -10 Then
+                    change += ConsumeGoods(GoodType.Tobacco, 1, 2, 0)
+                    change += ConsumeGoods(GoodType.Spice, 1, 1, 0)
+                End If
+
+            Case CrewRace.Unrelinquished
+                'unrelinquished need mordicus; desire leadership
+                change += ConsumeGoods(GoodType.Mordicus, 1, 0, -10)
+                If change > -10 Then
+                    If Ship.GetSkill(Nothing, CrewSkill.Leadership) >= 7 Then change += 1
+                End If
+        End Select
+    End Sub
+    Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer) As Integer
+        Dim good As New Good(goodType, -qty)
+        If Ship.GoodsConsume(goodType) = False OrElse Ship.CheckAddGood(good) = False Then Return negativeChange
+        Ship.AddGood(good)
+        Return positiveChange
+    End Function
+
+    Public Enum CrewMorale
+        Motivated
+        Content
+        Neutral
+        Unhappy
+        Mutinous
+    End Enum
 #End Region
 
 #Region "Console"
