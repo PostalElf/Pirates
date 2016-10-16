@@ -1,7 +1,7 @@
 ﻿Public Structure Good
     Public Type As GoodType
     Public Qty As Integer
-    Public ReadOnly Property HullCost As Double
+    Public ReadOnly Property Weight As Double
         Get
             Select Case Type
                 Case GoodType.Grapples : Return 0.1
@@ -16,9 +16,19 @@
             End Select
         End Get
     End Property
-    Public ReadOnly Property TotalHullCost As Double
+    Public ReadOnly Property TotalWeight As Double
         Get
-            Return Qty * HullCost
+            Return Qty * Weight
+        End Get
+    End Property
+    Public ReadOnly Property Mass As Double
+        Get
+            Return 0.1
+        End Get
+    End Property
+    Public ReadOnly Property TotalMass As Double
+        Get
+            Return Qty * Mass
         End Get
     End Property
 

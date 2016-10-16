@@ -30,7 +30,7 @@
 
         For Each gt In [Enum].GetValues(GetType(GoodType))
             Goods.Add(gt, Good.Generate(gt))
-            GoodsConsume.Add(gt, False)
+            GoodsFreeForConsumption.Add(gt, False)
         Next
 
         'note: ties in heuristic distance are broken by how high the move is up in the list
@@ -65,7 +65,11 @@
         Return total(type)
     End Function
     Protected Shared Function GenerateHullSpace(ByVal type As ShipType) As Integer
-        Dim total As Integer() = {25, 40, 75, 100, 150, 180}
+        Dim total As Integer() = {0, 40, 75, 100, 150, 180}
+        Return total(type)
+    End Function
+    Protected Shared Function GenerateTonnageMax(ByVal type As ShipType) As Integer
+        Dim total As Integer() = {0, 50, 100, 120, 150, 150}
         Return total(type)
     End Function
 
@@ -200,14 +204,30 @@
 #End Region
 
 #Region "Goods"
-    Protected HullSpace As Integer
-    Protected MaxHullUse As New Dictionary(Of ShipQuarter, Integer)
     Private Goods As New Dictionary(Of GoodType, Good)
-    Public GoodsConsume As New Dictionary(Of GoodType, Boolean)
+    Public GoodsFreeForConsumption As New Dictionary(Of GoodType, Boolean)
     Public Function CheckAddGood(ByVal good As Good) As Boolean
-        If FreeHullSpace - good.TotalHullCost < 0 Then Return False
+        If good.Qty + HoldSpaceUsed > HoldSpaceMax Then Return False
         Return True
     End Function
+    Private ReadOnly Property HoldSpaceMax As Double
+        Get
+            Dim total As Double = 0
+            For Each hold In GetModules(ShipModule.ModuleType.Hold)
+                total += hold.Capacity
+            Next
+            Return total
+        End Get
+    End Property
+    Private ReadOnly Property HoldSpaceUsed As Double
+        Get
+            Dim total As Integer = 0
+            For Each g In Goods.Values
+                total += g.TotalMass
+            Next
+            Return total
+        End Get
+    End Property
     Public Sub AddGood(ByVal good As Good)
         Goods(good.Type) += good
     End Sub
@@ -218,25 +238,25 @@
         Return Goods(gt).Qty
     End Function
 
-    Public ReadOnly Property FreeHullSpace As Double
+    Protected TonnageMax As Integer
+    Private ReadOnly Property Tonnage As Double
         Get
             Dim total As Double = 0
-            For Each t In Goods.Keys
-                total += Goods(t).TotalHullCost
+            For Each Good In Goods.Values
+                total += Good.TotalWeight
             Next
-            Return HullSpace - total
+            Return total
         End Get
     End Property
     Protected ReadOnly Property Waterline As ShipWaterline
         Get
-            If FreeHullSpace < 0 Then Throw New Exception
-            Select Case FreeHullSpace / HullSpace
+            Select Case Tonnage / TonnageMax
                 Case Is <= 0.1 : Return ShipWaterline.Overladen
                 Case Is <= 0.25 : Return ShipWaterline.Heavy
                 Case Is <= 0.5 : Return ShipWaterline.Medium
                 Case Is <= 0.75 : Return ShipWaterline.Light
                 Case Is <= 1.0 : Return ShipWaterline.Unladen
-                Case Else : Throw New Exception
+                Case Else : Throw New Exception("Unrecognised Waterline")
             End Select
         End Get
     End Property
@@ -244,17 +264,6 @@
 
 #Region "Modules"
     Private Modules As New Dictionary(Of ShipQuarter, List(Of ShipModule))
-    Private ReadOnly Property IsSeaworthy As Boolean
-        Get
-            'check to ensure that ship has helm, quarterdeck, maproom, and at least one quarter
-            If GetModules(ShipModule.ModuleType.Helm).Count = 0 Then Return False
-            If GetModules(ShipModule.ModuleType.Quarterdeck).Count = 0 Then Return False
-            If GetModules(ShipModule.ModuleType.Maproom).Count = 0 Then Return False
-            If GetModules(ShipModule.ModuleType.Crew).Count = 0 Then Return False
-
-            Return True
-        End Get
-    End Property
     Public Function CheckAddModule(ByVal quarter As ShipQuarter, ByVal m As ShipModule) As Boolean
         If m.HullCost > HullSpace Then Return False
         If MaxHullUse(quarter) < m.HullCost Then Return False
@@ -290,6 +299,20 @@
         Next
         Return total
     End Function
+
+    Protected HullSpace As Integer
+    Protected MaxHullUse As New Dictionary(Of ShipQuarter, Integer)
+    Private ReadOnly Property IsSeaworthy As Boolean
+        Get
+            'check to ensure that ship has helm, quarterdeck, maproom, and at least one quarter
+            If GetModules(ShipModule.ModuleType.Helm).Count = 0 Then Return False
+            If GetModules(ShipModule.ModuleType.Quarterdeck).Count = 0 Then Return False
+            If GetModules(ShipModule.ModuleType.Maproom).Count = 0 Then Return False
+            If GetModules(ShipModule.ModuleType.Crew).Count = 0 Then Return False
+
+            Return True
+        End Get
+    End Property
 #End Region
 
 #Region "Crew"

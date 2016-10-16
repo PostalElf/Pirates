@@ -41,6 +41,7 @@
             End Select
 
             .HullSpace = Pirates.Ship.GenerateHullSpace(.Type)
+            .TonnageMax = Pirates.Ship.GenerateTonnageMax(.Type)
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
                 .HullPoints(q) = Pirates.Ship.GenerateHullPoints(.Type)
                 .MaxHullUse(q) = 10000

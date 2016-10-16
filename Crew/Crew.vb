@@ -352,7 +352,7 @@
     End Sub
     Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer) As Integer
         Dim good As New Good(goodType, -qty)
-        If Ship.GoodsConsume(goodType) = False OrElse Ship.CheckAddGood(good) = False Then Return negativeChange
+        If Ship.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then Return negativeChange
         Ship.AddGood(good)
         Return positiveChange
     End Function
