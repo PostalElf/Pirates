@@ -1,4 +1,4 @@
 ﻿Public Enum Faction
-    Neutral
+    Neutral = 1
 
 End Enum

@@ -50,8 +50,8 @@
         If NamePrefixes.Count = 0 Then NamePrefixes = IO.SimpleFilegetAll("shipPrefixes.txt")
         If NameSuffixes.Count = 0 Then NameSuffixes = IO.SimpleFilegetAll("shipSuffixes.txt")
 
-        Dim prefix As String = Dev.GetRandom(NamePrefixes)
-        Dim suffix As String = Dev.GetRandom(NameSuffixes)
+        Dim prefix As String = Dev.GrabRandom(NamePrefixes)
+        Dim suffix As String = Dev.GrabRandom(NameSuffixes)
         Return prefix & " " & suffix
     End Function
     Protected Shared Function GenerateID(ByVal aName As String) As String
@@ -242,6 +242,17 @@
 
 #Region "Modules"
     Private Modules As New Dictionary(Of ShipQuarter, List(Of ShipModule))
+    Private ReadOnly Property IsSeaworthy As Boolean
+        Get
+            'check to ensure that ship has helm, quarterdeck, maproom, and at least one quarter
+            If GetModules(ShipModule.ModuleType.Helm).Count = 0 Then Return False
+            If GetModules(ShipModule.ModuleType.Quarterdeck).Count = 0 Then Return False
+            If GetModules(ShipModule.ModuleType.Maproom).Count = 0 Then Return False
+            If GetModules(ShipModule.ModuleType.Crew).Count = 0 Then Return False
+
+            Return True
+        End Get
+    End Property
     Public Function CheckAddModule(ByVal quarter As ShipQuarter, ByVal m As ShipModule) As Boolean
         If m.HullCost > HullSpace Then Return False
         If MaxHullUse(quarter) < m.HullCost Then Return False
@@ -328,12 +339,18 @@
         Next
     End Sub
     Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As CrewRole) As List(Of Crew)
-        If role = Nothing Then Return Crews(quarter)
-
         Dim total As New List(Of Crew)
-        For Each c In Crews(quarter)
-            If c.Role = role Then total.Add(c)
-        Next
+        If quarter = Nothing Then
+            For Each q In [Enum].GetValues(GetType(ShipQuarter))
+                total.AddRange(GetCrews(q, role))
+            Next
+        ElseIf role = Nothing Then
+            Return Crews(quarter)
+        Else
+            For Each c In Crews(quarter)
+                If c.Role = role Then total.Add(c)
+            Next
+        End If
         Return total
     End Function
 #End Region

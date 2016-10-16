@@ -4,7 +4,8 @@
     Public Sub New()
         MyBase.New()
     End Sub
-    Public Shared Function Generate(ByVal type As ShipType, Optional ByVal faction As Faction = Nothing, Optional ByVal race As CrewRace = Nothing) As Ship
+    Public Shared Function Generate(ByVal type As ShipType, Optional ByVal faction As Faction = Nothing, Optional ByVal race As CrewRace = Nothing, Optional ByRef rng As Random = Nothing) As Ship
+        If rng Is Nothing Then rng = New Random
         Dim cannons As New ShipWeapon("Cannons", 20, 10, DamageType.Cannon, 2, GoodType.Shot, 5, 2, 3)
         cannons.HullCost = 5
         Dim swivel As New ShipWeapon("Swivelgun", 10, 10, DamageType.Firearms, 1, GoodType.Bullets, 5, 1, 2)
@@ -13,11 +14,13 @@
         hailshot.HullCost = 3
         Dim bombard As New ShipWeapon("Bombard", 30, 10, DamageType.Cannon, 2, GoodType.Explosive, 10, 3, 5)
         bombard.HullCost = 10
+        Dim races As CrewRace() = [Enum].GetValues(GetType(CrewRace))
+        Dim factions As Faction() = [Enum].GetValues(GetType(Faction))
 
         Dim ship As New ShipAI
         With ship
-            If race = Nothing Then .Race = Dev.Rng.Next(1, 4) Else .Race = race
-            .Faction = faction
+            If race = Nothing Then .Race = Dev.Rng.Next(1, races.Length + 1) Else .Race = race
+            If faction = Nothing Then .Faction = Dev.Rng.Next(1, factions.Length + 1) Else .Faction = faction
             .Type = type
             .Name = GenerateName()
             .ID = GenerateID(.Name)
@@ -38,11 +41,11 @@
             End Select
 
             .HullSpace = Pirates.Ship.GenerateHullSpace(.Type)
-            .AddModule(ShipQuarter.Fore, New ShipModule("Quarters", ShipModule.ModuleType.Crew, 5, 1, False))
+            GenerateStandardModules(ship, rng)
 
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
                 .HullPoints(q) = Pirates.Ship.GenerateHullPoints(.Type)
-                .maxhulluse(q) = 10000
+                .MaxHullUse(q) = 10000
                 .AddCrew(q, Crew.Generate(.Race), CrewRole.Sailor)
             Next
 
@@ -54,6 +57,25 @@
         End With
         Return ship
     End Function
+    Private Shared Sub GenerateStandardModules(ByRef ship As ShipAI, ByRef rng As Random)
+        With ship
+            Dim crewCount As Integer = ship.GetCrews(Nothing, Nothing).Count
+            For n = 1 To Math.Ceiling(crewCount / 5)
+                Dim quarter As ShipQuarter = rng.Next(1, 5)
+                .AddModule(quarter, New ShipModule("Crew Quarters", ShipModule.ModuleType.Crew, 5, 0, False))
+            Next
+
+            If rng.Next(1, 3) = 1 Then
+                .AddModule(ShipQuarter.Aft, New ShipModule("Aftcastle", ShipModule.ModuleType.Quarterdeck, 1, 0, True))
+                .AddModule(ShipQuarter.Fore, New ShipModule("Helm", ShipModule.ModuleType.Helm, 1, 0, True))
+            Else
+                .AddModule(ShipQuarter.Fore, New ShipModule("Forecastle", ShipModule.ModuleType.Quarterdeck, 1, 0, True))
+                .AddModule(ShipQuarter.Aft, New ShipModule("Helm", ShipModule.ModuleType.Helm, 1, 0, True))
+            End If
+
+            .AddModule(rng.Next(1, 5), New ShipModule("Maproom", ShipModule.ModuleType.Maproom, 1, 0, True))
+        End With
+    End Sub
     Private Shared Sub GenerateWeapon(ByRef ship As ShipAI, ByVal weaponTemplate As ShipWeapon, ByVal quarter As ShipQuarter)
         Dim weapon As ShipWeapon = weaponTemplate.Clone
         ship.AddWeapon(quarter, weapon)

@@ -55,12 +55,12 @@
         End With
         battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
 
-        Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop)
+        Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing, rng)
         ai1.ConsoleColour = ConsoleColor.Green
         'ai1.Cheaterbug(True, True, False, False)
         battlefield.AddCombatant(ai1, 1, 1, BattleDirection.East)
 
-        Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop)
+        Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing, rng)
         ai2.ConsoleColour = ConsoleColor.Green
         ai2.Cheaterbug(True, True, False, False)
         battlefield.AddCombatant(ai2, 8, 8, BattleDirection.West)

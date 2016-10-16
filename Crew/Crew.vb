@@ -27,7 +27,7 @@
 
             Dim skills As New List(Of CrewSkill)([Enum].GetValues(GetType(CrewSkill)))
             For n = 1 To 2
-                Dim cs As CrewSkill = Dev.GetRandom(Of CrewSkill)(skills)
+                Dim cs As CrewSkill = Dev.GrabRandom(Of CrewSkill)(skills)
                 .AddSkillXP(cs, SkillThresholds(n))
             Next
         End With
@@ -38,8 +38,8 @@
         If NamePrefixes.Count = 0 Then NamePrefixes = IO.SimpleFilegetAll("namePrefixes.txt")
         If NameSuffixes.Count = 0 Then NameSuffixes = IO.SimpleFilegetAll("nameSuffixes.txt")
 
-        Dim prefix As String = Dev.GetRandom(Of String)(NamePrefixes)
-        Dim suffix As String = Dev.GetRandom(Of String)(NameSuffixes)
+        Dim prefix As String = Dev.GrabRandom(Of String)(NamePrefixes)
+        Dim suffix As String = Dev.GrabRandom(Of String)(NameSuffixes)
         Return prefix & " " & suffix
     End Function
     Private Shared NamePrefixes As New List(Of String)
@@ -176,7 +176,7 @@
     Private DamageSustained As Integer
 
     Public Sub MeleeAttack(ByRef targets As List(Of Crew))
-        Dim target As Crew = Dev.GetRandom(targets)
+        Dim target As Crew = Dev.GrabRandom(targets)
         MeleeAttack(target)
     End Sub
     Public Sub MeleeAttack(ByRef target As Crew)
