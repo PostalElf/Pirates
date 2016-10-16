@@ -59,6 +59,15 @@
         total = total.ToUpper
         Return total
     End Function
+    Public Sub GenerateBaselines(ByVal aType As ShipType)
+        Type = aType
+
+        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+            HullPoints(q) = GenerateHullPoints(aType)
+        Next
+        HullSpaceMax = GenerateHullSpace(aType)
+        TonnageMax = GenerateTonnageMax(aType)
+    End Sub
     Protected Shared Function GenerateHullPoints(ByVal type As ShipType) As Integer
         Dim total As Integer() = {0, 100, 120, 150, 200, 250}
         Return total(type)
@@ -68,7 +77,7 @@
         Return total(type)
     End Function
     Protected Shared Function GenerateTonnageMax(ByVal type As ShipType) As Integer
-        Dim total As Integer() = {0, 50, 100, 120, 150, 150}
+        Dim total As Integer() = {0, 100, 120, 150, 200, 225}
         Return total(type)
     End Function
 
@@ -241,6 +250,16 @@
     Private ReadOnly Property Tonnage As Double
         Get
             Dim total As Double = 0
+            For Each wlist In Weapons.Values
+                For Each w In wlist
+                    total += w.Weight
+                Next
+            Next
+            For Each mlist In Modules.Values
+                For Each m In mlist
+                    total += m.weight
+                Next
+            Next
             For Each Good In Goods.Values
                 total += Good.TotalWeight
             Next
@@ -249,13 +268,13 @@
     End Property
     Protected ReadOnly Property Waterline As ShipWaterline
         Get
-            Select Case Tonnage / TonnageMax
-                Case Is <= 0.1 : Return ShipWaterline.Overladen
-                Case Is <= 0.25 : Return ShipWaterline.Heavy
-                Case Is <= 0.5 : Return ShipWaterline.Medium
-                Case Is <= 0.75 : Return ShipWaterline.Light
-                Case Is <= 1.0 : Return ShipWaterline.Unladen
-                Case Else : Throw New Exception("Unrecognised Waterline")
+            Dim ratio As Double = Tonnage / TonnageMax * 100
+            Select Case ratio
+                Case Is <= 25 : Return ShipWaterline.Unladen
+                Case Is <= 50 : Return ShipWaterline.Light
+                Case Is <= 75 : Return ShipWaterline.Medium
+                Case Is <= 100 : Return ShipWaterline.Heavy
+                Case Else : Return ShipWaterline.Overladen
             End Select
         End Get
     End Property
@@ -287,7 +306,7 @@
         For Each q In Modules.Keys
             If quarter = Nothing OrElse quarter = q Then
                 For Each m In Modules(q)
-                    If m.Type = type Then total.Add(m)
+                    If type = Nothing OrElse m.Type = type Then total.Add(m)
                 Next
             End If
         Next
@@ -307,6 +326,11 @@
             Dim total As Integer = 0
             For Each m In GetModules(Nothing, Nothing)
                 total += m.HullCost
+            Next
+            For Each wList In Weapons.Values
+                For Each w In wList
+                    total += w.HullCost
+                Next
             Next
             Return total
         End Get
@@ -589,6 +613,10 @@
             Console.Write(" - Command " & commandCount)
             Console.WriteLine()
         Next
+        Console.WriteLine(t & Dev.vbTab("Hullspace:", s) & HullSpaceUsed & "/" & HullSpaceMax)
+        Console.Write(t & Dev.vbTab("Tonnage:", s) & Tonnage.ToString("0.0") & "/" & TonnageMax)
+        Dim ratio As Double = Tonnage / TonnageMax * 100
+        Console.WriteLine(" (" & ratio.ToString("0.0") & "% - " & Waterline.ToString & ")")
     End Sub
 #End Region
 End Class

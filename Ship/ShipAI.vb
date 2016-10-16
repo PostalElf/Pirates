@@ -33,12 +33,10 @@
                 Case ShipType.Frigate
             End Select
 
-            .HullSpaceMax = Pirates.Ship.GenerateHullSpace(.Type)
-            .TonnageMax = Pirates.Ship.GenerateTonnageMax(.Type)
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
-                .HullPoints(q) = Pirates.Ship.GenerateHullPoints(.Type)
                 newCrews.Add(New CrewPosition(q, CrewRole.Sailor))
             Next
+            .GenerateBaselines(.Type)
             GenerateStandardModules(ship, newCrews, rng)
 
             'add loot

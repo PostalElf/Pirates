@@ -13,8 +13,26 @@
     Private MoveTokens As New List(Of MoveToken)
     Private MoveTokenProgress As New Dictionary(Of ShipQuarter, Integer)
     Private AdvancedMoveTokenProgress As New Dictionary(Of ShipQuarter, Integer)
-    Private Const MoveTokenThreshold As Integer = 5
-    Private Const AdvancedMoveTokenThreshold As Integer = 10
+    Private ReadOnly Property MoveTokenThreshold As Integer
+        Get
+            Dim total As Integer = 5
+            If IgnoresWaterline = False Then
+                If Waterline = ShipWaterline.Medium Then total += 1
+                If Waterline = ShipWaterline.Heavy Then total += 2
+            End If
+            Return total
+        End Get
+    End Property
+    Private ReadOnly Property AdvancedMoveTokenThreshold As Integer
+        Get
+            Dim total As Integer = 10
+            If IgnoresWaterline = False Then
+                If Waterline = ShipWaterline.Medium Then total += 1
+                If Waterline = ShipWaterline.Heavy Then total += 2
+            End If
+            Return total
+        End Get
+    End Property
 
     Public Function CheckSpendMoveToken(ByVal moveToken As MoveToken) As Boolean
         If IgnoresMoveTokens = True Then Return True

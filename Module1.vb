@@ -37,6 +37,7 @@
         With ship
             .ConsoleColour = ConsoleColor.Cyan
             .Name = "Baron's Spear"
+            .GenerateBaselines(ShipType.Sloop)
 
             Dim quarters1 = ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Poor, CrewRace.Human)
             .AddModule(ShipQuarter.Aft, quarters1)
@@ -56,7 +57,7 @@
             .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters2, CrewRole.Helmsman)
 
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("cannon"))
-            '.Cheaterbug(True, True, True, True)
+            .AddGood(GoodType.Shot, 600)
         End With
         Return ship
     End Function
@@ -66,7 +67,7 @@
         With ship
             .ConsoleColour = ConsoleColor.Cyan
             .Name = "Baron's Spear"
-            .Cheaterbug(True, True, True, True)
+            '.Cheaterbug(True, True, True, True)
         End With
         battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
 

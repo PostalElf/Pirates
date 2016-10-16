@@ -9,6 +9,7 @@
         End Get
     End Property
     Public HullCost As Integer
+    Public Weight As Integer
     Public IsExclusive As Boolean = False
 
     Public Ship As Ship
@@ -63,40 +64,48 @@
                     .Name = quality.ToString & " Crew Quarters"
                     .Capacity = 5
                     .HullCost = 2
+                    .Weight = 5
 
                 Case ModuleType.Quarterdeck
                     .Capacity = 1
                     .Race = Nothing
                     .HullCost = quality
+                    .Weight = 0
                     .IsExclusive = True
 
                 Case ModuleType.Helm
                     .Capacity = 1
                     .HullCost = quality
+                    .Weight = 0
                     .IsExclusive = True
 
                 Case ModuleType.Maproom
                     .Name = quality.ToString & " Map Room"
                     .Capacity = 1
                     .HullCost = quality
+                    .Weight = quality
                     .IsExclusive = True
 
                 Case ModuleType.Kitchen
                     .Capacity = 1
                     .HullCost = quality
+                    .Weight = quality
                     .IsExclusive = True
 
                 Case ModuleType.Laboratory
                     .Capacity = 3
                     .HullCost = quality * 2
+                    .Weight = quality
 
                 Case ModuleType.Shrine
                     .Capacity = quality * 3
                     .HullCost = 5
+                    .Weight = 5
 
                 Case ModuleType.Hold
-                    .Capacity = quality * 10
+                    .Capacity = quality * 100
                     .HullCost = 5
+                    .Weight = 0
 
                 Case Else : Throw New Exception
             End Select
