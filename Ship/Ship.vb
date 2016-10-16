@@ -520,7 +520,8 @@
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             Console.Write(t & Dev.vbTab(q.ToString & ":", s))
             Console.Write("Damage " & DamageSustained(q) & "/" & HullPoints(q))
-            Console.Write(" - Crew " & GetCrews(q, Nothing).Count)
+            Console.Write(" - Sails " & GetCrews(q, CrewRole.Sailor).Count)
+            Console.Write(" - Guns " & GetCrews(q, CrewRole.Gunner).Count)
             Console.WriteLine()
         Next
     End Sub

@@ -55,21 +55,14 @@
             MoveTokenProgress(q) += sailTotal
             While MoveTokenProgress(q) > MoveTokenThreshold
                 MoveTokenProgress(q) -= MoveTokenThreshold
-                Dim newMoveToken As MoveToken = ConvertQuarterToMoveToken(q)
+                Dim newMoveToken As MoveToken = ConvertQuarterToMoveToken(q, False)
                 If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
             End While
 
             AdvancedMoveTokenProgress(q) += advancedSailTotal
             While AdvancedMoveTokenProgress(q) > AdvancedMoveTokenThreshold
                 AdvancedMoveTokenProgress(q) -= AdvancedMoveTokenThreshold
-                Dim newMoveToken As MoveToken = Nothing
-                Select Case q
-                    Case ShipQuarter.Fore : newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.Forward})
-                    Case ShipQuarter.Starboard : newMoveToken = New MoveToken({BattleMove.TurnRight})
-                    Case ShipQuarter.Aft : newMoveToken = New MoveToken({BattleMove.Backwards})
-                    Case ShipQuarter.Port : newMoveToken = New MoveToken({BattleMove.TurnLeft})
-                    Case Else : Throw New Exception("Unrecognised ship quarter")
-                End Select
+                Dim newMoveToken As MoveToken = ConvertQuarterToMoveToken(q, True)
                 If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
             End While
         Next
@@ -79,13 +72,36 @@
             Report.Add(Name & " gained a new sailing token: " & newMoveToken.ToString, ReportType.MoveToken)
         Next
     End Sub
-    Private Function ConvertQuarterToMoveToken(ByVal q As ShipQuarter) As MoveToken
+    Private Function ConvertQuarterToMoveToken(ByVal q As ShipQuarter, ByVal isAdvanced As Boolean) As MoveToken
         Dim newMoveToken As MoveToken = Nothing
         Select Case q
-            Case ShipQuarter.Fore : newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.Forward})
-            Case ShipQuarter.Starboard : newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.TurnRight})
-            Case ShipQuarter.Aft : newMoveToken = New MoveToken({BattleMove.Forward})
-            Case ShipQuarter.Port : newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.TurnLeft})
+            Case ShipQuarter.Fore
+                If isAdvanced = False Then
+                    newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.Forward})
+                Else
+                    newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.Forward})
+                End If
+
+            Case ShipQuarter.Starboard
+                If isAdvanced = False Then
+                    newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.TurnRight})
+                Else
+                    newMoveToken = New MoveToken({BattleMove.TurnRight})
+                End If
+
+            Case ShipQuarter.Aft
+                If isAdvanced = False Then
+                    newMoveToken = New MoveToken({BattleMove.Forward})
+                Else
+                    newMoveToken = New MoveToken({BattleMove.Backwards})
+                End If
+
+            Case ShipQuarter.Port
+                If isAdvanced = False Then
+                    newMoveToken = New MoveToken({BattleMove.Forward, BattleMove.TurnLeft})
+                Else
+                    newMoveToken = New MoveToken({BattleMove.TurnLeft})
+                End If
             Case Else : Throw New Exception("Unrecognised ship quarter")
         End Select
         Return newMoveToken
@@ -93,10 +109,10 @@
     Private Function ConvertMoveTokenToQuarter(ByVal mt As MoveToken) As ShipQuarter
         Select Case mt.ToString
             Case "Full Sails" : Return ShipQuarter.Fore
-            Case "Starboard" : Return ShipQuarter.Starboard
-            Case "Port" : Return ShipQuarter.Port
-            Case "Half Sails" : Return ShipQuarter.Aft
-            Case Else : Throw New Exception("Unrecognised standard movetoken")
+            Case "Starboard", "Hard to Starboard" : Return ShipQuarter.Starboard
+            Case "Port", "Hard to Port" : Return ShipQuarter.Port
+            Case "Half Sails", "Tack Aft" : Return ShipQuarter.Aft
+            Case Else : Throw New Exception("Unrecognised movetoken")
         End Select
     End Function
     Private Function CountMoveTokens(ByVal mt As MoveToken) As Integer
@@ -173,21 +189,30 @@
 
     Public Overrides Sub ConsoleReport()
         Dim s As String = Dev.vbSpace(2)
-        Dim t As Integer = 12
+        Dim t As Integer = 20
 
         MyBase.ConsoleReport()
         Console.WriteLine(Dev.vbSpace(1) & "Movement")
-        For Each q In MoveTokenProgress.Keys
-            Dim mt As MoveToken = ConvertQuarterToMoveToken(q)
+        For n = 1 To 2
+            Dim isAdvanced As Boolean : If n = 1 Then isAdvanced = False Else isAdvanced = True
+            For Each q In MoveTokenProgress.Keys
+                Dim mt As MoveToken = ConvertQuarterToMoveToken(q, isAdvanced)
 
-            Console.Write(s & Dev.vbTab(mt.ToString & ":", t))
-            Console.Write("[")
-            For p = 1 To MoveTokenThreshold
-                If p <= MoveTokenProgress(q) Then Console.Write("*") Else Console.Write("-")
+                Console.Write(s & Dev.vbTab(mt.ToString & ":", t))
+                Console.Write("[")
+                If isAdvanced = False Then
+                    For p = 1 To MoveTokenThreshold
+                        If p <= MoveTokenProgress(q) Then Console.Write("*") Else Console.Write("-")
+                    Next
+                Else
+                    For p = 1 To AdvancedMoveTokenThreshold
+                        If p <= AdvancedMoveTokenProgress(q) Then Console.Write("*") Else Console.Write("-")
+                    Next
+                End If
+                Console.Write("]  ")
+                Console.Write("x" & CountMoveTokens(mt))
+                Console.WriteLine()
             Next
-            Console.Write("]  ")
-            Console.Write("x" & CountMoveTokens(mt))
-            Console.WriteLine()
         Next
     End Sub
 End Class
