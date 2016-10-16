@@ -5,7 +5,7 @@
     Gunnery
     Bracing
     Cooking
-    Logistics
+    Alchemy
 
     Firearms = 101
     Melee

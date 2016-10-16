@@ -22,6 +22,7 @@
         Helm
         Maproom
         Kitchen
+        Laboratory
         Hold
     End Enum
 End Class

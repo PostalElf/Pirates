@@ -6,4 +6,5 @@
     Sailor
     Navigator
     Helmsman
+    Alchemist
 End Enum

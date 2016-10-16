@@ -245,6 +245,9 @@
     Public Function CheckAddModule(ByVal quarter As ShipQuarter, ByVal m As ShipModule) As Boolean
         If m.HullCost > HullSpace Then Return False
         If MaxHullUse(quarter) < m.HullCost Then Return False
+        If m.IsExclusive = False Then
+            If GetModules(m.Type).Count > 0 Then Return False
+        End If
 
         Return True
     End Function
@@ -285,6 +288,7 @@
         If GetModules(ShipModule.ModuleType.Maproom, quarter).Count > 0 Then total.Add(CrewRole.Navigator)
         If GetModules(ShipModule.ModuleType.Helm, quarter).Count > 0 Then total.AddRange({CrewRole.Helmsman, CrewRole.FirstMate})
         If GetModules(ShipModule.ModuleType.Quarterdeck, quarter).Count > 0 Then total.Add(CrewRole.Captain)
+        If GetModules(ShipModule.ModuleType.Laboratory, quarter).Count > 0 Then total.Add(CrewRole.Alchemist)
         Return total
     End Function
     Public Function CheckAddCrew(ByVal quarter As ShipQuarter, ByVal crew As Crew, Optional ByVal role As CrewRole = Nothing) As Boolean

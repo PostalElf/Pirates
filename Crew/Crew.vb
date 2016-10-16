@@ -131,6 +131,7 @@
             Case CrewRole.Gunner : cs = CrewSkill.Gunnery
             Case CrewRole.Sailor, CrewRole.Helmsman : cs = CrewSkill.Sailing
             Case CrewRole.Navigator : cs = CrewSkill.Navigation
+            Case CrewRole.Alchemist : cs = CrewSkill.Alchemy
         End Select
         If cs = Nothing Then Return -1
         Return GetSkill(cs)
