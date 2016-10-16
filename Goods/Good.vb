@@ -1,36 +1,36 @@
 ﻿Public Structure Good
     Public Type As GoodType
     Public Qty As Integer
-    Public HullCost As Double
+    Public ReadOnly Property HullCost As Double
+        Get
+            Select Case Type
+                Case GoodType.Grapples : Return 0.1
+                Case GoodType.Bullets : Return 0.01
+                Case GoodType.Shot : Return 0.1
+                Case GoodType.Explosive : Return 0.2
+                Case GoodType.Grapeshot : Return 0.1
+
+                Case GoodType.Coin : Return 0.001
+                Case GoodType.Jewellery : Return 0.1
+                Case Else : Return 0.1
+            End Select
+        End Get
+    End Property
     Public ReadOnly Property TotalHullCost As Double
         Get
             Return Qty * HullCost
         End Get
     End Property
 
-    Public Sub New(ByVal aType As GoodType, ByVal aQty As Integer, ByVal aHullCost As Double)
+    Public Sub New(ByVal aType As GoodType, ByVal aQty As Integer)
         Type = aType
         Qty = aQty
-        HullCost = aHullCost
     End Sub
     Public Shared Operator +(ByVal g1 As Good, ByVal g2 As Good) As Good
         If g1.Type <> g2.Type Then Return g1
-        Return New Good(g1.Type, g1.Qty + g2.Qty, g1.HullCost)
+        Return New Good(g1.Type, g1.Qty + g2.Qty)
     End Operator
     Public Shared Function Generate(ByVal gt As GoodType, Optional ByVal aQty As Integer = 0) As Good
-        Dim hc As Double
-        Select Case gt
-            Case GoodType.Grapplers : hc = 0.1
-            Case GoodType.Bullets : hc = 0.01
-            Case GoodType.Shot : hc = 0.1
-            Case GoodType.Explosive : hc = 0.2
-            Case GoodType.Grapeshot : hc = 0.1
-
-            Case GoodType.Coin : hc = 0.001
-            Case GoodType.Treasure : hc = 0.1
-            Case Else : hc = 0.1
-        End Select
-
-        Return New Good(gt, aQty, hc)
+        Return New Good(gt, aQty)
     End Function
 End Structure

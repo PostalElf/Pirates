@@ -33,7 +33,7 @@
     End Sub
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
         Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0)
-        Dim hooks As New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, GoodType.Grapplers, 5, 2, 5)
+        Dim hooks As New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, GoodType.Grapples, 5, 2, 5)
         Dim cannon As New ShipWeapon("Cannons", 30, 10, DamageType.Cannon, 2, GoodType.Shot, 3, 1, 3)
         Dim grapeshot As New ShipWeapon("Grapeshot", 10, 25, DamageType.Firearms, 1, GoodType.Grapeshot, 5, 2, 5)
 

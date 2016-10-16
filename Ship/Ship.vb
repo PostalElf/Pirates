@@ -372,9 +372,6 @@
         End Select
         Return total
     End Function
-    Protected Function GetCrewMorale() As Integer
-
-    End Function
 #End Region
 
 #Region "Attack"

@@ -1,10 +1,21 @@
 ﻿Public Enum GoodType
-    Grapplers = 1
+    Grapples = 1
     Bullets
     Shot
     Explosive
     Grapeshot
 
     Coin = 101
-    Treasure
+    Jewellery
+    Liqour
+    Blackspice
+    Shadeweed
+    Spidersilk
+    NReagents
+    SReagents
+    EReagents
+    WReagents
+
+    Rations
+    Water
 End Enum
