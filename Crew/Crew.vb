@@ -106,7 +106,26 @@
         For Each e In Equipment
             If e.SkillBonuses.ContainsKey(cs) Then total += e.SkillBonuses(cs)
         Next
+
+        'specific bonuses
+        If cs = CrewSkill.Leadership AndAlso (Role = CrewRole.FirstMate OrElse Role = CrewRole.Captain) Then
+            total += ConvertQualityToBonus(ShipModule.ModuleType.Quarterdeck)
+        ElseIf cs = CrewSkill.Sailing AndAlso Role = CrewRole.Helmsman Then
+            total += ConvertQualityToBonus(ShipModule.ModuleType.Helm)
+        ElseIf cs = CrewSkill.Navigation AndAlso Role = CrewRole.Navigator Then
+            total += ConvertQualityToBonus(ShipModule.ModuleType.Maproom)
+        End If
+
         Return total
+    End Function
+    Private Function ConvertQualityToBonus(ByVal moduleType As ShipModule.ModuleType) As Integer
+        Dim quality As Integer = Ship.GetModules(moduleType)(0).Quality
+        Select Case quality
+            Case 0, 1, 2 : Return 0
+            Case 3, 4 : Return 1
+            Case 5 : Return 2
+            Case Else : Throw New Exception
+        End Select
     End Function
     Private Function GetBestSkill(ByVal meleeOnly As Boolean) As CrewSkill
         Dim bestSkill As CrewSkill = Nothing
@@ -269,6 +288,8 @@
 
 #Region "Morale"
     Public Morale As Integer
+    Public Quarters As ShipModule
+    Public Shrine As ShipModule
     Public ReadOnly Property MoraleLevel As CrewMorale
         Get
             Select Case Morale
@@ -301,13 +322,7 @@
                 'seatouched need rations and water; desire prayer
                 change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
                 change += ConsumeGoods(GoodType.Water, 1, 0, -10)
-                If change > -10 Then
-                    Dim prayCapacity As Integer = 0
-                    For Each shrine In Ship.GetModules(ShipModule.ModuleType.Shrine)
-                        prayCapacity += shrine.Capacity
-                    Next
-                    If prayCapacity >= Ship.GetCrewsByRace(CrewRace.Seatouched).Count Then change -= 5 Else change += 1
-                End If
+                If Shrine Is Nothing Then change -= 5 Else  : If change < -10 Then change += 1
 
             Case CrewRace.Windsworn
                 'windsworn need rations and water; desire tobacco and spice
@@ -325,6 +340,15 @@
                     If Ship.GetSkill(Nothing, CrewSkill.Leadership) >= 7 Then change += 1
                 End If
         End Select
+
+        'quarters
+        If change >= 0 AndAlso Quarters Is Nothing = False Then
+            change += (Quarters.Quality - 2)
+            change = Dev.Constrain(change, 0, 100)
+        End If
+
+        'apply
+        Morale += change
     End Sub
     Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer) As Integer
         Dim good As New Good(goodType, -qty)

@@ -60,22 +60,22 @@
             Dim crewCount As Integer = ship.GetCrews(Nothing, Nothing).Count + 3
             For n = 1 To Math.Ceiling(crewCount / 5)
                 Dim quarter As ShipQuarter = rng.Next(1, 5)
-                .AddModule(quarter, New ShipModule("Crew Quarters", ShipModule.ModuleType.Crew, 5, 2, False))
+                .AddModule(quarter, ShipModule.Generate(ShipModule.ModuleType.Crew, 1, .Race))
             Next
 
             If rng.Next(1, 3) = 1 Then
-                .AddModule(ShipQuarter.Aft, New ShipModule("Aftcastle", ShipModule.ModuleType.Quarterdeck, 1, 0, True))
+                .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, 1, .Race))
                 .AddCrew(ShipQuarter.Aft, Crew.Generate(ship.Race, rng), CrewRole.Captain)
-                .AddModule(ShipQuarter.Fore, New ShipModule("Helm", ShipModule.ModuleType.Helm, 1, 0, True))
+                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Helm, 1, .Race))
                 .AddCrew(ShipQuarter.Fore, Crew.Generate(ship.Race, rng), CrewRole.Helmsman)
             Else
-                .AddModule(ShipQuarter.Fore, New ShipModule("Forecastle", ShipModule.ModuleType.Quarterdeck, 1, 0, True))
+                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, 1, .Race))
                 .AddCrew(ShipQuarter.Fore, Crew.Generate(ship.Race, rng), CrewRole.Captain)
-                .AddModule(ShipQuarter.Aft, New ShipModule("Helm", ShipModule.ModuleType.Helm, 1, 0, True))
+                .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Helm, 1, .Race))
                 .AddCrew(ShipQuarter.Aft, Crew.Generate(ship.Race, rng), CrewRole.Helmsman)
             End If
 
-            .AddModule(rng.Next(1, 5), New ShipModule("Maproom", ShipModule.ModuleType.Maproom, 1, 0, True))
+            .AddModule(rng.Next(1, 5), ShipModule.Generate(ShipModule.ModuleType.Maproom, 1, .Race))
             .AddCrew(ShipQuarter.Fore, Crew.Generate(ship.Race, rng), CrewRole.Navigator)
         End With
     End Sub
