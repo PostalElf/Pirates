@@ -214,10 +214,6 @@
 #Region "Goods"
     Private Goods As New Dictionary(Of GoodType, Good)
     Public GoodsFreeForConsumption As New Dictionary(Of GoodType, Boolean)
-    Public Function CheckAddGood(ByVal good As Good) As Boolean
-        If good.Qty + HoldSpaceUsed > HoldSpaceMax Then Return False
-        Return True
-    End Function
     Private ReadOnly Property HoldSpaceMax As Double
         Get
             Dim total As Double = 0
@@ -236,6 +232,13 @@
             Return total
         End Get
     End Property
+    Public Function CheckAddGood(ByVal gt As GoodType, ByVal qty As Integer) As Boolean
+        Return CheckAddGood(Good.Generate(gt, qty))
+    End Function
+    Public Function CheckAddGood(ByVal good As Good) As Boolean
+        If good.TotalMass + HoldSpaceUsed > HoldSpaceMax Then Return False
+        Return True
+    End Function
     Public Sub AddGood(ByVal good As Good)
         Goods(good.Type) += good
     End Sub
@@ -260,8 +263,8 @@
                     total += m.weight
                 Next
             Next
-            For Each Good In Goods.Values
-                total += Good.TotalWeight
+            For Each k In Goods.Keys
+                total += Goods(k).TotalWeight
             Next
             Return total
         End Get
@@ -312,10 +315,10 @@
         Next
         Return total
     End Function
-    Public Function GetModulesFree(ByVal type As ShipModule.ModuleType, Optional ByVal quarter As ShipQuarter = Nothing) As List(Of ShipModule)
+    Public Function GetModulesFree(ByVal type As ShipModule.ModuleType, ByVal aRace As CrewRace, Optional ByVal quarter As ShipQuarter = Nothing) As List(Of ShipModule)
         Dim total As New List(Of ShipModule)
         For Each m In GetModules(type, quarter)
-            If m.CapacityFree > 0 Then total.Add(m)
+            If (aRace = Nothing OrElse aRace = m.Race) AndAlso m.CapacityFree > 0 Then total.Add(m)
         Next
         Return total
     End Function
@@ -342,6 +345,10 @@
             If GetModules(ShipModule.ModuleType.Quarterdeck).Count = 0 Then Return False
             If GetModules(ShipModule.ModuleType.Maproom).Count = 0 Then Return False
             If GetModules(ShipModule.ModuleType.Crew).Count = 0 Then Return False
+
+            If GetCrews(Nothing, CrewRole.Helmsman).Count = 0 Then Return False
+            If GetCrews(Nothing, CrewRole.Captain).Count = 0 Then Return False
+            If GetCrews(Nothing, CrewRole.Navigator).Count = 0 Then Return False
 
             Return True
         End Get

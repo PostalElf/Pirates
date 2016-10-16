@@ -32,15 +32,18 @@
         End Get
     End Property
 
-    Public Sub New(ByVal aType As GoodType, ByVal aQty As Integer)
+    Private Sub New(ByVal aType As GoodType, ByVal aQty As Integer)
         Type = aType
         Qty = aQty
     End Sub
+    Public Overrides Function ToString() As String
+        Return Type.ToString & " x" & Qty
+    End Function
     Public Shared Operator +(ByVal g1 As Good, ByVal g2 As Good) As Good
         If g1.Type <> g2.Type Then Return g1
         Return New Good(g1.Type, g1.Qty + g2.Qty)
     End Operator
-    Public Shared Function Generate(ByVal gt As GoodType, Optional ByVal aQty As Integer = 0) As Good
+    <DebuggerStepThrough()> Public Shared Function Generate(ByVal gt As GoodType, Optional ByVal aQty As Integer = 0) As Good
         Return New Good(gt, aQty)
     End Function
 End Structure

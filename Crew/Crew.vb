@@ -314,7 +314,7 @@
                 'seatouched need rations and water; desire prayer
                 change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
                 change += ConsumeGoods(GoodType.Water, 1, 0, -10)
-                If Shrine Is Nothing Then change -= 5 Else  : If change < -10 Then change += 1
+                If Shrine Is Nothing Then change -= 5 Else  : If change > -10 Then change += Math.Ceiling(Shrine.Quality / 2)
 
             Case CrewRace.Windsworn
                 'windsworn need rations and water; desire tobacco and spice
@@ -343,7 +343,7 @@
         Morale += change
     End Sub
     Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer) As Integer
-        Dim good As New Good(goodType, -qty)
+        Dim good As Good = good.Generate(goodType, -qty)
         If Ship.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then Return negativeChange
         Ship.AddGood(good)
         Return positiveChange

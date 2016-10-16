@@ -57,7 +57,7 @@
             .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters2, CrewRole.Helmsman)
 
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("cannon"))
-            .AddGood(GoodType.Shot, 600)
+            .AddModule(ShipQuarter.Starboard, ShipModule.Generate(ShipModule.ModuleType.Hold, ShipModule.ModuleQuality.Excellent, Nothing))
         End With
         Return ship
     End Function
@@ -196,6 +196,25 @@
     End Sub
     Private Sub TestSnippet()
         Dim ship = SetupPlayerShip((New Random(5)))
+        With ship
+            .AddGood(GoodType.Shot, 100)
+            .GoodsFreeForConsumption(GoodType.Shot) = True
+            .AddGood(GoodType.Rations, 100)
+            .GoodsFreeForConsumption(GoodType.Rations) = True
+            .AddGood(GoodType.Water, 100)
+            .GoodsFreeForConsumption(GoodType.Water) = True
 
+            Dim st As Crew = Crew.Generate(CrewRace.Seatouched)
+            .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, CrewRace.Seatouched))
+            .AddCrew(ShipQuarter.Fore, st, ship.GetModulesFree(ShipModule.ModuleType.Crew, CrewRace.Seatouched, Nothing)(0))
+            .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Shrine, ShipModule.ModuleQuality.Luxurious, CrewRace.Seatouched))
+            st.Shrine = .GetModulesFree(ShipModule.ModuleType.Shrine, CrewRace.Seatouched)(0)
+
+            .Tick()
+
+            .ConsoleReport()
+        End With
+        Console.ReadKey()
+        End
     End Sub
 End Module

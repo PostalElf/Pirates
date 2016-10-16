@@ -98,9 +98,25 @@
                     .Weight = quality
 
                 Case ModuleType.Shrine
-                    .Capacity = quality * 3
-                    .HullCost = 5
-                    .Weight = 5
+                    Dim c As Integer = 0
+                    Select Case quality
+                        Case 0, 1
+                            .Capacity = 3
+                            .HullCost = 5
+                            .Weight = 5
+                        Case 2, 3
+                            .Capacity = 3
+                            .HullCost = 5
+                            .Weight = 7
+                        Case 4
+                            .Capacity = 5
+                            .HullCost = 5
+                            .Weight = 10
+                        Case 5
+                            .Capacity = 5
+                            .HullCost = 7
+                            .Weight = 12
+                    End Select
 
                 Case ModuleType.Hold
                     .Capacity = quality * 100
