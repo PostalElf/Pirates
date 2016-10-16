@@ -354,19 +354,19 @@
         Return total
     End Function
 
-    Protected Function GetSkill(ByVal skill As CrewSkill) As Integer
+    Protected Function GetSkill(ByVal quarter As ShipQuarter, ByVal skill As CrewSkill) As Integer
         Dim total As Integer = 0
         Select Case skill
             Case CrewSkill.Leadership
-                For Each c In GetCrews(Nothing, CrewRole.Captain)
+                For Each c In GetCrews(quarter, CrewRole.Captain)
                     total += c.GetSkillFromRole * 2
                 Next
-                For Each c In GetCrews(Nothing, CrewRole.FirstMate)
+                For Each c In GetCrews(quarter, CrewRole.FirstMate)
                     total += c.GetSkillFromRole
                 Next
             Case Else
                 Dim role As CrewRole = Crew.ConvertSkillToRole(skill)
-                For Each c In GetCrews(Nothing, role)
+                For Each c In GetCrews(quarter, role)
                     total += c.GetSkillFromRole
                 Next
         End Select
@@ -408,32 +408,12 @@
         If Weapons(quarter).Contains(weapon) = False Then Exit Sub
         If weapon.IsReady = False Then Exit Sub
 
-        Dim range As Integer = weapon.Range
-        Dim attackSquares As Queue(Of Battlesquare) = BattleSquare.GetSubjectiveAdjacents(Facing, quarter, range)
-        Dim attackTarget As BattlefieldObject = Nothing
-        While attackSquares.Count > 0
-            Dim attackSquare As Battlesquare = attackSquares.Dequeue
-            If attackSquare.Contents Is Nothing = False Then
-                attackTarget = attackSquare.Contents
-                Exit While
-            End If
-        End While
-        If attackTarget Is Nothing Then Exit Sub
-
-        Dim attackDirection As BattleDirection
-        For Each direction In [Enum].GetValues(GetType(BattleDirection))
-            Dim targetSquares As Queue(Of Battlesquare) = attackTarget.BattleSquare.GetAdjacents(direction, range)
-            While targetSquares.Count > 0
-                If targetSquares.Dequeue.Equals(BattleSquare) Then
-                    attackDirection = direction
-                    Exit For
-                End If
-            End While
-        Next
+        Dim attackTarget As BattlefieldObject = weapon.GetAttackTarget(Facing)
+        Dim attackDirection As BattleDirection = GetAttackDirection(weapon, attackTarget)
 
         Dim repType As ReportType
         If TypeOf Me Is ShipPlayer Then repType = ReportType.PlayerShipAttack Else repType = ReportType.EnemyShipAttack
-        Report.Add(Name & " fires its " & quarter.ToString & " " & weapon.Name & ".", repType)
+        Report.Add(Name & " fires its " & quarter.ToString & " " & weapon.Name & " at " & attackTarget.Name & ".", repType)
         JustFired(quarter) = True
 
         If weapon.Name <> "Grappling Hooks" Then
@@ -450,6 +430,19 @@
             Report.Add(Name & " and " & attackTarget.Name & " are joined in melee!", ReportType.Melee)
         End If
     End Sub
+    Private Function GetAttackDirection(ByVal weapon As ShipWeapon, ByVal attackTarget As BattlefieldObject) As BattleDirection
+        Dim attackDirection As BattleDirection
+        For Each direction In [Enum].GetValues(GetType(BattleDirection))
+            Dim targetSquares As Queue(Of Battlesquare) = attackTarget.BattleSquare.GetAdjacents(direction, weapon.Range)
+            While targetSquares.Count > 0
+                If targetSquares.Dequeue.Equals(BattleSquare) Then
+                    attackDirection = direction
+                    Exit For
+                End If
+            End While
+        Next
+        Return attackDirection
+    End Function
     Private Function GetTargetQuarter(ByVal attackDirection As BattleDirection) As ShipQuarter Implements BattlefieldObject.GetTargetQuarter
         'determine target quarter by ship facing and attackDirection
         Select Case Facing

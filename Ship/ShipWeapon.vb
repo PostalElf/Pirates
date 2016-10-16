@@ -54,6 +54,18 @@
         attackTarget.Damage(Damage, targetQuarter, accuracy)
         CooldownCounter = CooldownMax + 1
     End Sub
+    Public Function GetAttackTarget(ByVal facing As BattleDirection) As BattlefieldObject
+        Dim attackSquares As Queue(Of Battlesquare) = Ship.BattleSquare.GetSubjectiveAdjacents(facing, Quarter, Range)
+        Dim attackTarget As BattlefieldObject = Nothing
+        While attackSquares.Count > 0
+            Dim attackSquare As Battlesquare = attackSquares.Dequeue
+            If attackSquare.Contents Is Nothing = False Then
+                attackTarget = attackSquare.Contents
+                Exit While
+            End If
+        End While
+        Return attackTarget
+    End Function
     Public Sub Tick()
         Cooldown(1)
     End Sub
