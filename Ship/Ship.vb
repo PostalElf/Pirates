@@ -46,12 +46,12 @@
     End Function
     Private Shared NamePrefixes As New List(Of String)
     Private Shared NameSuffixes As New List(Of String)
-    Protected Shared Function GenerateName() As String
+    Protected Shared Function GenerateName(ByRef rng As Random) As String
         If NamePrefixes.Count = 0 Then NamePrefixes = IO.SimpleFilegetAll("shipPrefixes.txt")
         If NameSuffixes.Count = 0 Then NameSuffixes = IO.SimpleFilegetAll("shipSuffixes.txt")
 
-        Dim prefix As String = Dev.GrabRandom(NamePrefixes)
-        Dim suffix As String = Dev.GrabRandom(NameSuffixes)
+        Dim prefix As String = Dev.GrabRandom(NamePrefixes, rng)
+        Dim suffix As String = Dev.GrabRandom(NameSuffixes, rng)
         Return prefix & " " & suffix
     End Function
     Protected Shared Function GenerateID(ByVal aName As String) As String

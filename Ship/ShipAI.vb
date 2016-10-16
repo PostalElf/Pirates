@@ -22,7 +22,7 @@
             If race = Nothing Then .Race = Dev.Rng.Next(1, races.Length + 1) Else .Race = race
             If faction = Nothing Then .Faction = Dev.Rng.Next(1, factions.Length + 1) Else .Faction = faction
             .Type = type
-            .Name = GenerateName()
+            .Name = GenerateName(rng)
             .ID = GenerateID(.Name)
 
             Select Case type
@@ -41,18 +41,16 @@
             End Select
 
             .HullSpace = Pirates.Ship.GenerateHullSpace(.Type)
-            GenerateStandardModules(ship, rng)
-
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
                 .HullPoints(q) = Pirates.Ship.GenerateHullPoints(.Type)
                 .MaxHullUse(q) = 10000
                 .AddCrew(q, Crew.Generate(.Race), CrewRole.Sailor)
             Next
+            GenerateStandardModules(ship, rng)
 
             'add loot
             For n = 1 To 3
-                Dim gt As GoodType = Dev.Rng.Next(1, [Enum].GetValues(GetType(GoodType)).Length)
-                .AddGood(Good.Generate(gt, Dev.Rng.Next(10, 30)))
+                GenerateLoot(ship, rng)
             Next
         End With
         Return ship
@@ -80,7 +78,7 @@
         Dim weapon As ShipWeapon = weaponTemplate.Clone
         ship.AddWeapon(quarter, weapon)
 
-        Const ammoAmt As Integer = 50
+        Dim ammoAmt As Integer = weapon.AmmoUse.Qty * 10
         Dim ammoType As GoodType = weapon.AmmoUse.Type
         If ammoType <> Nothing Then ship.AddGood(ammoType, ammoAmt)
 
@@ -89,6 +87,11 @@
                 ship.AddCrew(quarter, Crew.Generate(ship.Race), CrewRole.Gunner)
             Next
         End If
+    End Sub
+    Private Shared Sub GenerateLoot(ByRef ship As ShipAI, ByRef rng As Random)
+        Dim goods As New List(Of GoodType)([Enum].GetValues(GetType(GoodType)))
+        Dim gt As GoodType = Dev.GetRandom(Of GoodType)(goods, rng)
+        ship.AddGood(Good.Generate(gt, rng.Next(10, 30)))
     End Sub
 
 #Region "Movement"

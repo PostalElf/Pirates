@@ -4,4 +4,7 @@
     Shot
     Explosive
     Grapeshot
+
+    Coin = 101
+    Treasure
 End Enum

@@ -20,6 +20,14 @@
     Public Shared Function Generate(ByVal gt As GoodType, Optional ByVal aQty As Integer = 0) As Good
         Dim hc As Double
         Select Case gt
+            Case GoodType.Grapplers : hc = 0.1
+            Case GoodType.Bullets : hc = 0.01
+            Case GoodType.Shot : hc = 0.1
+            Case GoodType.Explosive : hc = 0.2
+            Case GoodType.Grapeshot : hc = 0.1
+
+            Case GoodType.Coin : hc = 0.001
+            Case GoodType.Treasure : hc = 0.1
             Case Else : hc = 0.1
         End Select
 

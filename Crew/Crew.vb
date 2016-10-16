@@ -27,7 +27,7 @@
 
             Dim skills As New List(Of CrewSkill)([Enum].GetValues(GetType(CrewSkill)))
             For n = 1 To 2
-                Dim cs As CrewSkill = Dev.GrabRandom(Of CrewSkill)(skills)
+                Dim cs As CrewSkill = Dev.GrabRandom(Of CrewSkill)(skills, rng)
                 .AddSkillXP(cs, SkillThresholds(n))
             Next
         End With
@@ -38,8 +38,8 @@
         If NamePrefixes.Count = 0 Then NamePrefixes = IO.SimpleFilegetAll("namePrefixes.txt")
         If NameSuffixes.Count = 0 Then NameSuffixes = IO.SimpleFilegetAll("nameSuffixes.txt")
 
-        Dim prefix As String = Dev.GrabRandom(Of String)(NamePrefixes)
-        Dim suffix As String = Dev.GrabRandom(Of String)(NameSuffixes)
+        Dim prefix As String = Dev.GrabRandom(Of String)(NamePrefixes, rng)
+        Dim suffix As String = Dev.GrabRandom(Of String)(NameSuffixes, rng)
         Return prefix & " " & suffix
     End Function
     Private Shared NamePrefixes As New List(Of String)
