@@ -53,9 +53,8 @@
 
 #Region "Bonuses"
     Private Scars As New List(Of CrewBonus)
-    Private Mutations As New List(Of CrewBonus)
     Private Equipment As New List(Of CrewBonus)
-    Private CrewBonuses As List(Of CrewBonus)() = {Scars, Mutations, Equipment}
+    Private CrewBonuses As List(Of CrewBonus)() = {Scars, Equipment}
     Private Function CheckAddBonus(ByVal listName As String, ByVal effect As CrewBonus) As Boolean
         'check slot against all lists
         For Each cbl In CrewBonuses
@@ -82,7 +81,6 @@
     Private Function GetBonusList(ByVal listName As String) As List(Of CrewBonus)
         Select Case listName.ToLower
             Case "scars", "scar" : Return Scars
-            Case "mutations", "mutation" : Return Mutations
             Case "equipment" : Return Equipment
         End Select
         Return Nothing
@@ -166,9 +164,6 @@
         Dim total As Integer = Skills(cs)
         For Each s In Scars
             If s.SkillBonuses.ContainsKey(cs) Then total += s.SkillBonuses(cs)
-        Next
-        For Each m In Mutations
-            If m.SkillBonuses.ContainsKey(cs) Then total += m.SkillBonuses(cs)
         Next
         For Each e In Equipment
             If e.SkillBonuses.ContainsKey(cs) Then total += e.SkillBonuses(cs)
@@ -487,7 +482,6 @@
         Next
 
         If Equipment.Count > 0 Then ConsoleReportList(Equipment, "Gear:")
-        If Mutations.Count > 0 Then ConsoleReportList(Mutations, "Mutations:")
     End Sub
     Private Sub ConsoleReportList(ByVal l As List(Of CrewBonus), ByVal title As String)
         Console.WriteLine(Dev.vbSpace(1) & title)
