@@ -58,7 +58,9 @@
     Private Function CheckAddBonus(ByVal listName As String, ByVal effect As CrewBonus) As Boolean
         'check slot against all lists
         For Each cbl In CrewBonuses
-            If GetSlot(cbl, effect.Slot) Is Nothing = False Then Return False
+            If effect.Slot Is Nothing = False Then
+                If GetSlot(cbl, effect.Slot) Is Nothing = False Then Return False
+            End If
         Next
 
         Return True
@@ -91,17 +93,20 @@
         Next
         Return Nothing
     End Function
-
-    Private Function GenerateScar(ByVal damage As Damage, ByVal exclude As List(Of CrewBonus)) As CrewBonus
-        Dim scarNames As New List(Of String)({"Hook Hand", "Gun Hand", "Cracked Skull", "Fractured Ribs", "Pegleg", _
-                                              "Touch of Death"})
-        For Each thing In exclude
-            If scarNames.Contains(thing.Name) Then scarNames.remove(thing.Name)
+    Private Function GetArmour(ByVal damageType As DamageType) As Integer
+        Dim total As Integer = 0
+        For Each cbl As List(Of CrewBonus) In CrewBonuses
+            For Each cb As CrewBonus In cbl
+                If cb.Armour.ContainsKey(damageType) Then total += cb.Armour(damageType)
+            Next
         Next
-        If scarNames.Count <= 0 Then Return Nothing
+        Return total
+    End Function
 
-        Dim roll As Integer = Dev.Rng.Next(0, scarNames.Count)
-        Dim scarName As String = scarNames(roll)
+    Private Function GenerateScar(ByVal damage As Damage) As CrewBonus
+        Dim scarNames = GenerateScarNames()
+        Dim scarName As String = scarNames(Dev.Rng.Next(scarNames.Count))
+
         Dim total As New CrewBonus
         With total
             .Name = scarName
@@ -111,7 +116,6 @@
                     .Skill = CrewSkill.Melee
                     .Damage = 10
                     .DamageType = DamageType.Blade
-                    .AmmoUse = 0
 
                 Case "Gun Hand"
                     .Slot = "Left Hand"
@@ -120,38 +124,72 @@
                     .DamageType = DamageType.Firearms
                     .AmmoUse = 1
 
-                Case "Cracked Skull"
+                Case "Thick-Skulled"
                     .Slot = "Head"
-                    .Skill = Nothing
-                    .Damage = 0
-                    .DamageType = Nothing
-                    .AmmoUse = 0
 
                 Case "Fractured Ribs"
                     .Slot = "Body"
-                    .Skill = Nothing
-                    .Damage = 0
-                    .DamageType = Nothing
-                    .AmmoUse = 0
 
                 Case "Pegleg"
                     .Slot = "Feet"
-                    .Skill = Nothing
-                    .Damage = 0
-                    .DamageType = Nothing
-                    .AmmoUse = 0
 
                 Case "Touch of Death"
                     .Slot = "Talisman"
                     .Skill = CrewSkill.Alchemy
                     .Damage = 10
                     .DamageType = DamageType.Necromancy
-                    .AmmoUse = 0
+
+                Case "Tentacled Arm"
+                    .Slot = "Left Hand"
+                    .Skill = CrewSkill.Melee
+                    .Damage = 20
+                    .DamageType = DamageType.Blunt
+
+                Case "Crabclaw"
+                    .Slot = "Right Hand"
+                    .Skill = CrewSkill.Melee
+                    .Damage = 20
+                    .DamageType = DamageType.Blade
+
+                Case "Angler's Light"
+                    .Slot = "Head"
+
+                Case "Sharkskin"
+                    .Slot = "Body"
+                    .Armour.Add(DamageType.Blade, 20)
+
+                Case "Greenskin"
+                    .Slot = "Body"
+
+                Case "Writhing Mass"
+                    .Slot = "Feet"
+                    .Skill = CrewSkill.Melee
+                    .Damage = 15
+                    .DamageType = DamageType.Blunt
 
                 Case Else : Throw New Exception("Out of roll range")
             End Select
         End With
         Return total
+    End Function
+    Private Function GenerateScarNames() As List(Of String)
+        Dim scarNames As New List(Of String)
+        Select Case Race
+            Case CrewRace.Human, CrewRace.Windsworn
+                scarNames.AddRange({"Hook Hand", "Gun Hand", "Thick-Skulled", "Fractured Ribs", "Pegleg", "Touch of Death"})
+
+            Case CrewRace.Seatouched
+                scarNames.AddRange({"Tentacled Arm", "Crabclaw", "Angler's Light", "Sharkskin", "Greenskin", "Writhing Mass"})
+
+            Case CrewRace.Unrelinquished
+                Return Nothing
+
+        End Select
+
+        For Each thing In Scars
+            If scarNames.Contains(thing.Name) Then scarNames.Remove(thing.Name)
+        Next
+        If scarNames.Count <= 0 Then Return Nothing Else Return scarNames
     End Function
 #End Region
 
@@ -322,7 +360,7 @@
         If Ship Is Nothing Then Exit Sub
         If damage.CrewDamage <= 0 Then Exit Sub
 
-        DamageSustained += damage.CrewDamage
+        DamageSustained += (damage.CrewDamage - GetArmour(damage.Type))
         DamageLog.Add(damage)
         Dim repType As ReportType
         If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDamage Else repType = ReportType.EnemyCrewDamage
@@ -330,6 +368,42 @@
 
         If DamageSustained >= Health Then Death()
     End Sub
+    Private Sub TickHeal(ByVal doctor As Crew)
+        Dim currentDamage As Damage = GetWorstDamage()
+        If currentDamage Is Nothing Then Exit Sub
+
+        Dim skill As Integer = doctor.GetSkillFromRole + Dev.FateRoll
+        If doctor.Race <> Me.Race Then skill -= 2
+
+        If skill > currentDamage.CrewDamage Then
+            DamageLog.Remove(currentDamage)
+            DamageSustained -= currentDamage.CrewDamage
+            Report.Add("The ship doctor successfully treated " & Name & "'s worst injuries.", ReportType.Doctor)
+        ElseIf skill = currentDamage.CrewDamage Then
+            DamageLog.Remove(currentDamage)
+            DamageSustained -= currentDamage.CrewDamage
+            Report.Add("The ship doctor treated " & Name & "'s worst injuries.", ReportType.Doctor)
+
+            If Me.Race <> CrewRace.Unrelinquished Then
+                Dim scar As CrewBonus = GenerateScar(currentDamage)
+                If scar Is Nothing Then Exit Sub
+                AddBonus("scar", scar)
+                Report.Add(Name & " gains a new scar: " & scar.Name, ReportType.Doctor)
+            End If
+        Else
+            Report.Add("The ship doctor failed to treat " & Name & "'s worst injuries.", ReportType.Doctor)
+            DamageSustained += 1
+            If DamageSustained > Health Then Death()
+        End If
+
+    End Sub
+    Private Function GetWorstDamage() As Damage
+        Dim worstDmg As Damage = Nothing
+        For Each dmg In DamageLog
+            If dmg.CrewDamage < worstDmg.CrewDamage Then worstDmg = dmg
+        Next
+        Return worstDmg
+    End Function
     Private Sub Death()
         Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
         If battlefield Is Nothing = False Then battlefield.AddDead(Me)
@@ -419,43 +493,11 @@
         'apply
         Morale += change
     End Sub
-    Private Sub TickHeal(ByVal doctor As Crew)
-        Dim currentDamage As Damage = GetWorstDamage()
-        If currentDamage Is Nothing Then Exit Sub
-
-        Dim damageHealed As Integer = 0
-        Dim skill As Integer = doctor.GetSkillFromRole + Dev.FateRoll
-        If skill > currentDamage.CrewDamage Then
-            DamageLog.Remove(currentDamage)
-            damageHealed -= currentDamage.CrewDamage
-            Report.Add("The ship doctor successfully treated " & Name & "'s worst injuries.", ReportType.Doctor)
-        ElseIf skill = currentDamage.CrewDamage Then
-            DamageLog.Remove(currentDamage)
-            DamageSustained -= currentDamage.CrewDamage
-            Report.Add("The ship doctor sorta treated " & Name & "'s worst injuries.", ReportType.Doctor)
-
-            Dim scar As CrewBonus = GenerateScar(currentDamage, Scars)
-            AddBonus("scar", scar)
-            Report.Add(Name & " gains a new scar: " & scar.Name, ReportType.Doctor)
-        Else
-            Report.Add("The ship doctor failed to treat " & Name & "'s worst injuries.", ReportType.Doctor)
-            DamageSustained += 1
-            If DamageSustained > Health Then Death()
-        End If
-
-    End Sub
     Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer) As Integer
         Dim good As Good = good.Generate(goodType, -qty)
         If Ship.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then Return negativeChange
         Ship.AddGood(good)
         Return positiveChange
-    End Function
-    Private Function GetWorstDamage() As Damage
-        Dim worstDmg As Damage = Nothing
-        For Each dmg In DamageLog
-            If dmg.CrewDamage < worstDmg.CrewDamage Then worstDmg = dmg
-        Next
-        Return worstDmg
     End Function
 
     Public Enum CrewMorale
