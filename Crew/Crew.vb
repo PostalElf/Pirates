@@ -379,6 +379,11 @@
         If DamageSustained >= Health Then Death()
     End Sub
     Private Sub TickHeal(ByVal doctor As Crew)
+        'doctors have disadvantage when treating patients not of their race
+        'failure to treat will deal damage
+        'unrelinquished do not gain scars but are harder to treat
+        'seatouched have a chance to gain mutation instead of scar
+
         Dim currentDamage As Damage = GetWorstDamage()
         If currentDamage Is Nothing Then Exit Sub
 
@@ -412,7 +417,7 @@
             End If
         Else
             Report.Add("The ship doctor failed to treat " & Name & "'s worst injuries.", ReportType.Doctor)
-            DamageSustained += 1
+            DamageSustained += 5
             If DamageSustained > Health Then Death()
         End If
 

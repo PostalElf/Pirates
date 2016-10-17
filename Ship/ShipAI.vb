@@ -70,7 +70,7 @@
                 .AddModule(quarter, ShipModule.Generate(ShipModule.ModuleType.Crew, 1, .Race))
             Next
             For Each cp In newCrews
-                .AddCrew(cp.quarter, Crew.Generate(.Race), .GetModulesFree(ShipModule.ModuleType.Crew, .Race)(0), cp.role)
+                .AddCrew(cp.quarter, Crew.Generate(.Race), cp.role)
             Next
             newCrews.Clear()
         End With

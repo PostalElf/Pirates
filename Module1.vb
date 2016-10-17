@@ -3,7 +3,7 @@
 
     Sub Main()
         Console.SetWindowSize(Console.WindowWidth, 50)
-        TestSnippet()
+        'TestSnippet()
         Battle()
     End Sub
 
@@ -39,22 +39,21 @@
             .Name = "Baron's Spear"
             .GenerateBaselines(ShipType.Sloop)
 
-            Dim quarters1 = ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Poor, CrewRace.Human)
-            .AddModule(ShipQuarter.Aft, quarters1)
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Gunner)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), quarters1, CrewRole.Gunner)
+            For n = 1 To 3
+                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, CrewRace.Human))
+            Next
 
-            Dim quarters2 = ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Poor, CrewRace.Human)
-            .AddModule(ShipQuarter.Aft, quarters2)
-            .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, ShipModule.ModuleQuality.Average, CrewRace.Human))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters2, CrewRole.Captain)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
+
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Captain)
             .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Maproom, ShipModule.ModuleQuality.Average, CrewRace.Human))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters2, CrewRole.Navigator)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Navigator)
             .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Helm, ShipModule.ModuleQuality.Average, CrewRace.Human))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), quarters2, CrewRole.Helmsman)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Helmsman)
 
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("cannon"))
             .AddModule(ShipQuarter.Starboard, ShipModule.Generate(ShipModule.ModuleType.Hold, ShipModule.ModuleQuality.Excellent, Nothing))
@@ -206,7 +205,7 @@
 
             Dim st As Crew = Crew.Generate(CrewRace.Seatouched)
             .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, CrewRace.Seatouched))
-            .AddCrew(ShipQuarter.Fore, st, ship.GetModulesFree(ShipModule.ModuleType.Crew, CrewRace.Seatouched, Nothing)(0))
+            .AddCrew(ShipQuarter.Fore, st)
             .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Shrine, ShipModule.ModuleQuality.Luxurious, CrewRace.Seatouched))
             st.Shrine = .GetModulesFree(ShipModule.ModuleType.Shrine, CrewRace.Seatouched)(0)
 

@@ -367,19 +367,22 @@
         If GetModules(ShipModule.ModuleType.Laboratory, quarter).Count > 0 Then total.Add(CrewRole.Alchemist)
         Return total
     End Function
-    Public Function CheckAddCrew(ByVal quarter As ShipQuarter, ByVal crew As Crew, ByRef quarters As ShipModule, Optional ByVal role As CrewRole = Nothing) As Boolean
-        If quarters.Type <> ShipModule.ModuleType.Crew Then Return False
-        If quarters.CapacityFree - 1 < 0 Then Return False
+    Public Function CheckAddCrew(ByVal quarter As ShipQuarter, ByVal crew As Crew, Optional ByVal role As CrewRole = Nothing) As Boolean
+        Dim qlist As List(Of ShipModule) = GetModulesFree(ShipModule.ModuleType.Crew, crew.Race, Nothing)
+        If qlist.Count = 0 Then Return False
+        If qlist(0).CapacityFree - 1 < 0 Then Return False
 
         Return True
     End Function
-    Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, ByRef quarters As ShipModule, Optional ByVal role As CrewRole = Nothing)
+    Public Sub AddCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew, Optional ByVal role As CrewRole = Nothing)
         Crews(quarter).Add(crew)
         crew.Ship = Me
         crew.ShipQuarter = quarter
-
-        quarters.AddCrew(crew)
         If role <> Nothing Then crew.Role = role
+
+        Dim qlist As List(Of ShipModule) = GetModulesFree(ShipModule.ModuleType.Crew, crew.Race, Nothing)
+        If qlist.Count = 0 Then Exit Sub
+        qlist(0).AddCrew(crew)
     End Sub
     Public Sub RemoveCrew(ByVal quarter As ShipQuarter, ByRef crew As Crew)
         If Crews(quarter).Contains(crew) = False Then Exit Sub

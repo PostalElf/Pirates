@@ -22,4 +22,5 @@
 
     Rations
     Water
+    Lumber
 End Enum
