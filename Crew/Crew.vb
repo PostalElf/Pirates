@@ -400,6 +400,15 @@
                 If scar Is Nothing Then Exit Sub
                 AddBonus("scar", scar)
                 Report.Add(Name & " gains a new scar: " & scar.Name, ReportType.Doctor)
+
+                'check for old scars and overwrite if necessary
+                If scar.Slot <> Nothing Then
+                    Dim oldScar As CrewBonus = GetSlot(GetBonusList("scar"), scar.Slot)
+                    If oldScar Is Nothing = False Then
+                        RemoveBonus("scar", scar.Slot)
+                        Report.Add(Name & "'s new scar replaces an old scar: " & oldScar.Name, ReportType.Doctor)
+                    End If
+                End If
             End If
         Else
             Report.Add("The ship doctor failed to treat " & Name & "'s worst injuries.", ReportType.Doctor)
