@@ -430,7 +430,18 @@
         Next
         Return total
     End Function
-
+    Public Function GetBestCrew(ByVal quarter As ShipQuarter, ByVal role As CrewRole) As Crew
+        Dim total As List(Of Crew) = GetCrews(quarter, role)
+        Dim bestCrew As Crew = Nothing
+        Dim bestSkill As Integer = -10
+        For Each c In total
+            If c.GetSkillFromRole > bestSkill Then
+                bestCrew = c
+                bestSkill = c.GetSkillFromRole
+            End If
+        Next
+        Return bestCrew
+    End Function
     Public Function GetSkill(ByVal quarter As ShipQuarter, ByVal skill As CrewSkill) As Integer
         Dim total As Integer = 0
         Select Case skill
@@ -449,10 +460,13 @@
         End Select
         Return total
     End Function
+
     Public Sub Tick()
+        Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
+
         For Each CrewList In Crews.Values
             For Each Crew In CrewList
-                Crew.tick()
+                Crew.Tick(doctor)
             Next
         Next
     End Sub
@@ -582,10 +596,10 @@
     Public Sub EnterCombat(ByRef battlefield As Battlefield, ByRef combatantList As List(Of Ship))
         combatantList.Add(Me)
     End Sub
-    Public Sub CombatTick() Implements BattlefieldObject.CombatTick
+    Public Sub TickCombat() Implements BattlefieldObject.CombatTick
         For Each q In Weapons.Keys
             For Each w In Weapons(q)
-                w.CombatTick()
+                w.TickCombat()
             Next
             JustFired(q) = False
         Next

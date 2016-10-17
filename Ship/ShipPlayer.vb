@@ -162,7 +162,7 @@
         Next
     End Sub
     Public Overloads Sub CombatTick()
-        MyBase.CombatTick()
+        MyBase.TickCombat()
 
         GainMoveTokens()
         RunCommands()

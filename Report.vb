@@ -50,6 +50,7 @@ Public Enum ReportType
     CrewDeath
     EnemyCrewDamage
     EnemyCrewDeath
+    Doctor
 
     PlayerShipAttack
     EnemyShipAttack

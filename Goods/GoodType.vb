@@ -8,6 +8,7 @@
     Coin = 101
     Jewellery
     Silk
+    Salt
     Liqour
     Coffee
     Spice

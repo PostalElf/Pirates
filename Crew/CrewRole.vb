@@ -7,4 +7,5 @@
     Navigator
     Helmsman
     Alchemist
+    Doctor
 End Enum

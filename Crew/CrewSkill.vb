@@ -6,6 +6,7 @@
     Bracing
     Cooking
     Alchemy
+    Medicine
 
     Firearms = 101
     Melee

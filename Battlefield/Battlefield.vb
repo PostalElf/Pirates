@@ -144,7 +144,7 @@
                 If combatant.InMelee = True Then Continue For
                 If TypeOf combatant Is ShipAI Then : CType(combatant, ShipAI).CombatTick(PlayerShip)
                 ElseIf TypeOf combatant Is ShipPlayer Then : CType(combatant, ShipPlayer).CombatTick()
-                Else : combatant.CombatTick()
+                Else : combatant.TickCombat()
                 End If
             Next
 

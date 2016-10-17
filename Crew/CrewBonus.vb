@@ -8,12 +8,12 @@
     Public DamageType As DamageType
     Public ReadOnly Property IsReady(ByVal ship As Ship) As Boolean
         Get
-            If AmmoUse <= 0 Then Return True
-
-            Dim AmmoType As GoodType = GetAmmoType()
-            If Ship.GetGood(AmmoType) >= AmmoUse Then Return True
-
-            Return False
+            If AmmoUse > 0 Then
+                Dim AmmoType As GoodType = GetAmmoType()
+                If ship.GoodsFreeForConsumption(AmmoType) = False Then Return False
+                If ship.GetGood(AmmoType) < AmmoUse Then Return False
+            End If
+            Return True
         End Get
     End Property
 

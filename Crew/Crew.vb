@@ -21,7 +21,7 @@
                 .Damage = 10
                 .DamageType = DamageType.Blunt
                 .AmmoUse = 0
-                .Slot = "Weapon"
+                .Slot = "Right Hand"
             End With
             .AddBonus("equipment", cutlass)
 
@@ -56,11 +56,16 @@
     Private Mutations As New List(Of CrewBonus)
     Private Equipment As New List(Of CrewBonus)
     Private CrewBonuses As List(Of CrewBonus)() = {Scars, Mutations, Equipment}
-    Private Sub AddBonus(ByVal listName As String, ByVal effect As CrewBonus)
+    Private Function CheckAddBonus(ByVal listName As String, ByVal effect As CrewBonus) As Boolean
         'check slot against all lists
         For Each cbl In CrewBonuses
-            If GetSlot(cbl, effect.Slot) Is Nothing = False Then Exit Sub
+            If GetSlot(cbl, effect.Slot) Is Nothing = False Then Return False
         Next
+
+        Return True
+    End Function
+    Private Sub AddBonus(ByVal listName As String, ByVal effect As CrewBonus)
+        If CheckAddBonus(listName, effect) = False Then Exit Sub
 
         Dim targetList As List(Of CrewBonus) = GetBonusList(listName)
         targetList.Add(effect)
@@ -87,6 +92,68 @@
             If e.Slot = slot Then Return e
         Next
         Return Nothing
+    End Function
+
+    Private Function GenerateScar(ByVal damage As Damage, ByVal exclude As List(Of CrewBonus)) As CrewBonus
+        Dim scarNames As New List(Of String)({"Hook Hand", "Gun Hand", "Cracked Skull", "Fractured Ribs", "Pegleg", _
+                                              "Touch of Death"})
+        For Each thing In exclude
+            If scarNames.Contains(thing.Name) Then scarNames.remove(thing.Name)
+        Next
+        If scarNames.Count <= 0 Then Return Nothing
+
+        Dim roll As Integer = Dev.Rng.Next(0, scarNames.Count)
+        Dim scarName As String = scarNames(roll)
+        Dim total As New CrewBonus
+        With total
+            .Name = scarName
+            Select Case scarName
+                Case "Hook Hand"
+                    .Slot = "Right Hand"
+                    .Skill = CrewSkill.Melee
+                    .Damage = 10
+                    .DamageType = DamageType.Blade
+                    .AmmoUse = 0
+
+                Case "Gun Hand"
+                    .Slot = "Left Hand"
+                    .Skill = CrewSkill.Firearms
+                    .Damage = 25
+                    .DamageType = DamageType.Firearms
+                    .AmmoUse = 1
+
+                Case "Cracked Skull"
+                    .Slot = "Head"
+                    .Skill = Nothing
+                    .Damage = 0
+                    .DamageType = Nothing
+                    .AmmoUse = 0
+
+                Case "Fractured Ribs"
+                    .Slot = "Body"
+                    .Skill = Nothing
+                    .Damage = 0
+                    .DamageType = Nothing
+                    .AmmoUse = 0
+
+                Case "Pegleg"
+                    .Slot = "Feet"
+                    .Skill = Nothing
+                    .Damage = 0
+                    .DamageType = Nothing
+                    .AmmoUse = 0
+
+                Case "Touch of Death"
+                    .Slot = "Talisman"
+                    .Skill = CrewSkill.Alchemy
+                    .Damage = 10
+                    .DamageType = DamageType.Necromancy
+                    .AmmoUse = 0
+
+                Case Else : Throw New Exception("Out of roll range")
+            End Select
+        End With
+        Return total
     End Function
 #End Region
 
@@ -188,6 +255,7 @@
             Case CrewSkill.Sailing : Return CrewRole.Sailor
             Case CrewSkill.Navigation : Return CrewRole.Navigator
             Case CrewSkill.Alchemy : Return CrewRole.Alchemist
+            Case CrewSkill.Medicine : Return CrewRole.Doctor
             Case Else : Return Nothing
         End Select
     End Function
@@ -199,6 +267,7 @@
             Case CrewRole.Sailor, CrewRole.Helmsman : Return CrewSkill.Sailing
             Case CrewRole.Navigator : Return CrewSkill.Navigation
             Case CrewRole.Alchemist : Return CrewSkill.Alchemy
+            Case CrewRole.Doctor : Return CrewSkill.Medicine
             Case Else : Return Nothing
         End Select
     End Function
@@ -264,12 +333,14 @@
         If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDamage Else repType = ReportType.EnemyCrewDamage
         Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.CrewDamage & " damage by " & damage.Sender & ".", repType)
 
-        If DamageSustained >= Health Then
-            Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
-            battlefield.AddDead(Me)
-            If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDeath Else repType = ReportType.EnemyCrewDeath
-            Report.Add("[" & Ship.ID & "] " & Name & " has perished in battle!", repType)
-        End If
+        If DamageSustained >= Health Then Death()
+    End Sub
+    Private Sub Death()
+        Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
+        If battlefield Is Nothing = False Then battlefield.AddDead(Me)
+        Dim repType As ReportType
+        If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDeath Else repType = ReportType.EnemyCrewDeath
+        Report.Add("[" & Ship.ID & "] " & Name & " has perished!", repType)
     End Sub
 #End Region
 
@@ -293,10 +364,11 @@
             End Select
         End Get
     End Property
-    Public Sub Tick()
-        MoraleTick()
+    Public Sub Tick(ByVal doctor As Crew)
+        TickMorale()
+        TickHeal(doctor)
     End Sub
-    Private Sub MoraleTick()
+    Private Sub TickMorale()
         'morale ranges from 1 to 100
         Dim change As Integer = 0
 
@@ -305,22 +377,26 @@
                 'humans need rations and water; desire coffee and liqour
                 change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
                 change += ConsumeGoods(GoodType.Water, 1, 0, -10)
-                If change > -10 Then
+                If change >= -5 Then
                     change += ConsumeGoods(GoodType.Coffee, 1, 1, 0)
                     change += ConsumeGoods(GoodType.Liqour, 1, 2, 0)
                 End If
 
             Case CrewRace.Seatouched
-                'seatouched need rations and water; desire prayer
+                'seatouched need rations, water and prayer; desire salt
                 change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
                 change += ConsumeGoods(GoodType.Water, 1, 0, -10)
-                If Shrine Is Nothing Then change -= 5 Else  : If change > -10 Then change += Math.Ceiling(Shrine.Quality / 2)
+                If Shrine Is Nothing Then change -= 5 : Exit Select
+                If change >= -5 Then
+                    change += ConsumeGoods(GoodType.Salt, 1, 1, 0)
+                    change += Math.Ceiling(Shrine.Quality / 2)
+                End If
 
             Case CrewRace.Windsworn
                 'windsworn need rations and water; desire tobacco and spice
                 change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
                 change += ConsumeGoods(GoodType.Water, 1, 0, -5)
-                If change > -10 Then
+                If change >= -5 Then
                     change += ConsumeGoods(GoodType.Tobacco, 1, 2, 0)
                     change += ConsumeGoods(GoodType.Spice, 1, 1, 0)
                 End If
@@ -333,20 +409,58 @@
                 End If
         End Select
 
-        'quarters
-        If change >= 0 AndAlso Quarters Is Nothing = False Then
-            change += (Quarters.Quality - 2)
-            change = Dev.Constrain(change, 0, 100)
+        'other bonuses
+        If change >= 0 Then
+            If Quarters Is Nothing = False Then
+                change += (Quarters.Quality - 2)
+                change = Dev.Constrain(change, 0, 100)
+            End If
+            If Race <> CrewRace.Unrelinquished Then
+                Dim cooking As Integer = Ship.GetSkill(Nothing, CrewSkill.Cooking)
+                change += Math.Ceiling(cooking / 2)
+            End If
         End If
 
         'apply
         Morale += change
+    End Sub
+    Private Sub TickHeal(ByVal doctor As Crew)
+        Dim currentDamage As Damage = GetWorstDamage()
+        If currentDamage Is Nothing Then Exit Sub
+
+        Dim damageHealed As Integer = 0
+        Dim skill As Integer = doctor.GetSkillFromRole + Dev.FateRoll
+        If skill > currentDamage.CrewDamage Then
+            DamageLog.Remove(currentDamage)
+            damageHealed -= currentDamage.CrewDamage
+            Report.Add("The ship doctor successfully treated " & Name & "'s worst injuries.", ReportType.Doctor)
+        ElseIf skill = currentDamage.CrewDamage Then
+            DamageLog.Remove(currentDamage)
+            DamageSustained -= currentDamage.CrewDamage
+            Report.Add("The ship doctor sorta treated " & Name & "'s worst injuries.", ReportType.Doctor)
+
+            Dim scar As CrewBonus = GenerateScar(currentDamage, Scars)
+            AddBonus("scar", scar)
+            Report.Add(Name & " gains a new scar: " & scar.Name, ReportType.Doctor)
+        Else
+            Report.Add("The ship doctor failed to treat " & Name & "'s worst injuries.", ReportType.Doctor)
+            DamageSustained += 1
+            If DamageSustained > Health Then Death()
+        End If
+
     End Sub
     Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer) As Integer
         Dim good As Good = good.Generate(goodType, -qty)
         If Ship.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then Return negativeChange
         Ship.AddGood(good)
         Return positiveChange
+    End Function
+    Private Function GetWorstDamage() As Damage
+        Dim worstDmg As Damage = Nothing
+        For Each dmg In DamageLog
+            If dmg.CrewDamage < worstDmg.CrewDamage Then worstDmg = dmg
+        Next
+        Return worstDmg
     End Function
 
     Public Enum CrewMorale

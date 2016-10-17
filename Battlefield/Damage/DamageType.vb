@@ -6,4 +6,5 @@
     Firearms
     Blade
     Blunt
+    Necromancy
 End Enum
