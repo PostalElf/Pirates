@@ -124,11 +124,21 @@
                     .DamageType = DamageType.Firearms
                     .AmmoUse = 1
 
-                Case "Thick-Skulled"
-                    .Slot = "Head"
+                Case "Dimwitted"
+                    .SkillBonuses.Add(CrewSkill.Leadership, -2)
+                    .SkillBonuses.Add(CrewSkill.Medicine, -2)
 
-                Case "Fractured Ribs"
-                    .Slot = "Body"
+                Case "Half-Blind"
+                    .SkillBonuses.Add(CrewSkill.Navigation, -2)
+                    .SkillBonuses.Add(CrewSkill.Gunnery, -2)
+
+                Case "Anosmia"
+                    .SkillBonuses.Add(CrewSkill.Alchemy, -2)
+                    .SkillBonuses.Add(CrewSkill.Cooking, -2)
+
+                Case "Lungshot"
+                    .SkillBonuses.Add(CrewSkill.Melee, -2)
+                    .SkillBonuses.Add(CrewSkill.Sailing, -2)
 
                 Case "Pegleg"
                     .Slot = "Feet"
@@ -148,18 +158,24 @@
                 Case "Crabclaw"
                     .Slot = "Right Hand"
                     .Skill = CrewSkill.Melee
-                    .Damage = 20
+                    .Damage = 10
                     .DamageType = DamageType.Blade
+                    .Armour.Add(DamageType.Blade, 5)
 
                 Case "Angler's Light"
                     .Slot = "Head"
+                    .Armour.Add(DamageType.Necromancy, 15)
 
                 Case "Sharkskin"
                     .Slot = "Body"
-                    .Armour.Add(DamageType.Blade, 20)
+                    .Armour.Add(DamageType.Blunt, 20)
 
                 Case "Greenskin"
                     .Slot = "Body"
+
+                Case "Hardened Carapace"
+                    .Slot = "Body"
+                    .Armour.Add(DamageType.Blade, 10)
 
                 Case "Writhing Mass"
                     .Slot = "Feet"
@@ -173,18 +189,12 @@
         Return total
     End Function
     Private Function GenerateScarNames() As List(Of String)
+        If Me.Race = CrewRace.Unrelinquished Then Return Nothing
         Dim scarNames As New List(Of String)
-        Select Case Race
-            Case CrewRace.Human, CrewRace.Windsworn
-                scarNames.AddRange({"Hook Hand", "Gun Hand", "Thick-Skulled", "Fractured Ribs", "Pegleg", "Touch of Death"})
-
-            Case CrewRace.Seatouched
-                scarNames.AddRange({"Tentacled Arm", "Crabclaw", "Angler's Light", "Sharkskin", "Greenskin", "Writhing Mass"})
-
-            Case CrewRace.Unrelinquished
-                Return Nothing
-
-        End Select
+        scarNames.AddRange({"Hook Hand", "Gun Hand", "Dimwitted", "Half-Blind", "Anosmia", "Lungshot", "Pegleg", "Touch of Death"})
+        If Me.Race = CrewRace.Seatouched Then
+            scarNames.AddRange({"Tentacled Arm", "Crabclaw", "Angler's Light", "Sharkskin", "Greenskin", "Hardened Carapace", "Writhing Mass"})
+        End If
 
         For Each thing In Scars
             If scarNames.Contains(thing.Name) Then scarNames.Remove(thing.Name)
@@ -374,6 +384,7 @@
 
         Dim skill As Integer = doctor.GetSkillFromRole + Dev.FateRoll
         If doctor.Race <> Me.Race Then skill -= 2
+        If Me.Race = CrewRace.Unrelinquished Then skill -= 1
 
         If skill > currentDamage.CrewDamage Then
             DamageLog.Remove(currentDamage)
