@@ -1,7 +1,12 @@
 ﻿Public Class World
     Public Shared Rng As New Random(5)
+    Public Shared Calendar As Calendar
     Public WorldWind As BattleDirection
     Public ShipPlayer As ShipPlayer
+
+    Public Sub New()
+        Calendar = New Calendar(1, 4, 7, 106)
+    End Sub
 
 #Region "Battlefield"
     Public Sub EnterCombat(ByVal enemies As List(Of ShipAI))
