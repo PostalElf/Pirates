@@ -106,9 +106,20 @@
 
     Public Function GetLoot(ByRef rng As Random) As List(Of Good)
         Dim total As New List(Of Good)
-        For Each gt In MyBase.Goods.Keys
-
+        For Each gt In [Enum].GetValues(GetType(GoodType))
+            Dim qty As Integer = GetGood(gt)
+            If qty > 0 Then
+                Select Case Dev.FateRoll(World.Rng)
+                    Case -4, -3 : qty = 0
+                    Case -2 : qty *= 0.25
+                    Case -1, 0, 1, 2 : qty *= 0.5
+                    Case 3 : qty *= 0.75
+                    Case 4
+                End Select
+                If qty > 0 Then total.Add(Good.Generate(gt, qty))
+            End If
         Next
+        Return total
     End Function
 
 #Region "Movement"
