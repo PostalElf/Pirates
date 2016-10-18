@@ -4,33 +4,13 @@
     Sub Main()
         Console.SetWindowSize(Console.WindowWidth, 50)
         'TestSnippet()
-        Battle()
-    End Sub
 
-    Private Sub Battle()
         Dim rng As New Random(5)
-        Dim battlefield As Battlefield = SetupBattlefield(rng)
-        Dim playerShip As ShipPlayer = battlefield.playership
+        Dim world As New World(rng)
+        world.ShipPlayer = SetupPlayerShip(rng)
 
-        While battlefield.IsOver = False
-            Console.Clear()
-            battlefield.ConsoleWrite()
-            Console.WriteLine()
-            Report.ConsoleReport()
-            Console.WriteLine()
-
-            Dim AITurn As Boolean = PlayerInput(playerShip, battlefield)
-            battlefield.CombatTick(AITurn)
-        End While
-
-        Console.Clear()
-        battlefield.ConsoleWrite()
-        Console.WriteLine()
-        Report.ConsoleReport()
-        Console.WriteLine()
-        Console.ForegroundColor = ConsoleColor.Red
-        Console.WriteLine("WINNER WINNER CHICKEN DINNER")
-        Console.ReadKey()
+        Dim enemies As New List(Of ShipAI) From {ShipAI.Generate(ShipType.Sloop, Faction.Neutral, CrewRace.Human, Nothing)}
+        world.EnterCombat(enemies)
     End Sub
     Private Function SetupPlayerShip(ByRef rng As Random) As ShipPlayer
         Dim ship As New ShipPlayer
@@ -60,28 +40,17 @@
         End With
         Return ship
     End Function
-    Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
-        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0)
-        Dim ship As ShipPlayer = SetupPlayerShip(rng)
-        With ship
-            .ConsoleColour = ConsoleColor.Cyan
-            .Name = "Baron's Spear"
-            '.Cheaterbug(True, True, True, True)
-        End With
-        battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
 
-        Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing, rng)
-        ai1.ConsoleColour = ConsoleColor.Green
-        'ai1.Cheaterbug(True, True, False, False)
-        battlefield.AddCombatant(ai1, 1, 1, BattleDirection.East)
+    Public Sub Battle(ByVal battlefield As Battlefield, ByVal playerShip As ShipPlayer)
+        Console.Clear()
+        battlefield.ConsoleWrite()
+        Console.WriteLine()
+        Report.ConsoleReport()
+        Console.WriteLine()
 
-        Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing, rng)
-        ai2.ConsoleColour = ConsoleColor.Green
-        ai2.Cheaterbug(True, True, False, False)
-        battlefield.AddCombatant(ai2, 8, 8, BattleDirection.West)
-
-        Return battlefield
-    End Function
+        Dim AITurn As Boolean = PlayerInput(playerShip, battlefield)
+        battlefield.CombatTick(AITurn)
+    End Sub
     Private Function PlayerInput(ByRef ship As ShipPlayer, ByRef battlefield As Battlefield) As Boolean
         'return true when player ends turn
 
@@ -118,7 +87,7 @@
     End Function
     Private Sub ViewBattlefield(ByVal battlefield As Battlefield)
         Console.WriteLine()
-        battlefield.consoleReportCombatants()
+        battlefield.ConsoleReportCombatants()
         Console.ReadKey()
     End Sub
     Private Sub ViewSelf(ByVal ship As ShipPlayer)
@@ -193,6 +162,30 @@
         If target Is Nothing Then Exit Sub
         ship.Attack(target)
     End Sub
+
+#Region "Retired Tests"
+    Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
+        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0, BattleDirection.East)
+        Dim ship As ShipPlayer = SetupPlayerShip(rng)
+        With ship
+            .ConsoleColour = ConsoleColor.Cyan
+            .Name = "Baron's Spear"
+            '.Cheaterbug(True, True, True, True)
+        End With
+        battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
+
+        Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing, rng)
+        ai1.ConsoleColour = ConsoleColor.Green
+        'ai1.Cheaterbug(True, True, False, False)
+        battlefield.AddCombatant(ai1, 1, 1, BattleDirection.East)
+
+        Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing, rng)
+        ai2.ConsoleColour = ConsoleColor.Green
+        ai2.Cheaterbug(True, True, False, False)
+        battlefield.AddCombatant(ai2, 8, 8, BattleDirection.West)
+
+        Return battlefield
+    End Function
     Private Sub TestSnippet()
         Dim ship = SetupPlayerShip((New Random(5)))
         With ship
@@ -216,4 +209,5 @@
         Console.ReadKey()
         End
     End Sub
+#End Region
 End Module

@@ -22,30 +22,28 @@
             Squares(x, y) = value
         End Set
     End Property
-    Public Function RandomSquare(ByVal isEmpty As Boolean, Optional ByRef rng As Random = Nothing) As Battlesquare
+    Public Function GetRandomSquare(ByVal isEmpty As Boolean, ByVal padding As Integer, Optional ByRef rng As Random = Nothing) As Battlesquare
         If rng Is Nothing Then rng = New Random
         If isEmpty = False Then
-            Dim X As Integer = rng.Next(0, MaxX + 1)
-            Dim Y As Integer = rng.Next(0, MaxY + 1)
+            Dim X As Integer = rng.Next(0 + padding, MaxX + 1 - padding)
+            Dim Y As Integer = rng.Next(0 + padding, MaxY + 1 - padding)
             Return Square(X, Y)
         Else
-            Dim sl As List(Of Battlesquare) = EmptySquares
+            Dim sl As List(Of Battlesquare) = GetEmptySquares(padding)
             Dim roll As Integer = rng.Next(0, sl.Count)
             Return sl(roll)
         End If
     End Function
-    Private ReadOnly Property EmptySquares As List(Of Battlesquare)
-        Get
-            Dim total As New List(Of Battlesquare)
-            For x = 0 To MaxX
-                For y = 0 To MaxY
-                    Dim s As Battlesquare = Square(x, y)
-                    If s.Contents Is Nothing Then total.Add(s)
-                Next
+    Private Function GetEmptySquares(ByVal padding As Integer) As List(Of Battlesquare)
+        Dim total As New List(Of Battlesquare)
+        For x = (0 + padding) To (MaxX - padding)
+            For y = (0 + padding) To (MaxY - padding)
+                Dim s As Battlesquare = Square(x, y)
+                If s.Contents Is Nothing Then total.Add(s)
             Next
-            Return total
-        End Get
-    End Property
+        Next
+        Return total
+    End Function
 
     Public Sub New(ByVal X As Integer, ByVal Y As Integer)
         _MaxX = X - 1
@@ -58,26 +56,25 @@
         Next
     End Sub
     Private Shared BattlefieldObjects As Type() = {GetType(BF_Rock), GetType(BF_Tides)}
-    Public Shared Function Generate(ByVal X As Integer, ByVal Y As Integer, ByVal featureDensity As Integer, Optional ByVal aWind As BattleDirection = Nothing) As Battlefield
+    Public Shared Function Generate(ByVal X As Integer, ByVal Y As Integer, ByVal featureDensity As Integer, ByVal aWind As BattleDirection) As Battlefield
         Dim rng As New Random(5)
         Dim battlefield As New Battlefield(X, Y)
         For n = 0 To featureDensity - 1
-            Dim s As Battlesquare = battlefield.RandomSquare(True, rng)
-            GenerateFeature(s, rng)
+            battlefield.GenerateFeature(rng)
         Next
-        If aWind = Nothing Then battlefield.Wind = rng.Next(1, 5)
+        battlefield.Wind = aWind
         Return battlefield
     End Function
-    Private Shared Function GenerateFeature(ByRef square As Battlesquare, Optional ByRef rng As Random = Nothing)
-        Dim roll As Integer = rng.Next(0, BattlefieldObjects.Length)
-        Dim type As Type = BattlefieldObjects(roll)
+    Private Function GenerateFeature(ByRef rng As Random)
+        Dim type As Type = BattlefieldObjects(rng.Next(BattlefieldObjects.Length))
         Dim bfo As BattlefieldObject = Nothing
         Select Case type
             Case GetType(BF_Rock) : bfo = New BF_Rock
-            Case GetType(BF_Tides) : bfo = New BF_Tides(rng.Next(0, 4))
+            Case GetType(BF_Tides) : bfo = New BF_Tides(rng.Next(1, 5))
         End Select
 
         If bfo Is Nothing = False Then
+            Dim square As Battlesquare = GetRandomSquare(True, 1, rng)
             square.Contents = bfo
             bfo.BattleSquare = square
             Return bfo
@@ -120,8 +117,11 @@
     Public PlayerShip As ShipPlayer
     Private Melees As New List(Of Melee)
     Public Sub AddCombatant(ByRef combatant As Ship, ByVal x As Integer, ByVal y As Integer, ByVal facing As BattleDirection)
+        AddCombatant(combatant, Square(x, y), facing)
+    End Sub
+    Public Sub AddCombatant(ByRef combatant As Ship, ByRef battleSquare As Battlesquare, ByVal facing As BattleDirection)
         combatant.Facing = facing
-        combatant.SetSquare(Square(x, y))
+        combatant.SetSquare(battleSquare)
         Select Case combatant.GetType
             Case GetType(ShipPlayer)
                 CType(combatant, ShipPlayer).EnterCombat(Me, Combatants)
@@ -217,7 +217,7 @@
                 DeadCrew(n).Ship.RemoveCrew(DeadCrew(n))
             End If
             For Each Melee In Melees
-                If Melee.Contains(DeadCrew(n)) Then Melee.remove(DeadCrew(n))
+                If Melee.Contains(DeadCrew(n)) Then Melee.Remove(DeadCrew(n))
             Next
             DeadCrew(n) = Nothing
             DeadCrew.RemoveAt(n)

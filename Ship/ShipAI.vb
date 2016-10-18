@@ -17,6 +17,7 @@
             .Type = type
             .Name = GenerateName(rng)
             .ID = GenerateID(.Name)
+            .ConsoleColour = ConsoleColor.Red
 
             Select Case type
                 Case ShipType.Sloop

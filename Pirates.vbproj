@@ -117,6 +117,7 @@
     <Compile Include="Ship\ShipType.vb" />
     <Compile Include="Ship\ShipWaterline.vb" />
     <Compile Include="Ship\ShipWeapon.vb" />
+    <Compile Include="World\World.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">
