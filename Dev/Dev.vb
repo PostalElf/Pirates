@@ -1,5 +1,4 @@
 ﻿<DebuggerStepThrough()> Public Class Dev
-    Public Shared Rng As New Random
     Public Shared Function Constrain(ByVal value As Integer, Optional ByVal min As Integer = 0, Optional ByVal max As Integer = 100) As Integer
         If value < min Then value = min
         If value > max Then value = max
@@ -84,7 +83,7 @@
     End Function
 
     Public Shared Function GetRandom(Of T)(ByRef targetList As List(Of T), Optional ByRef aRng As Random = Nothing) As T
-        If aRng Is Nothing Then aRng = Rng
+        If aRng Is Nothing Then aRng = New Random
         If targetList.Count = 0 Then Return Nothing
         If targetList.Count = 1 Then Return targetList(0)
 
@@ -92,14 +91,14 @@
         Return targetList(roll)
     End Function
     Public Shared Function GrabRandom(Of T)(ByRef targetList As List(Of T), Optional ByRef aRng As Random = Nothing) As T
-        If aRng Is Nothing Then aRng = Rng
+        If aRng Is Nothing Then aRng = New Random
         If targetList.Count = 0 Then Return Nothing
 
         Dim roll As Integer = aRng.Next(targetList.Count - 1)
         GrabRandom = targetList(roll)
         targetList.RemoveAt(roll)
     End Function
-    Public Shared Function FateRoll() As Integer
+    Public Shared Function FateRoll(ByRef rng As Random) As Integer
         'roll 4 fudge dice for bell-curved -4 to +4
 
         Dim total As Integer = 0

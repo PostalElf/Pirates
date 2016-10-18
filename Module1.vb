@@ -5,9 +5,8 @@
         Console.SetWindowSize(Console.WindowWidth, 50)
         'TestSnippet()
 
-        Dim rng As New Random(5)
-        Dim world As New World(rng)
-        world.ShipPlayer = SetupPlayerShip(rng)
+        Dim world As New World()
+        world.ShipPlayer = SetupPlayerShip(world.Rng)
 
         Dim enemies As New List(Of ShipAI) From {ShipAI.Generate(ShipType.Sloop, Faction.Neutral, CrewRace.Human, Nothing)}
         world.EnterCombat(enemies)
@@ -165,7 +164,7 @@
 
 #Region "Retired Tests"
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
-        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0, BattleDirection.East)
+        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0, BattleDirection.East, rng)
         Dim ship As ShipPlayer = SetupPlayerShip(rng)
         With ship
             .ConsoleColour = ConsoleColor.Cyan

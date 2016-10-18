@@ -1,4 +1,5 @@
 ﻿Public Class Battlefield
+    Private Rng As Random
     Private _MaxX As Integer
     Private _MaxY As Integer
     Public ReadOnly Property MaxX As Integer
@@ -45,7 +46,7 @@
         Return total
     End Function
 
-    Public Sub New(ByVal X As Integer, ByVal Y As Integer)
+    Public Sub New(ByVal X As Integer, ByVal Y As Integer, ByRef aRng As Random)
         _MaxX = X - 1
         _MaxY = Y - 1
         ReDim Squares(MaxX, MaxY)
@@ -54,11 +55,16 @@
                 Squares(nX, nY) = New Battlesquare(Me, nX, nY)
             Next
         Next
+        Rng = aRng
+
+        For Each gt In [Enum].GetValues(GetType(GoodType))
+            Loot.Add(gt, Good.Generate(gt, 0))
+        Next
     End Sub
     Private Shared BattlefieldObjects As Type() = {GetType(BF_Rock), GetType(BF_Tides)}
-    Public Shared Function Generate(ByVal X As Integer, ByVal Y As Integer, ByVal featureDensity As Integer, ByVal aWind As BattleDirection) As Battlefield
+    Public Shared Function Generate(ByVal X As Integer, ByVal Y As Integer, ByVal featureDensity As Integer, ByVal aWind As BattleDirection, ByRef aRng As Random) As Battlefield
         Dim rng As New Random(5)
-        Dim battlefield As New Battlefield(X, Y)
+        Dim battlefield As New Battlefield(X, Y, aRng)
         For n = 0 To featureDensity - 1
             battlefield.GenerateFeature(rng)
         Next
@@ -159,8 +165,15 @@
 #Region "Death"
     Private DeadCrew As New List(Of Crew)
     Private DeadObjects As New List(Of BattlefieldObject)
+    Private Loot As New Dictionary(Of GoodType, Good)
     Public Sub AddDead(ByVal bfo As BattlefieldObject)
         If DeadObjects.Contains(bfo) = False Then DeadObjects.Add(bfo)
+        If TypeOf bfo Is ShipAI Then
+            Dim ai As ShipAI = CType(bfo, ShipAI)
+            For Each Good As Good In ai.GetLoot(rng)
+                Loot(Good.Type) += Good
+            Next
+        End If
     End Sub
     Public Sub AddDead(ByVal crew As Crew)
         If DeadCrew.Contains(crew) = False Then DeadCrew.Add(crew)

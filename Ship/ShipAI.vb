@@ -12,8 +12,8 @@
 
         Dim ship As New ShipAI
         With ship
-            If race = Nothing Then .Race = Dev.Rng.Next(1, races.Length + 1) Else .Race = race
-            If faction = Nothing Then .Faction = Dev.Rng.Next(1, factions.Length + 1) Else .Faction = faction
+            If race = Nothing Then .Race = World.Rng.Next(1, races.Length + 1) Else .Race = race
+            If faction = Nothing Then .Faction = World.Rng.Next(1, factions.Length + 1) Else .Faction = faction
             .Type = type
             .Name = GenerateName(rng)
             .ID = GenerateID(.Name)
@@ -103,6 +103,13 @@
             role = aRole
         End Sub
     End Class
+
+    Public Function GetLoot(ByRef rng As Random) As List(Of Good)
+        Dim total As New List(Of Good)
+        For Each gt In MyBase.Goods.Keys
+
+        Next
+    End Function
 
 #Region "Movement"
     Public Overloads Sub CombatTick(ByVal playerShip As ShipPlayer)

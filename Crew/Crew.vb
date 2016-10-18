@@ -105,7 +105,7 @@
 
     Private Function GenerateScar(ByVal damage As Damage) As CrewBonus
         Dim scarNames = GenerateScarNames()
-        Dim scarName As String = scarNames(Dev.Rng.Next(scarNames.Count))
+        Dim scarName As String = scarNames(World.Rng.Next(scarNames.Count))
 
         Dim total As New CrewBonus
         With total
@@ -331,8 +331,8 @@
         Dim skill As CrewSkill = weapon.Skill
 
         'roll skill vs skill
-        Dim attSkill As Integer = GetSkill(skill) + Dev.FateRoll()
-        Dim defSkill As Integer = target.GetSkill(skill) + Dev.FateRoll()
+        Dim attSkill As Integer = GetSkill(skill) + Dev.FateRoll(World.Rng)
+        Dim defSkill As Integer = target.GetSkill(skill) + Dev.FateRoll(World.Rng)
         If attSkill > defSkill Then
             'success, damage
             Dim damage As New Damage(0, weapon.Damage, weapon.DamageType, Name)
@@ -356,8 +356,8 @@
     Public Sub ShipAttack(ByVal accuracy As Integer, ByVal damage As Damage)
         If damage.CrewDamage <= 0 Then Exit Sub
 
-        Dim skill As Integer = GetSkill(CrewSkill.Bracing) + Dev.FateRoll()
-        If skill > accuracy + Dev.FateRoll() Then
+        Dim skill As Integer = GetSkill(CrewSkill.Bracing) + Dev.FateRoll(World.Rng)
+        If skill > accuracy + Dev.FateRoll(World.Rng) Then
             'Dim nuDamage As Damage = damage.Clone(damage)
             'nuDamage.CrewDamage = Dev.Constrain(nuDamage.CrewDamage / 2, 1)
             damage.CrewDamage = Dev.Constrain(damage.CrewDamage / 2, 1)
@@ -387,7 +387,7 @@
         Dim currentDamage As Damage = GetWorstDamage()
         If currentDamage Is Nothing Then Exit Sub
 
-        Dim skill As Integer = doctor.GetSkillFromRole + Dev.FateRoll
+        Dim skill As Integer = doctor.GetSkillFromRole + Dev.FateRoll(World.Rng)
         If doctor.Race <> Me.Race Then skill -= 2
         If Me.Race = CrewRace.Unrelinquished Then skill -= 1
 

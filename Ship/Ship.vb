@@ -212,7 +212,7 @@
 #End Region
 
 #Region "Goods"
-    Private Goods As New Dictionary(Of GoodType, Good)
+    Protected Goods As New Dictionary(Of GoodType, Good)
     Public GoodsFreeForConsumption As New Dictionary(Of GoodType, Boolean)
     Private ReadOnly Property HoldSpaceMax As Double
         Get
