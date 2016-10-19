@@ -5,7 +5,11 @@
     Public ShipPlayer As ShipPlayer
 
     Public Sub New()
-        Calendar = New Calendar(Calendar.CalendarDay.Duke, 4, Calendar.CalendarSeason.Silence, 106)
+        Calendar = New Calendar(Calendar.CalendarDay.Duke, 4, Calendar.CalendarSeason.Song, 106)
+    End Sub
+
+    Public Sub Tick()
+        Calendar.Tick()
     End Sub
 
 #Region "Battlefield"

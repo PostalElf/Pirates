@@ -3,10 +3,14 @@
 
     Sub Main()
         Console.SetWindowSize(Console.WindowWidth, 50)
-        'TestSnippet()
-
         Dim world As New World()
         world.ShipPlayer = SetupPlayerShip(world.Rng)
+
+        While world.Calendar.Year = 106
+            world.Tick()
+            Console.WriteLine(world.Calendar.ToString)
+        End While
+        Console.ReadKey()
 
         Dim enemies As New List(Of ShipAI) From {ShipAI.Generate(ShipType.Sloop, Faction.Neutral, CrewRace.Human)}
         world.EnterCombat(enemies)
@@ -185,7 +189,7 @@
 
         Return battlefield
     End Function
-    Private Sub TestSnippet()
+    Private Sub TestPlayerShip()
         Dim ship = SetupPlayerShip((New Random(5)))
         With ship
             .AddGood(GoodType.Shot, 100)
