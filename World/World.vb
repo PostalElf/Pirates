@@ -5,7 +5,7 @@
     Public ShipPlayer As ShipPlayer
 
     Public Sub New()
-        Calendar = New Calendar(1, 4, 7, 106)
+        Calendar = New Calendar(Calendar.CalendarDay.Duke, 4, Calendar.CalendarSeason.Silence, 106)
     End Sub
 
 #Region "Battlefield"
