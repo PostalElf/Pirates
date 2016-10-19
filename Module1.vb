@@ -7,13 +7,14 @@
         world = New World
         world.ShipPlayer = SetupPlayerShip(world.Rng)
 
-        For n = 1 To 10
+        While True
+            Console.Clear()
             world.Tick()
             Console.ForegroundColor = ConsoleColor.White
             Console.WriteLine(world.Calendar.ToString)
             Report.ConsoleReport()
             Console.ReadKey()
-        Next
+        End While
     End Sub
     Private Function SetupPlayerShip(ByRef rng As Random) As ShipPlayer
         Dim ship As New ShipPlayer
