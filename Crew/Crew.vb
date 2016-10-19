@@ -440,15 +440,7 @@
 #Region "Movement"
     Public Station As New CrewStation
     Public BattleStation As New CrewStation
-    Public Property Ship As Ship
-        Get
-            Return Station.Ship
-        End Get
-        Set(ByVal value As Ship)
-            Station.Ship = value
-            BattleStation.Ship = value
-        End Set
-    End Property
+    Public Ship As Ship
     Public ShipQuarter As ShipQuarter
     Public Role As CrewRole
     Public Sub SetStation(ByVal station As CrewStation, ByVal inCombat As Boolean)

@@ -379,8 +379,8 @@
         crew.Ship = Me
         crew.ShipQuarter = quarter
         If role <> Nothing Then
-            crew.SetStation(New CrewStation(Me, quarter, role), True)
-            crew.SetStation(New CrewStation(Me, quarter, role), False)
+            crew.SetStation(New CrewStation(quarter, role), True)
+            crew.SetStation(New CrewStation(quarter, role), False)
             crew.Role = role
         End If
 

@@ -8,7 +8,7 @@
         If rng Is Nothing Then rng = New Random
         Dim races As CrewRace() = [Enum].GetValues(GetType(CrewRace))
         Dim factions As Faction() = [Enum].GetValues(GetType(Faction))
-        Dim newCrews As New List(Of CrewPosition)
+        Dim newCrews As New List(Of CrewStation)
 
         Dim ship As New ShipAI
         With ship
@@ -35,7 +35,7 @@
             End Select
 
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
-                newCrews.Add(New CrewPosition(q, CrewRole.Sailor))
+                newCrews.Add(New CrewStation(q, CrewRole.Sailor))
             Next
             .GenerateBaselines(.Type)
             GenerateStandardModules(ship, newCrews, rng)
@@ -47,23 +47,23 @@
         End With
         Return ship
     End Function
-    Private Shared Sub GenerateStandardModules(ByRef ship As ShipAI, ByRef newCrews As List(Of CrewPosition), ByRef rng As Random)
+    Private Shared Sub GenerateStandardModules(ByRef ship As ShipAI, ByRef newCrews As List(Of CrewStation), ByRef rng As Random)
         With ship
             If rng.Next(1, 3) = 1 Then
                 .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, 1, .Race))
-                newCrews.Add(New CrewPosition(ShipQuarter.Aft, CrewRole.Captain))
+                newCrews.Add(New CrewStation(ShipQuarter.Aft, CrewRole.Captain))
                 .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Helm, 1, .Race))
-                newCrews.Add(New CrewPosition(ShipQuarter.Fore, CrewRole.Helmsman))
+                newCrews.Add(New CrewStation(ShipQuarter.Fore, CrewRole.Helmsman))
             Else
                 .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, 1, .Race))
-                newCrews.Add(New CrewPosition(ShipQuarter.Fore, CrewRole.Captain))
+                newCrews.Add(New CrewStation(ShipQuarter.Fore, CrewRole.Captain))
                 .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Helm, 1, .Race))
-                newCrews.Add(New CrewPosition(ShipQuarter.Aft, CrewRole.Helmsman))
+                newCrews.Add(New CrewStation(ShipQuarter.Aft, CrewRole.Helmsman))
             End If
 
             Dim q As ShipQuarter = rng.Next(1, 5)
             .AddModule(q, ShipModule.Generate(ShipModule.ModuleType.Maproom, 1, .Race))
-            newCrews.Add(New CrewPosition(q, CrewRole.Navigator))
+            newCrews.Add(New CrewStation(q, CrewRole.Navigator))
 
 
             'generate crewquarters
@@ -75,12 +75,12 @@
 
             'add crew
             For Each cp In newCrews
-                .AddCrew(cp.quarter, Crew.Generate(.Race), cp.role)
+                .AddCrew(cp.ShipQuarter, Crew.Generate(.Race), cp.Role)
             Next
             newCrews.Clear()
         End With
     End Sub
-    Private Shared Sub GenerateWeapon(ByRef ship As ShipAI, ByVal weaponTemplate As String, ByVal quarter As ShipQuarter, ByRef newCrews As List(Of CrewPosition))
+    Private Shared Sub GenerateWeapon(ByRef ship As ShipAI, ByVal weaponTemplate As String, ByVal quarter As ShipQuarter, ByRef newCrews As List(Of CrewStation))
         Dim weapon As ShipWeapon = ShipWeapon.Generate(weaponTemplate)
         ship.AddWeapon(quarter, weapon)
 
@@ -90,7 +90,7 @@
 
         If weapon.CrewCount > 0 Then
             For n = 1 To weapon.CrewCount
-                newCrews.Add(New CrewPosition(quarter, CrewRole.Gunner))
+                newCrews.Add(New CrewStation(quarter, CrewRole.Gunner))
             Next
         End If
     End Sub
@@ -99,14 +99,6 @@
         Dim gt As GoodType = Dev.GetRandom(Of GoodType)(goods, rng)
         ship.AddGood(Good.Generate(gt, rng.Next(10, 30)))
     End Sub
-    Private Class CrewPosition
-        Public quarter As ShipQuarter
-        Public role As CrewRole
-        Public Sub New(ByVal aQuarter As ShipQuarter, ByVal aRole As CrewRole)
-            quarter = aQuarter
-            role = aRole
-        End Sub
-    End Class
 
     Public Function GetLoot(ByRef rng As Random) As List(Of Good)
         Dim total As New List(Of Good)
