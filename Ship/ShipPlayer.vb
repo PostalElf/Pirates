@@ -225,27 +225,45 @@
         Dim t As Integer = 20
 
         MyBase.ConsoleReport()
-        Console.WriteLine(Dev.vbSpace(1) & "Movement")
-        For n = 1 To 2
-            Dim isAdvanced As Boolean : If n = 1 Then isAdvanced = False Else isAdvanced = True
-            For Each q In MoveTokenProgress.Keys
-                Dim mt As MoveToken = ConvertQuarterToMoveToken(q, isAdvanced)
+        If InCombat = True Then
+            Console.WriteLine(Dev.vbSpace(1) & "Movement")
+            For n = 1 To 2
+                Dim isAdvanced As Boolean : If n = 1 Then isAdvanced = False Else isAdvanced = True
+                For Each q In MoveTokenProgress.Keys
+                    Dim mt As MoveToken = ConvertQuarterToMoveToken(q, isAdvanced)
 
-                Console.Write(s & Dev.vbTab(mt.ToString & ":", t))
-                Console.Write("[")
-                If isAdvanced = False Then
-                    For p = 1 To MoveTokenThreshold
-                        If p <= MoveTokenProgress(q) Then Console.Write("*") Else Console.Write("-")
-                    Next
-                Else
-                    For p = 1 To AdvancedMoveTokenThreshold
-                        If p <= AdvancedMoveTokenProgress(q) Then Console.Write("*") Else Console.Write("-")
-                    Next
-                End If
-                Console.Write("]  ")
-                Console.Write("x" & CountMoveTokens(mt))
-                Console.WriteLine()
+                    Console.Write(s & Dev.vbTab(mt.ToString & ":", t))
+                    Console.Write("[")
+                    If isAdvanced = False Then
+                        For p = 1 To MoveTokenThreshold
+                            If p <= MoveTokenProgress(q) Then Console.Write("*") Else Console.Write("-")
+                        Next
+                    Else
+                        For p = 1 To AdvancedMoveTokenThreshold
+                            If p <= AdvancedMoveTokenProgress(q) Then Console.Write("*") Else Console.Write("-")
+                        Next
+                    End If
+                    Console.Write("]  ")
+                    Console.Write("x" & CountMoveTokens(mt))
+                    Console.WriteLine()
+                Next
             Next
+        End If
+    End Sub
+    Public Sub ConsoleReportGoods()
+        Dim s As Integer = 12
+
+        For Each gt In [Enum].GetValues(GetType(GoodType))
+            Dim g As Good = GetGood(gt)
+            Console.Write(Dev.vbTab(gt.ToString & ":", s))
+            Console.Write(Dev.vbTab(g.Qty, 5))
+            Console.Write("(" & g.TotalWeight.ToString("0.0") & "t.)")
+            Console.WriteLine()
         Next
+        Console.WriteLine()
+        Console.WriteLine(Dev.vbTab("Hullspace:", s) & HullSpaceUsed & "/" & HullSpaceMax)
+        Console.Write(Dev.vbTab("Tonnage:", s) & Tonnage.ToString("0.0") & "/" & TonnageMax)
+        Dim ratio As Double = Tonnage / TonnageMax * 100
+        Console.WriteLine(" (" & ratio.ToString("0.0") & "% - " & Waterline.ToString & ")")
     End Sub
 End Class

@@ -243,14 +243,14 @@
         End If
         Return True
     End Function
-    Public Sub AddGood(ByVal good As Good)
-        Goods(good.Type) += good
-    End Sub
     Public Sub AddGood(ByVal gt As GoodType, ByVal qty As Integer)
         AddGood(Good.Generate(gt, qty))
     End Sub
-    Public Function GetGood(ByVal gt As GoodType) As Integer
-        Return Goods(gt).Qty
+    Public Sub AddGood(ByVal good As Good)
+        Goods(good.Type) += good
+    End Sub
+    Public Function GetGood(ByVal gt As GoodType) As Good
+        Return Goods(gt)
     End Function
     Public Function GetGoodConsumption(ByVal gt As GoodType) As Integer
         'return per diem consumption
@@ -269,7 +269,7 @@
     End Function
 
     Protected TonnageMax As Integer
-    Private ReadOnly Property Tonnage As Double
+    Protected ReadOnly Property Tonnage As Double
         Get
             Dim total As Double = 0
             For Each wlist In Weapons.Values
@@ -279,7 +279,7 @@
             Next
             For Each mlist In Modules.Values
                 For Each m In mlist
-                    total += m.weight
+                    total += m.Weight
                 Next
             Next
             For Each k In Goods.Keys
@@ -346,7 +346,7 @@
     End Function
 
     Protected HullSpaceMax As Integer
-    Private ReadOnly Property HullSpaceUsed As Integer
+    Protected ReadOnly Property HullSpaceUsed As Integer
         Get
             Dim total As Integer = 0
             For Each m In GetModules(Nothing, Nothing)

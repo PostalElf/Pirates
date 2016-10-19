@@ -9,11 +9,13 @@
 
         While True
             Console.Clear()
-            world.Tick()
             Console.ForegroundColor = ConsoleColor.White
             Console.WriteLine(world.Calendar.ToString)
+            Console.ForegroundColor = ConsoleColor.Gray
             Report.ConsoleReport()
-            Console.ReadKey()
+            Console.WriteLine()
+            Console.WriteLine()
+            If MainPlayerInput() = True Then world.Tick()
         End While
     End Sub
     Private Function SetupPlayerShip(ByRef rng As Random) As ShipPlayer
@@ -33,6 +35,7 @@
             .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
             .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
 
+            .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, ShipModule.ModuleQuality.Average, Nothing))
             .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Captain)
             .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Maproom, ShipModule.ModuleQuality.Average, CrewRace.Human))
             .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Navigator)
@@ -41,8 +44,39 @@
 
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("cannon"))
             .AddModule(ShipQuarter.Starboard, ShipModule.Generate(ShipModule.ModuleType.Hold, ShipModule.ModuleQuality.Excellent, Nothing))
+
+            .AddModule(ShipQuarter.Starboard, ShipModule.Generate(ShipModule.ModuleType.Hold, ShipModule.ModuleQuality.Poor, Nothing))
+            .AddGood(GoodType.Rations, 100)
+            .AddGood(GoodType.Water, 100)
         End With
         Return ship
+    End Function
+
+    Private Function MainPlayerInput() As Boolean
+        Dim choices As New Dictionary(Of Char, String)
+        With choices
+            .Add("s"c, "View Ship")
+            .Add("c"c, "View Crew")
+            .Add("g"c, "View Goods")
+            .Add("z"c, "Tick")
+        End With
+        Dim input As Char = Menu.getListChoice(choices, 0)
+        Console.WriteLine()
+        Select Case input
+            Case "s"c
+                world.ShipPlayer.ConsoleReport()
+                Console.ReadKey()
+            Case "c"c
+                ExamineCrew(world.ShipPlayer)
+            Case "g"c
+                Console.WriteLine()
+                world.ShipPlayer.ConsoleReportGoods()
+                Console.WriteLine()
+                Console.ReadKey()
+            Case "z"c : Return True
+        End Select
+
+        Return False
     End Function
 
     Private Sub EnterBattle()
@@ -56,10 +90,10 @@
         Report.ConsoleReport()
         Console.WriteLine()
 
-        Dim AITurn As Boolean = PlayerInput(playerShip, battlefield)
+        Dim AITurn As Boolean = BattlePlayerInput(playerShip, battlefield)
         battlefield.CombatTick(AITurn)
     End Sub
-    Private Function PlayerInput(ByRef ship As ShipPlayer, ByRef battlefield As Battlefield) As Boolean
+    Private Function BattlePlayerInput(ByRef ship As ShipPlayer, ByRef battlefield As Battlefield) As Boolean
         'return true when player ends turn
 
         Dim targetMove As MoveToken = Nothing
@@ -145,6 +179,7 @@
     End Sub
     Private Sub ExamineCrew(ByRef ship As ShipPlayer)
         Dim target As Crew = GetCrew(ship)
+        If target Is Nothing Then Exit Sub
         Console.WriteLine()
         target.ConsoleReport()
         Console.WriteLine()

@@ -61,7 +61,7 @@
 
             Select Case type
                 Case ModuleType.Crew
-                    .Name = quality.ToString & " Crew Quarters"
+                    .Name = quality.ToString & " " & .Race.ToString & " Quarters"
                     .Capacity = 5
                     .HullCost = 2
                     .Weight = 5
@@ -122,6 +122,7 @@
                     .Capacity = quality * 100
                     .HullCost = 5
                     .Weight = 0
+                    .Race = Nothing
 
                 Case Else : Throw New Exception
             End Select

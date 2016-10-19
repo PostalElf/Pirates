@@ -23,7 +23,7 @@
                 If Ship.GetCrews(Quarter, CrewRole.Gunner).Count < CrewCount Then Return False
             End If
             If IgnoresAmmo = False Then
-                If Ship.GetGood(AmmoUse.Type) < AmmoUse.Qty Then Return False
+                If Ship.GetGood(AmmoUse.Type).Qty < AmmoUse.Qty Then Return False
             End If
             Return True
         End Get

@@ -5,17 +5,18 @@
             SkillsXP.Add(cs, 0)
         Next
     End Sub
-    Public Shared Function Generate(ByVal race As CrewRace, Optional ByRef rng As Random = Nothing) As Crew
+    Public Shared Function Generate(ByVal aRace As CrewRace, Optional ByRef rng As Random = Nothing) As Crew
         If rng Is Nothing Then rng = New Random
 
         Dim crew As New Crew
         With crew
-            .Name = GenerateName(race)
-            .Race = race
+            .Name = GenerateName(aRace, rng)
+            .Race = aRace
             .Health = 100
+            .Morale = 100
 
-            Dim cutlass As New CrewBonus
-            With cutlass
+            Dim pin As New CrewBonus
+            With pin
                 .Name = "Belaying Pin"
                 .Skill = CrewSkill.Melee
                 .Damage = 10
@@ -23,17 +24,18 @@
                 .AmmoUse = 0
                 .Slot = "Right Hand"
             End With
-            .AddBonus("equipment", cutlass)
+            .AddBonus("equipment", pin)
 
             Dim skills As New List(Of CrewSkill)([Enum].GetValues(GetType(CrewSkill)))
             For n = 1 To 2
                 Dim cs As CrewSkill = Dev.GrabRandom(Of CrewSkill)(skills, rng)
                 .AddSkillXP(cs, SkillThresholds(n))
+                If n = 2 Then .addtalent(GenerateTalent(aRace, cs))
             Next
         End With
         Return crew
     End Function
-    Private Shared Function GenerateName(ByVal race As CrewRace, Optional ByRef rng As Random = Nothing) As String
+    Private Shared Function GenerateName(ByVal race As CrewRace, ByRef rng As Random) As String
         If rng Is Nothing Then rng = New Random
         If NamePrefixes.Count = 0 Then NamePrefixes = IO.SimpleFilegetAll("namePrefixes.txt")
         If NameSuffixes.Count = 0 Then NameSuffixes = IO.SimpleFilegetAll("nameSuffixes.txt")
@@ -41,6 +43,19 @@
         Dim prefix As String = Dev.GrabRandom(Of String)(NamePrefixes, rng)
         Dim suffix As String = Dev.GrabRandom(Of String)(NameSuffixes, rng)
         Return prefix & " " & suffix
+    End Function
+    Private Shared Function GenerateTalent(ByVal aRace As CrewRace, ByVal bestSkill As CrewSkill) As CrewTalent
+        Dim possibleTalents As New List(Of CrewTalent)
+        Select Case bestSkill
+            Case CrewSkill.Leadership : possibleTalents.AddRange({CrewTalent.Charismatic, CrewTalent.Intimidating})
+            Case CrewSkill.Sailing : possibleTalents.Add(CrewTalent.Windsinger)
+            Case CrewSkill.Gunnery, CrewSkill.Firearms : possibleTalents.Add(CrewTalent.Flamelicked)
+            Case CrewSkill.Bracing
+            Case CrewSkill.Cooking : possibleTalents.Add(CrewTalent.Gourmet)
+            Case CrewSkill.Alchemy : possibleTalents.AddRange({CrewTalent.Gourmet, CrewTalent.Leadthumb})
+            Case CrewSkill.Medicine : possibleTalents.Add(CrewTalent.Anatomist)
+        End Select
+        Return Dev.GetRandom(Of CrewTalent)(possibleTalents)
     End Function
     Private Shared NamePrefixes As New List(Of String)
     Private Shared NameSuffixes As New List(Of String)
@@ -320,6 +335,19 @@
             Case Else : Return Nothing
         End Select
     End Function
+
+    Private Talents As New List(Of CrewTalent)
+    Public Function GetTalent(ByVal t As CrewTalent) As Boolean
+        Return Talents.Contains(t)
+    End Function
+    Public Function CheckAddTalent(ByVal t As CrewTalent) As Boolean
+        If Talents.Contains(t) Then Return False
+        Return True
+    End Function
+    Public Sub AddTalent(ByVal t As CrewTalent)
+        If CheckAddTalent(t) = False Then Exit Sub
+        Talents.Add(t)
+    End Sub
 #End Region
 
 #Region "Combat"
@@ -569,10 +597,16 @@
 
         Console.WriteLine(Name)
         Console.WriteLine(s & "Race:   " & Race.ToString)
+        Console.WriteLine(s & "Morale: " & Morale & "/100 (" & MoraleLevel.ToString & ")")
 
         Console.WriteLine(s & "Skills: ")
         For Each k In Skills.Keys
             Console.WriteLine(ss & Dev.vbTab(k.ToString & ":", t) & GetSkill(k))
+        Next
+
+        Console.WriteLine(s & "Talents: ")
+        For Each talent In Talents
+            Console.WriteLine(ss & talent.ToString)
         Next
 
         If Equipment.Count > 0 Then ConsoleReportList(Equipment, "Gear:")

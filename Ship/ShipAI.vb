@@ -102,7 +102,7 @@
     Public Function GetLoot(ByRef rng As Random) As List(Of Good)
         Dim total As New List(Of Good)
         For Each gt In [Enum].GetValues(GetType(GoodType))
-            Dim qty As Integer = GetGood(gt)
+            Dim qty As Integer = GetGood(gt).Qty
             If qty > 0 Then
                 Select Case Dev.FateRoll(World.Rng)
                     Case -4, -3 : qty = 0

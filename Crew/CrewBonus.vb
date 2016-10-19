@@ -12,7 +12,7 @@
             If AmmoUse > 0 Then
                 Dim AmmoType As GoodType = GetAmmoType()
                 If ship.GoodsFreeForConsumption(AmmoType) = False Then Return False
-                If ship.GetGood(AmmoType) < AmmoUse Then Return False
+                If ship.GetGood(AmmoType).Qty < AmmoUse Then Return False
             End If
             Return True
         End Get
