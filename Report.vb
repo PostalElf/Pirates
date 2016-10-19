@@ -58,4 +58,7 @@ Public Enum ReportType
     ShipDeath
     WindMoveToken
     MoveToken
+
+    CrewConsumption
+    CrewMorale
 End Enum

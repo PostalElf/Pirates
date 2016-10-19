@@ -4,15 +4,15 @@
     Public ReadOnly Property Weight As Double
         Get
             Select Case Type
-                Case GoodType.Grapples : Return 0.1
+                Case GoodType.Grapples, GoodType.Grapeshot, GoodType.Shot : Return 0.1
                 Case GoodType.Bullets : Return 0.01
-                Case GoodType.Shot : Return 0.1
                 Case GoodType.Explosive : Return 0.2
-                Case GoodType.Grapeshot : Return 0.1
-
-                Case GoodType.Coin : Return 0.001
-                Case GoodType.Jewellery : Return 0.1
-                Case Else : Return 0.1
+                Case GoodType.Gold, GoodType.Silver : Return 0.001
+                Case GoodType.Jewellery, GoodType.Cloth, GoodType.Lumber, GoodType.Metal : Return 0.1
+                Case GoodType.Boricus, GoodType.Triaicus, GoodType.Incantus, GoodType.Mordicus : Return 0.01
+                Case GoodType.Rations, GoodType.Water : Return 0.01
+                Case GoodType.Salt, GoodType.Liqour, GoodType.Coffee, GoodType.Spice, GoodType.Tobacco : Return 0.01
+                Case Else : Throw New Exception("Unrecognised goodtype")
             End Select
         End Get
     End Property
@@ -23,7 +23,17 @@
     End Property
     Public ReadOnly Property Mass As Double
         Get
-            Return 0.1
+            Select Case Type
+                Case GoodType.Grapples, GoodType.Grapeshot, GoodType.Shot : Return 0.1
+                Case GoodType.Bullets : Return 0.01
+                Case GoodType.Explosive : Return 0.2
+                Case GoodType.Gold, GoodType.Silver : Return 0.001
+                Case GoodType.Jewellery, GoodType.Cloth, GoodType.Lumber, GoodType.Metal : Return 1
+                Case GoodType.Boricus, GoodType.Triaicus, GoodType.Incantus, GoodType.Mordicus : Return 0.1
+                Case GoodType.Rations, GoodType.Water : Return 0.01
+                Case GoodType.Salt, GoodType.Liqour, GoodType.Coffee, GoodType.Spice, GoodType.Tobacco : Return 0.01
+                Case Else : Throw New Exception("Unrecognised goodtype")
+            End Select
         End Get
     End Property
     Public ReadOnly Property TotalMass As Double

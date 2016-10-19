@@ -80,6 +80,13 @@
         Dim target As CrewBonus = GetSlot(targetList, slot)
         If target Is Nothing = False Then targetList.Remove(target)
     End Sub
+    Private Function GetBonus(ByVal listName As String, ByVal name As String) As CrewBonus
+        Dim cbl As List(Of CrewBonus) = GetBonusList(listName)
+        For Each cb In cbl
+            If cb.Name = name Then Return cb
+        Next
+        Return Nothing
+    End Function
     Private Function GetBonusList(ByVal listName As String) As List(Of CrewBonus)
         Select Case listName.ToLower
             Case "scars", "scar" : Return Scars
@@ -523,12 +530,23 @@
 
         'apply
         Morale += change
+        Ship.MoraleChange += change
     End Sub
     Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer) As Integer
         Dim good As Good = good.Generate(goodType, -qty)
-        If Ship.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then Return negativeChange
-        Ship.AddGood(good)
-        Return positiveChange
+
+        'shortcircuit for Greenskin mutation
+        If goodType = Pirates.GoodType.Rations AndAlso GetBonus("scar", "Greenskin") Is Nothing = False Then Return positiveChange
+
+
+        If Ship.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
+            Return negativeChange
+        Else
+            Ship.AddGood(good)
+            If Ship.GoodsConsumed.ContainsKey(goodType) = False Then Ship.GoodsConsumed.Add(goodType, good.Generate(goodType))
+            Ship.GoodsConsumed(goodType) += good
+            Return positiveChange
+        End If
     End Function
 
     Public Enum CrewMorale

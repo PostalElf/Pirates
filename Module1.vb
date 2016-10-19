@@ -1,19 +1,19 @@
 ﻿Module Module1
+    Dim world As World
     Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
 
     Sub Main()
         Console.SetWindowSize(Console.WindowWidth, 50)
-        Dim world As New World()
+        world = New World
         world.ShipPlayer = SetupPlayerShip(world.Rng)
 
-        While world.Calendar.Year = 106
+        For n = 1 To 10
             world.Tick()
+            Console.ForegroundColor = ConsoleColor.White
             Console.WriteLine(world.Calendar.ToString)
-        End While
-        Console.ReadKey()
-
-        Dim enemies As New List(Of ShipAI) From {ShipAI.Generate(ShipType.Sloop, Faction.Neutral, CrewRace.Human)}
-        world.EnterCombat(enemies)
+            Report.ConsoleReport()
+            Console.ReadKey()
+        Next
     End Sub
     Private Function SetupPlayerShip(ByRef rng As Random) As ShipPlayer
         Dim ship As New ShipPlayer
@@ -44,6 +44,10 @@
         Return ship
     End Function
 
+    Private Sub EnterBattle()
+        Dim enemies As New List(Of ShipAI) From {ShipAI.Generate(ShipType.Sloop, Faction.Neutral, CrewRace.Human)}
+        World.EnterCombat(enemies)
+    End Sub
     Public Sub Battle(ByVal battlefield As Battlefield, ByVal playerShip As ShipPlayer)
         Console.Clear()
         battlefield.ConsoleWrite()

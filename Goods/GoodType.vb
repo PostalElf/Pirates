@@ -5,22 +5,23 @@
     Explosive
     Grapeshot
 
-    Coin = 101
+    Gold = 101
+    Silver
     Jewellery
-    Silk
+    Cloth
+    Lumber
+    Metal
+
+    Boricus = 201
+    Triaicus
+    Incantus
+    Mordicus
+
+    Rations = 301
+    Water
     Salt
     Liqour
     Coffee
     Spice
     Tobacco
-    Artificery
-
-    Boricus
-    Triaicus
-    Incantus
-    Mordicus
-
-    Rations
-    Water
-    Lumber
 End Enum

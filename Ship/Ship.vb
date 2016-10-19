@@ -29,7 +29,7 @@
 
         For Each gt In [Enum].GetValues(GetType(GoodType))
             Goods.Add(gt, Good.Generate(gt))
-            GoodsFreeForConsumption.Add(gt, False)
+            GoodsFreeForConsumption.Add(gt, True)
         Next
 
         'note: ties in heuristic distance are broken by how high the move is up in the list
@@ -236,7 +236,11 @@
         Return CheckAddGood(Good.Generate(gt, qty))
     End Function
     Public Function CheckAddGood(ByVal good As Good) As Boolean
-        If good.TotalMass + HoldSpaceUsed > HoldSpaceMax Then Return False
+        If good.Qty > 0 Then
+            If good.TotalMass + HoldSpaceUsed > HoldSpaceMax Then Return False
+        ElseIf good.Qty < 0 Then
+            If Goods(good.Type).Qty + good.Qty < 0 Then Return False
+        End If
         Return True
     End Function
     Public Sub AddGood(ByVal good As Good)
@@ -247,6 +251,21 @@
     End Sub
     Public Function GetGood(ByVal gt As GoodType) As Integer
         Return Goods(gt).Qty
+    End Function
+    Public Function GetGoodConsumption(ByVal gt As GoodType) As Integer
+        'return per diem consumption
+        Dim total As Integer = 0
+        For Each r As CrewRace In [Enum].GetValues(GetType(CrewRace))
+            Dim crewCount As Integer = GetCrewsByRace(r).Count
+            Select Case gt
+                Case GoodType.Rations, GoodType.Water : If r <> CrewRace.Unrelinquished Then total += crewCount
+                Case GoodType.Coffee, GoodType.Liqour : If r = CrewRace.Human Then total += crewCount
+                Case GoodType.Salt : If r = CrewRace.Seatouched Then total += crewCount
+                Case GoodType.Tobacco, GoodType.Spice : If r = CrewRace.Windsworn Then total += crewCount
+                Case GoodType.Mordicus : If r = CrewRace.Unrelinquished Then total += crewCount
+            End Select
+        Next
+        Return total
     End Function
 
     Protected TonnageMax As Integer
@@ -479,13 +498,43 @@
 
     Public Sub Tick()
         Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
-
         For Each CrewList In Crews.Values
             For Each Crew In CrewList
                 Crew.Tick(doctor)
             Next
         Next
+
+        'report good consumption
+        If GoodsConsumed.Values.Count > 0 Then
+            Dim rep As String = "The crew consumed "
+            For n = 0 To GoodsConsumed.Values.Count - 1
+                Dim g As Good = GoodsConsumed.Values(n)
+                If n = GoodsConsumed.Values.Count - 1 Then rep &= "and "
+                If g.Qty < 0 Then
+                    rep &= Math.Abs(g.Qty) & " " & g.Type.ToString & ", "
+                End If
+                If n = GoodsConsumed.Values.Count - 1 Then
+                    rep = rep.Remove(rep.Count - 2, 2)
+                    rep &= "."
+                End If
+            Next
+            Report.Add(rep, ReportType.CrewConsumption)
+            GoodsConsumed.Clear()
+        End If
+
+        'report morale change
+        If MoraleChange <> 0 Then
+            Dim rep As String = "The crew's morale"
+            If MoraleChange > 0 Then rep &= " improves by " & MoraleChange
+            If MoraleChange < 0 Then rep &= " worses by " & Math.Abs(MoraleChange)
+            rep &= " in total "
+            rep &= "(avg " & MoraleChange / GetCrews(Nothing, Nothing).Count & ")."
+            Report.Add(rep, ReportType.CrewMorale)
+            MoraleChange = 0
+        End If
     End Sub
+    Public GoodsConsumed As New Dictionary(Of GoodType, Good)
+    Public MoraleChange As Integer
 #End Region
 
 #Region "Attack"

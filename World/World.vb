@@ -6,10 +6,12 @@
 
     Public Sub New()
         Calendar = New Calendar(Calendar.CalendarDay.Duke, 4, Calendar.CalendarSeason.Song, 106)
+        WorldWind = BattleDirection.North
     End Sub
 
     Public Sub Tick()
         Calendar.Tick()
+        ShipPlayer.Tick()
     End Sub
 
 #Region "Battlefield"
