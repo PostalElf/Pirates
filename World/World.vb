@@ -20,10 +20,7 @@
             Module1.Battle(battlefield, ShipPlayer)
         End While
 
-        If battlefield.PlayerWins = False Then
-            'death code
-            End
-        End If
+        If battlefield.PlayerWins = False Then End Else ShipPlayer.EndCombat()
 
         'loot
 

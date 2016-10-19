@@ -143,9 +143,10 @@
 #End Region
 
 #Region "Combat"
-    Public Overloads Sub EnterCombat(ByRef battlefield As Battlefield, ByRef combatantList As List(Of Ship))
-        MyBase.EnterCombat(battlefield, combatantList)
+    Public Overloads Sub EnterCombat()
+        MyBase.EnterCombat()
 
+        'add movetokens
         MoveTokens.Clear()
         For n = 1 To 2
             MoveTokens.Add(New MoveToken({BattleMove.Forward}))
@@ -154,11 +155,15 @@
         Next
         MoveTokens.Add(New MoveToken({BattleMove.Forward, BattleMove.Forward}))
 
-        MoveTokenProgress.Clear()
-        AdvancedMoveTokenProgress.Clear()
+        'reset movetokenprogress
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             MoveTokenProgress.Add(q, 0)
             AdvancedMoveTokenProgress.Add(q, 0)
+        Next
+
+        'battlestations
+        For Each Crew In GetCrews(Nothing, Nothing)
+            MoveCrewToStation(Crew)
         Next
     End Sub
     Public Overloads Sub CombatTick()
@@ -167,10 +172,34 @@
         GainMoveTokens()
         RunCommands()
     End Sub
+    Public Overloads Sub EndCombat()
+        MyBase.EndCombat()
+
+        'clear movetokenprogress
+        MoveTokenProgress.Clear()
+        AdvancedMoveTokenProgress.Clear()
+
+        'stations
+        For Each Crew In GetCrews(Nothing, Nothing)
+            MoveCrewToStation(Crew)
+        Next
+    End Sub
 #End Region
 
 #Region "Commands"
     Private Commands As New List(Of Command)
+    Public Class Command
+        Public Type As String
+        Public Target As Object
+        Public Destination As Object
+        Public Secondary As Object
+        Public Sub New(ByVal aType As String, ByVal aTarget As Object, ByVal aDestination As Object, Optional ByVal aSecondary As Object = Nothing)
+            Type = aType
+            Target = aTarget
+            Destination = aDestination
+            Secondary = aSecondary
+        End Sub
+    End Class
     Public Sub AddCommand(ByVal type As String, ByVal target As Object, ByVal destination As Object, Optional ByVal secondary As Object = Nothing)
         Commands.Add(New Command(type, target, destination, secondary))
     End Sub
@@ -189,20 +218,6 @@
             Commands.RemoveAt(0)
         End While
     End Sub
-
-    Public Class Command
-        Public Type As String
-        Public Target As Object
-        Public Destination As Object
-        Public Secondary As Object
-
-        Public Sub New(ByVal aType As String, ByVal aTarget As Object, ByVal aDestination As Object, Optional ByVal aSecondary As Object = Nothing)
-            Type = aType
-            Target = aTarget
-            Destination = aDestination
-            Secondary = aSecondary
-        End Sub
-    End Class
 #End Region
 
     Public Overrides Sub ConsoleReport()

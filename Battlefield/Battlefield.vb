@@ -126,18 +126,20 @@
         AddCombatant(combatant, Square(x, y), facing)
     End Sub
     Public Sub AddCombatant(ByRef combatant As Ship, ByRef battleSquare As Battlesquare, ByVal facing As BattleDirection)
+        Combatants.Add(combatant)
         combatant.Facing = facing
         combatant.SetSquare(battleSquare)
+
         Select Case combatant.GetType
             Case GetType(ShipPlayer)
-                CType(combatant, ShipPlayer).EnterCombat(Me, Combatants)
+                CType(combatant, ShipPlayer).EnterCombat()
                 PlayerShip = combatant
 
             Case GetType(ShipAI)
-                CType(combatant, ShipAI).EnterCombat(Me, Combatants)
+                CType(combatant, ShipAI).EnterCombat()
 
             Case Else
-                combatant.EnterCombat(Me, Combatants)
+                combatant.EnterCombat()
         End Select
     End Sub
     Public Sub AddMelee(ByVal melee As Melee)

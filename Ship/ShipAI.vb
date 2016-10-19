@@ -65,11 +65,15 @@
             .AddModule(q, ShipModule.Generate(ShipModule.ModuleType.Maproom, 1, .Race))
             newCrews.Add(New CrewPosition(q, CrewRole.Navigator))
 
+
+            'generate crewquarters
             Dim crewCount As Integer = newCrews.Count
             For n = 1 To Math.Ceiling(crewCount / 5)
                 Dim quarter As ShipQuarter = rng.Next(1, 5)
                 .AddModule(quarter, ShipModule.Generate(ShipModule.ModuleType.Crew, 1, .Race))
             Next
+
+            'add crew
             For Each cp In newCrews
                 .AddCrew(cp.quarter, Crew.Generate(.Race), cp.role)
             Next

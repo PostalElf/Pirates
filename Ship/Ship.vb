@@ -378,7 +378,11 @@
         Crews(quarter).Add(crew)
         crew.Ship = Me
         crew.ShipQuarter = quarter
-        If role <> Nothing Then crew.Role = role
+        If role <> Nothing Then
+            crew.SetStation(New CrewStation(Me, quarter, role), True)
+            crew.SetStation(New CrewStation(Me, quarter, role), False)
+            crew.Role = role
+        End If
 
         Dim qlist As List(Of ShipModule) = GetModulesFree(ShipModule.ModuleType.Crew, crew.Race, Nothing)
         If qlist.Count = 0 Then Exit Sub
@@ -391,15 +395,13 @@
         crew.Quarters = Nothing
         crew.Shrine = Nothing
         crew.Role = Nothing
+        crew.SetStation(Nothing, True)
+        crew.SetStation(Nothing, False)
     End Sub
     Public Sub RemoveCrew(ByRef crew As Crew)
         For Each k In Crews.Keys
             If Crews(k).Contains(crew) Then
-                Crews(k).Remove(crew)
-                crew.Ship = Nothing
-                crew.Quarters = Nothing
-                crew.Shrine = Nothing
-                crew.Role = Nothing
+                RemoveCrew(k, crew)
                 Exit Sub
             End If
         Next
@@ -408,6 +410,14 @@
         Crews(crew.ShipQuarter).Remove(crew)
         Crews(targetQuarter).Add(crew)
         If newRole <> Nothing Then crew.Role = newRole
+    End Sub
+    Public Sub MoveCrew(ByRef crew As Crew, ByVal targetStation As CrewStation)
+        Dim shipQuarter As ShipQuarter = targetStation.ShipQuarter
+        Dim role As CrewRole = targetStation.Role
+        MoveCrew(crew, shipQuarter, role)
+    End Sub
+    Public Sub MoveCrewToStation(ByRef crew As Crew)
+        If InCombat = True Then MoveCrew(crew, crew.battlestation) Else MoveCrew(crew, crew.station)
     End Sub
     Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As CrewRole) As List(Of Crew)
         Dim total As New List(Of Crew)
@@ -573,6 +583,7 @@
         Return Nothing
     End Function
 
+    Public InCombat As Boolean = False
     Public InMelee As Boolean = False
     Private DamageSustained As New Dictionary(Of ShipQuarter, Integer)
     Protected HullPoints As New Dictionary(Of ShipQuarter, Integer)
@@ -596,8 +607,8 @@
             Report.Add(Name & " has been destroyed!", ReportType.ShipDeath)
         End If
     End Sub
-    Public Sub EnterCombat(ByRef battlefield As Battlefield, ByRef combatantList As List(Of Ship))
-        combatantList.Add(Me)
+    Public Sub EnterCombat()
+        InCombat = True
     End Sub
     Public Sub TickCombat() Implements BattlefieldObject.CombatTick
         For Each q In Weapons.Keys
@@ -606,6 +617,9 @@
             Next
             JustFired(q) = False
         Next
+    End Sub
+    Public Sub EndCombat()
+        InCombat = False
     End Sub
 #End Region
 

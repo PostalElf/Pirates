@@ -204,7 +204,6 @@
 #End Region
 
 #Region "Skills"
-    Public Role As CrewRole
     Private Skills As New Dictionary(Of CrewSkill, Integer)
     Private SkillsXP As New Dictionary(Of CrewSkill, Integer)
     Private Shared SkillThresholds As Integer() = {0, 100, 300, 600, 1000, 1500}
@@ -439,8 +438,23 @@
 #End Region
 
 #Region "Movement"
-    Public Ship As Ship
+    Public Station As New CrewStation
+    Public BattleStation As New CrewStation
+    Public Property Ship As Ship
+        Get
+            Return Station.Ship
+        End Get
+        Set(ByVal value As Ship)
+            Station.Ship = value
+            BattleStation.Ship = value
+        End Set
+    End Property
     Public ShipQuarter As ShipQuarter
+    Public Role As CrewRole
+    Public Sub SetStation(ByVal station As CrewStation, ByVal inCombat As Boolean)
+        If inCombat = True Then BattleStation = station Else station = station
+    End Sub
+
     Public Quarters As ShipModule
     Public Shrine As ShipModule
 #End Region
