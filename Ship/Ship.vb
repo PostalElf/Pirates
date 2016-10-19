@@ -68,16 +68,16 @@
         HullSpaceMax = GenerateHullSpace(aType)
         TonnageMax = GenerateTonnageMax(aType)
     End Sub
-    Protected Shared Function GenerateHullPoints(ByVal type As ShipType) As Integer
+    Private Shared Function GenerateHullPoints(ByVal type As ShipType) As Integer
         Dim total As Integer() = {0, 100, 120, 150, 200, 250}
         Return total(type)
     End Function
-    Protected Shared Function GenerateHullSpace(ByVal type As ShipType) As Integer
+    Private Shared Function GenerateHullSpace(ByVal type As ShipType) As Integer
         Dim total As Integer() = {0, 40, 75, 100, 150, 180}
         Return total(type)
     End Function
-    Protected Shared Function GenerateTonnageMax(ByVal type As ShipType) As Integer
-        Dim total As Integer() = {0, 100, 120, 150, 200, 225}
+    Private Shared Function GenerateTonnageMax(ByVal type As ShipType) As Integer
+        Dim total As Integer() = {0, 220, 250, 300, 350, 400}
         Return total(type)
     End Function
 
@@ -265,6 +265,9 @@
             Next
             For Each k In Goods.Keys
                 total += Goods(k).TotalWeight
+            Next
+            For Each clist In Crews.Values
+                total += (10 * clist.Count)
             Next
             Return total
         End Get

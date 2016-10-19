@@ -1,5 +1,4 @@
 ﻿Public Class Battlefield
-    Private Rng As Random
     Private _MaxX As Integer
     Private _MaxY As Integer
     Public ReadOnly Property MaxX As Integer
@@ -46,7 +45,7 @@
         Return total
     End Function
 
-    Public Sub New(ByVal X As Integer, ByVal Y As Integer, ByRef aRng As Random)
+    Public Sub New(ByVal X As Integer, ByVal Y As Integer)
         _MaxX = X - 1
         _MaxY = Y - 1
         ReDim Squares(MaxX, MaxY)
@@ -55,16 +54,15 @@
                 Squares(nX, nY) = New Battlesquare(Me, nX, nY)
             Next
         Next
-        Rng = aRng
 
         For Each gt In [Enum].GetValues(GetType(GoodType))
             Loot.Add(gt, Good.Generate(gt, 0))
         Next
     End Sub
     Private Shared BattlefieldObjects As Type() = {GetType(BF_Rock), GetType(BF_Tides)}
-    Public Shared Function Generate(ByVal X As Integer, ByVal Y As Integer, ByVal featureDensity As Integer, ByVal aWind As BattleDirection, ByRef aRng As Random) As Battlefield
+    Public Shared Function Generate(ByVal X As Integer, ByVal Y As Integer, ByVal featureDensity As Integer, ByVal aWind As BattleDirection) As Battlefield
         Dim rng As New Random(5)
-        Dim battlefield As New Battlefield(X, Y, aRng)
+        Dim battlefield As New Battlefield(X, Y)
         For n = 0 To featureDensity - 1
             battlefield.GenerateFeature(rng)
         Next
@@ -111,10 +109,7 @@
     End Sub
     Public Sub ConsoleReportCombatants()
         For Each combatant In Combatants
-            If TypeOf combatant Is Ship Then
-                Dim ship As Ship = CType(combatant, Ship)
-                ship.ConsoleReport()
-            End If
+            If TypeOf combatant Is Ship Then CType(combatant, Ship).ConsoleReport()
             Console.WriteLine()
         Next
     End Sub
@@ -172,7 +167,7 @@
         If DeadObjects.Contains(bfo) = False Then DeadObjects.Add(bfo)
         If TypeOf bfo Is ShipAI Then
             Dim ai As ShipAI = CType(bfo, ShipAI)
-            For Each Good As Good In ai.GetLoot(rng)
+            For Each Good As Good In ai.GetLoot(World.Rng)
                 Loot(Good.Type) += Good
             Next
         End If
