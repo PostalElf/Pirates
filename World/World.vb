@@ -10,7 +10,7 @@
 
 #Region "Battlefield"
     Public Sub EnterCombat(ByVal enemies As List(Of ShipAI))
-        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 5, WorldWind, Rng)
+        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 5, WorldWind)
         battlefield.AddCombatant(ShipPlayer, battlefield.GetRandomSquare(True, 2, Rng), Rng.Next(1, 5))
         For Each enemy In enemies
             battlefield.AddCombatant(enemy, battlefield.GetRandomSquare(True, 2, Rng), Rng.Next(1, 5))

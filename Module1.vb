@@ -8,7 +8,7 @@
         Dim world As New World()
         world.ShipPlayer = SetupPlayerShip(world.Rng)
 
-        Dim enemies As New List(Of ShipAI) From {ShipAI.Generate(ShipType.Sloop, Faction.Neutral, CrewRace.Human, Nothing)}
+        Dim enemies As New List(Of ShipAI) From {ShipAI.Generate(ShipType.Sloop, Faction.Neutral, CrewRace.Human)}
         world.EnterCombat(enemies)
     End Sub
     Private Function SetupPlayerShip(ByRef rng As Random) As ShipPlayer
@@ -164,7 +164,7 @@
 
 #Region "Retired Tests"
     Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
-        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0, BattleDirection.East, rng)
+        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0, BattleDirection.East)
         Dim ship As ShipPlayer = SetupPlayerShip(rng)
         With ship
             .ConsoleColour = ConsoleColor.Cyan
@@ -173,12 +173,12 @@
         End With
         battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
 
-        Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing, rng)
+        Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing)
         ai1.ConsoleColour = ConsoleColor.Green
         'ai1.Cheaterbug(True, True, False, False)
         battlefield.AddCombatant(ai1, 1, 1, BattleDirection.East)
 
-        Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing, rng)
+        Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing)
         ai2.ConsoleColour = ConsoleColor.Green
         ai2.Cheaterbug(True, True, False, False)
         battlefield.AddCombatant(ai2, 8, 8, BattleDirection.West)

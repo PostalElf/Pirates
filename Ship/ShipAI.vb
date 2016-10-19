@@ -4,8 +4,7 @@
     Public Sub New()
         MyBase.New()
     End Sub
-    Public Shared Function Generate(ByVal type As ShipType, Optional ByVal faction As Faction = Nothing, Optional ByVal race As CrewRace = Nothing, Optional ByRef rng As Random = Nothing) As Ship
-        If rng Is Nothing Then rng = New Random
+    Public Shared Function Generate(ByVal type As ShipType, Optional ByVal faction As Faction = Nothing, Optional ByVal race As CrewRace = Nothing) As Ship
         Dim races As CrewRace() = [Enum].GetValues(GetType(CrewRace))
         Dim factions As Faction() = [Enum].GetValues(GetType(Faction))
         Dim newCrews As New List(Of CrewStation)
@@ -15,7 +14,7 @@
             If race = Nothing Then .Race = World.Rng.Next(1, races.Length + 1) Else .Race = race
             If faction = Nothing Then .Faction = World.Rng.Next(1, factions.Length + 1) Else .Faction = faction
             .Type = type
-            .Name = GenerateName(rng)
+            .Name = GenerateName(World.Rng)
             .ID = GenerateID(.Name)
             .ConsoleColour = ConsoleColor.Red
 
@@ -38,11 +37,11 @@
                 newCrews.Add(New CrewStation(q, CrewRole.Sailor))
             Next
             .GenerateBaselines(.Type)
-            GenerateStandardModules(ship, newCrews, rng)
+            GenerateStandardModules(ship, newCrews, World.Rng)
 
             'add loot
             For n = 1 To 3
-                GenerateLoot(ship, rng)
+                GenerateLoot(ship, World.Rng)
             Next
         End With
         Return ship
