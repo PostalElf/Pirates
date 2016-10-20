@@ -1,13 +1,26 @@
 ﻿Public Class World
     Public Shared Rng As New Random(5)
-    Public Shared Calendar As Calendar
+    Public Calendar As Calendar
     Public WorldWind As BattleDirection
     Public ShipPlayer As ShipPlayer
 
-    Public Sub New()
-        Calendar = New Calendar(Calendar.CalendarDay.Duke, 4, Calendar.CalendarSeason.Song, 106)
-        WorldWind = BattleDirection.North
-    End Sub
+    Private Isles As New List(Of Isle)
+
+    Public Shared Function Generate() As World
+        Dim world As New World
+        With world
+            .Calendar = New Calendar(Calendar.CalendarDay.Duke, 4, Calendar.CalendarSeason.Shore, 106)
+            .WorldWind = BattleDirection.North
+
+            'generate isles
+            Dim free As New Isle.MapData(3, 3, 3, 3)
+            .Isles.Add(Isle.Generate("Kingdom of the Dead", 2, 1, free))
+            .Isles.Add(Isle.Generate("Forsworn Islands", 1, 2, free))
+            .Isles.Add(Isle.Generate("Seatouched Dominion", 3, 2, free))
+            .Isles.Add(Isle.Generate("Commonwealth", 2, 3, free))
+        End With
+        Return world
+    End Function
 
     Public Sub Tick()
         Calendar.Tick()

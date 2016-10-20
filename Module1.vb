@@ -4,7 +4,7 @@
 
     Sub Main()
         Console.SetWindowSize(Console.WindowWidth, 50)
-        world = New World
+        world = Pirates.World.Generate
         world.ShipPlayer = SetupPlayerShip(world.Rng)
 
         While True
@@ -24,6 +24,7 @@
             .ConsoleColour = ConsoleColor.Cyan
             .Name = "Baron's Spear"
             .GenerateBaselines(ShipType.Sloop)
+            .AvailableMoves.Add(New MoveToken({BattleMove.Halt}))
 
             For n = 1 To 3
                 .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, CrewRace.Human))
@@ -53,8 +54,11 @@
     End Function
 
     Private Function MainPlayerInput() As Boolean
+        'return true when player ends turn
+
         Dim choices As New Dictionary(Of Char, String)
         With choices
+            .Add("a"c, "Attack")
             .Add("s"c, "View Ship")
             .Add("c"c, "View Crew")
             .Add("g"c, "View Goods")
@@ -63,11 +67,13 @@
         Dim input As Char = Menu.getListChoice(choices, 0)
         Console.WriteLine()
         Select Case input
+            Case "a"c
+                EnterBattle()
             Case "s"c
                 world.ShipPlayer.ConsoleReport()
                 Console.ReadKey()
             Case "c"c
-                ExamineCrew(world.ShipPlayer)
+                ManageCrew(world.ShipPlayer)
             Case "g"c
                 Console.WriteLine()
                 world.ShipPlayer.ConsoleReportGoods()
@@ -108,14 +114,11 @@
             Case ConsoleKey.NumPad7, ConsoleKey.U : targetMove = New MoveToken({BattleMove.Forward, BattleMove.TurnLeft})
             Case ConsoleKey.NumPad4 : targetMove = New MoveToken({BattleMove.TurnLeft})
             Case ConsoleKey.NumPad6 : targetMove = New MoveToken({BattleMove.TurnRight})
-            Case ConsoleKey.NumPad2, ConsoleKey.OemComma : targetMove = New MoveToken({BattleMove.Backwards})
-            Case ConsoleKey.V
-                ViewBattlefield(battlefield)
-                Return False
-            Case ConsoleKey.C
-                viewSelf(ship)
-                Return False
             Case ConsoleKey.Spacebar : Return True
+            Case ConsoleKey.NumPad2, ConsoleKey.OemComma : targetMove = New MoveToken({BattleMove.Backwards})
+            Case ConsoleKey.W : ViewWeapons(ship) : Return False
+            Case ConsoleKey.V : ViewBattlefield(battlefield) : Return False
+            Case ConsoleKey.C : ManageCrew(ship) : Return False
             Case ConsoleKey.Escape : End
         End Select
 
@@ -132,7 +135,7 @@
         battlefield.ConsoleReportCombatants()
         Console.ReadKey()
     End Sub
-    Private Sub ViewSelf(ByVal ship As ShipPlayer)
+    Private Sub ManageCrew(ByVal ship As ShipPlayer)
         Dim t As Integer = 12
         Dim s As String = Dev.vbSpace(1)
         Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
@@ -153,6 +156,19 @@
                 Console.WriteLine()
             End If
         Next
+        Console.WriteLine()
+
+        Select Case Menu.getListChoice(New List(Of String) From {"Move Crew", "Examine Crew"}, 0)
+            Case "Move Crew" : MoveCrew(ship)
+            Case "Examine Crew" : ExamineCrew(ship)
+            Case Else : Exit Sub
+        End Select
+    End Sub
+    Private Sub ViewWeapons(ByVal ship As ShipPlayer)
+        Dim s As String = Dev.vbSpace(1)
+        Dim t As Integer = 12
+
+        Console.WriteLine()
         Console.WriteLine("Weapons:")
         For Each q In quarters
             For Each weapon In ship.GetWeapons(q)
@@ -164,12 +180,7 @@
             Next
         Next
         Console.WriteLine()
-
-        Select Case Menu.getListChoice(New List(Of String) From {"Move Crew", "Examine Crew"}, 0)
-            Case "Move Crew" : MoveCrew(ship)
-            Case "Examine Crew" : ExamineCrew(ship)
-            Case Else : Exit Sub
-        End Select
+        Console.ReadKey()
     End Sub
     Private Sub MoveCrew(ByRef ship As ShipPlayer)
         Dim target As Crew = GetCrew(ship)

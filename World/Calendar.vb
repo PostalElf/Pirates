@@ -77,6 +77,6 @@
         Shadow
         Scorn
         Sand
-        Song
+        Shore
     End Enum
 End Class

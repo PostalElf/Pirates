@@ -88,6 +88,7 @@
     <Compile Include="Crew\CrewTalent.vb" />
     <Compile Include="Dev\IO.vb" />
     <Compile Include="Dev\Menu.vb" />
+    <Compile Include="Dev\Range.vb" />
     <Compile Include="Goods\Good.vb" />
     <Compile Include="Goods\GoodType.vb" />
     <Compile Include="Report.vb" />
@@ -120,6 +121,7 @@
     <Compile Include="Ship\ShipWaterline.vb" />
     <Compile Include="Ship\ShipWeapon.vb" />
     <Compile Include="World\Calendar.vb" />
+    <Compile Include="World\Isle.vb" />
     <Compile Include="World\World.vb" />
   </ItemGroup>
   <ItemGroup>
