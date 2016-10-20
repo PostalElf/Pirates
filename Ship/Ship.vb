@@ -495,6 +495,14 @@
         End Select
         Return total
     End Function
+
+    Private Equipment As New List(Of CrewBonus)
+    Public Function GetEquipments() As List(Of CrewBonus)
+        Return Equipment
+    End Function
+    Public Sub AddEquipment(ByVal cb As CrewBonus)
+        Equipment.Add(cb)
+    End Sub
 #End Region
 
 #Region "Attack"

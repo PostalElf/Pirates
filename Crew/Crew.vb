@@ -70,7 +70,7 @@
     Private Scars As New List(Of CrewBonus)
     Private Equipment As New List(Of CrewBonus)
     Private CrewBonuses As List(Of CrewBonus)() = {Scars, Equipment}
-    Private Function CheckAddBonus(ByVal listName As String, ByVal effect As CrewBonus) As Boolean
+    Public Function CheckAddBonus(ByVal listName As String, ByVal effect As CrewBonus) As Boolean
         'check slot against all lists
         For Each cbl In CrewBonuses
             If effect.Slot Is Nothing = False Then
@@ -80,29 +80,41 @@
 
         Return True
     End Function
-    Private Sub AddBonus(ByVal listName As String, ByVal effect As CrewBonus)
+    Public Sub AddBonus(ByVal listName As String, ByVal effect As CrewBonus)
         If CheckAddBonus(listName, effect) = False Then Exit Sub
 
         Dim targetList As List(Of CrewBonus) = GetBonusList(listName)
         targetList.Add(effect)
     End Sub
-    Private Sub RemoveBonus(ByVal listName As String, ByVal effect As CrewBonus)
+    Public Function CheckRemoveBonus(ByVal listname As String, ByVal effect As CrewBonus)
+        Dim targetList As List(Of CrewBonus) = GetBonusList(listname)
+        If targetList.Contains(effect) = False Then Return False
+        Return True
+    End Function
+    Public Function CheckRemoveBonus(ByVal listname As String, ByVal slot As String)
+        Dim targetList As List(Of CrewBonus) = GetBonusList(listname)
+        Dim target As CrewBonus = GetSlot(targetList, slot)
+        If target Is Nothing Then Return False
+
+        Return True
+    End Function
+    Public Sub RemoveBonus(ByVal listName As String, ByVal effect As CrewBonus)
         Dim targetList As List(Of CrewBonus) = GetBonusList(listName)
         If targetList.Contains(effect) Then targetList.Remove(effect)
     End Sub
-    Private Sub RemoveBonus(ByVal listName As String, ByVal slot As String)
+    Public Sub RemoveBonus(ByVal listName As String, ByVal slot As String)
         Dim targetList As List(Of CrewBonus) = GetBonusList(listName)
         Dim target As CrewBonus = GetSlot(targetList, slot)
         If target Is Nothing = False Then targetList.Remove(target)
     End Sub
-    Private Function GetBonus(ByVal listName As String, ByVal name As String) As CrewBonus
+    Public Function GetBonus(ByVal listName As String, ByVal name As String) As CrewBonus
         Dim cbl As List(Of CrewBonus) = GetBonusList(listName)
         For Each cb In cbl
             If cb.Name = name Then Return cb
         Next
         Return Nothing
     End Function
-    Private Function GetBonusList(ByVal listName As String) As List(Of CrewBonus)
+    Public Function GetBonusList(ByVal listName As String) As List(Of CrewBonus)
         Select Case listName.ToLower
             Case "scars", "scar" : Return Scars
             Case "equipment" : Return Equipment
@@ -609,18 +621,12 @@
             Console.WriteLine(ss & talent.ToString)
         Next
 
-        If Equipment.Count > 0 Then ConsoleReportList(Equipment, "Gear:")
-    End Sub
-    Private Sub ConsoleReportList(ByVal l As List(Of CrewBonus), ByVal title As String)
-        Console.WriteLine(Dev.vbSpace(1) & title)
-        For Each i In l
-            With i
-                Console.Write(Dev.vbSpace(2) & "(" & .Slot & ") " & .Name)
-                If .Damage > 0 Then Console.Write(" - " & .Damage & " " & .DamageType.ToString)
-                If .AmmoUse > 0 Then Console.Write(" - " & .AmmoUse & " " & .GetAmmoType)
-                Console.WriteLine()
-            End With
-        Next
+        If Equipment.Count > 0 Then
+            For Each cb In Equipment
+                Console.WriteLine(s & "Equipment:")
+                Console.WriteLine(ss & cb.ToString)
+            Next
+        End If
     End Sub
 #End Region
 End Class

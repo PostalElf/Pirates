@@ -25,4 +25,11 @@
             Case Else : Return Nothing
         End Select
     End Function
+
+    Public Overrides Function ToString() As String
+        Dim total As String = Name & " (" & Slot.ToString & ")"
+        If Damage > 0 Then total &= " - " & Damage & " " & DamageType.ToString
+        If AmmoUse > 0 Then total &= " - " & AmmoUse & " " & GetAmmoType().ToString
+        Return total
+    End Function
 End Class

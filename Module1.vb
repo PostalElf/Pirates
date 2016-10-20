@@ -7,6 +7,16 @@
         world = Pirates.World.Generate
         world.ShipPlayer = SetupPlayerShip(world.Rng)
 
+        Dim pistol As New CrewBonus
+        With pistol
+            .Name = "Pistol"
+            .Damage = 25
+            .DamageType = DamageType.Firearms
+            .AmmoUse = 1
+            .Slot = "Left Hand"
+        End With
+        world.ShipPlayer.AddEquipment(pistol)
+
         While True
             Console.Clear()
             Console.ForegroundColor = ConsoleColor.White
@@ -73,7 +83,7 @@
                 world.ShipPlayer.ConsoleReport()
                 Console.ReadKey()
             Case "c"c
-                ManageCrew(world.ShipPlayer)
+                ManageCrews(world.ShipPlayer)
             Case "g"c
                 Console.WriteLine()
                 world.ShipPlayer.ConsoleReportGoods()
@@ -118,7 +128,7 @@
             Case ConsoleKey.NumPad2, ConsoleKey.OemComma : targetMove = New MoveToken({BattleMove.Backwards})
             Case ConsoleKey.W : ViewWeapons(ship) : Return False
             Case ConsoleKey.V : ViewBattlefield(battlefield) : Return False
-            Case ConsoleKey.C : ManageCrew(ship) : Return False
+            Case ConsoleKey.C : ManageCrews(ship) : Return False
             Case ConsoleKey.Escape : End
         End Select
 
@@ -135,7 +145,7 @@
         battlefield.ConsoleReportCombatants()
         Console.ReadKey()
     End Sub
-    Private Sub ManageCrew(ByVal ship As ShipPlayer)
+    Private Sub ManageCrews(ByVal ship As ShipPlayer)
         Dim t As Integer = 12
         Dim s As String = Dev.vbSpace(1)
         Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
@@ -158,10 +168,72 @@
         Next
         Console.WriteLine()
 
-        Select Case Menu.getListChoice(New List(Of String) From {"Move Crew", "Examine Crew"}, 0)
-            Case "Move Crew" : MoveCrew(ship)
-            Case "Examine Crew" : ExamineCrew(ship)
-            Case Else : Exit Sub
+        Dim target As Crew = GetCrew(ship)
+        If target Is Nothing Then Exit Sub
+        Console.WriteLine()
+        target.ConsoleReport()
+        Console.WriteLine()
+
+        Dim choices As New Dictionary(Of Integer, String)
+        With choices
+            .Add(1, "Move")
+            .Add(2, "Set Sail Station")
+            .Add(3, "Set Battle Station")
+            .Add(4, "Add Gear")
+            .Add(5, "Remove Gear")
+        End With
+        Dim input As Integer = Menu.getListChoice(choices, 0)
+        Console.WriteLine()
+        Select Case input
+            Case 1, 2, 3
+                Dim destination As ShipQuarter = Menu.getListChoice(Of ShipQuarter)(quarters, 0, "To where?")
+                If destination = Nothing Then Exit Sub
+                Dim newrole As CrewRole = Menu.getListChoice(ship.GetAvailableRoles(destination), 0, "Select new role:")
+                If newrole = Nothing Then Exit Sub
+                Select Case input
+                    Case 1
+                        If ship.InCombat = True Then ship.AddCommand("Move", target, destination, newrole) Else ship.MoveCrew(target, destination, newrole)
+                    Case 2
+                        Dim station As New CrewStation(destination, newrole)
+                        target.SetStation(station, False)
+                        If ship.InCombat = False Then ship.MoveCrewToStation(target)
+                    Case 3
+                        Dim station As New CrewStation(destination, newrole)
+                        target.SetStation(station, True)
+                        If ship.InCombat = True Then ship.AddCommand("Move", target, destination, newrole)
+                End Select
+            Case 4
+                Dim gears As List(Of CrewBonus) = ship.GetEquipments()
+                If gears.Count = 0 Then
+                    Console.WriteLine("No spare equipment!")
+                    Console.ReadKey()
+                    Exit Sub
+                End If
+                Dim targetGear As CrewBonus = Menu.getListChoice(Of CrewBonus)(gears, 0)
+                Console.WriteLine()
+                If target.CheckAddBonus("equipment", targetGear) = False Then
+                    Console.WriteLine("Unable to add equipment!")
+                    Console.ReadKey()
+                    Exit Sub
+                End If
+                target.AddBonus("equipment", targetGear)
+            Case 5
+                Dim gears As List(Of CrewBonus) = target.GetBonusList("equipment")
+                If gears.Count = 0 Then
+                    Console.WriteLine("No equipment to remove!")
+                    Console.ReadKey()
+                    Exit Sub
+                End If
+                Dim targetGear As CrewBonus = Menu.getListChoice(Of CrewBonus)(gears, 0)
+                Console.WriteLine()
+                If target.CheckRemoveBonus("equipment", targetGear) = False Then
+                    Console.WriteLine("Invalid equipment!")
+                    Console.ReadKey()
+                    Exit Sub
+                End If
+                target.RemoveBonus("equipment", targetGear)
+            Case 5
+
         End Select
     End Sub
     Private Sub ViewWeapons(ByVal ship As ShipPlayer)
@@ -182,23 +254,9 @@
         Console.WriteLine()
         Console.ReadKey()
     End Sub
-    Private Sub MoveCrew(ByRef ship As ShipPlayer)
-        Dim target As Crew = GetCrew(ship)
-        Dim destination As ShipQuarter = Menu.getListChoice(Of ShipQuarter)(quarters, 0, "To where?")
-        Dim newrole As CrewRole = Menu.getListChoice(ship.GetAvailableRoles(destination), 0, "Select new role:")
-        ship.AddCommand("Move", target, destination, newrole)
-    End Sub
-    Private Sub ExamineCrew(ByRef ship As ShipPlayer)
-        Dim target As Crew = GetCrew(ship)
-        If target Is Nothing Then Exit Sub
-        Console.WriteLine()
-        target.ConsoleReport()
-        Console.WriteLine()
-        Console.ReadKey()
-    End Sub
     Private Function GetCrew(ByRef ship As ShipPlayer) As Crew
         Dim roles As New List(Of CrewRole)([Enum].GetValues(GetType(CrewRole)))
-        Dim role As CrewRole = Menu.getListChoice(Of CrewRole)(roles, 0, "From which role?")
+        Dim role As CrewRole = Menu.getListChoice(Of CrewRole)(roles, 0, "Select crew role:")
         Dim choiceList As New List(Of Crew)
         For Each q In quarters
             choiceList.AddRange(ship.GetCrews(q, role))
