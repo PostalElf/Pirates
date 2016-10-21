@@ -28,6 +28,15 @@
         Dim min As Integer = max - 99
         Return New Range(min, max)
     End Function
+    Public Overrides Function ToString() As String
+        Return Name & " (" & XSector & "-" & XSubSector & ", " & YSector & "-" & YSubSector & ")"
+    End Function
+    Public Shared Operator =(ByVal i1 As Isle, ByVal i2 As Isle)
+        Return i1.Equals(i2)
+    End Operator
+    Public Shared Operator <>(ByVal i1 As Isle, ByVal i2 As Isle)
+        If i1 = i2 Then Return False Else Return True
+    End Operator
 
     Public Class MapData
         Private Points As New Dictionary(Of MapDataPoint, List(Of MapDataPoint))

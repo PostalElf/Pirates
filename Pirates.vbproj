@@ -122,6 +122,7 @@
     <Compile Include="Ship\ShipWeapon.vb" />
     <Compile Include="World\Calendar.vb" />
     <Compile Include="World\Isle.vb" />
+    <Compile Include="World\Route.vb" />
     <Compile Include="World\World.vb" />
   </ItemGroup>
   <ItemGroup>

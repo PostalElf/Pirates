@@ -573,7 +573,7 @@
 
             If Me.Race <> CrewRace.Unrelinquished Then
                 Dim scarRollBonus As Integer = 0
-                If doctor.GetTalent(CrewTalent.Fleshshaper) = True Then scarRollBonus = 3
+                If doctor.GetTalent(CrewTalent.Fleshshaper) = True AndAlso Me.Race = CrewRace.Seatouched Then scarRollBonus += 4
                 Dim scar As CrewBonus = GenerateScar(currentDamage, scarRollBonus)
                 If scar Is Nothing Then Exit Sub
                 AddBonus("scar", scar)

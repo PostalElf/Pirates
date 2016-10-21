@@ -220,6 +220,31 @@
     End Sub
 #End Region
 
+#Region "World"
+    Private Routes As New List(Of Route)
+    Public Function CheckAddRoute(ByVal route As Route)
+        If GetRoute(route) = True Then Return False
+        Return True
+    End Function
+    Public Sub AddRoute(ByVal Route As Route)
+        Routes.Add(Route)
+    End Sub
+    Public Function CheckRemoveRoute(ByVal route As Route)
+        If GetRoute(route) = False Then Return False
+        Return True
+    End Function
+    Public Sub RemoveRoute(ByVal route As Route)
+        Routes.Remove(route)
+    End Sub
+    Public Function GetRoute(ByVal route As Route) As Boolean
+        For Each r In Routes
+            If r = route Then Return True
+        Next
+        Return False
+    End Function
+#End Region
+
+#Region "Console"
     Public Overrides Sub ConsoleReport()
         Dim s As String = Dev.vbSpace(2)
         Dim t As Integer = 20
@@ -266,4 +291,5 @@
         Dim ratio As Double = Tonnage / TonnageMax * 100
         Console.WriteLine(" (" & ratio.ToString("0.0") & "% - " & Waterline.ToString & ")")
     End Sub
+#End Region
 End Class
