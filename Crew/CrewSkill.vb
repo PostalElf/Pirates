@@ -4,6 +4,7 @@
     Sailing
     Gunnery
     Bracing
+    Athletics
     Cooking
     Alchemy
     Medicine

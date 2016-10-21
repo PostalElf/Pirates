@@ -3,8 +3,10 @@
     Charismatic
     Windsinger
     Flamelicked
-    Gourmet
-    Leadthumb
     Anatomist
+
+    'trained skills
+    Fleshshaper = 101
+    Firemage
     Duelist
 End Enum

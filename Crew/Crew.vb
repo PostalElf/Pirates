@@ -46,15 +46,10 @@
     End Function
     Private Shared Function GenerateTalent(ByVal aRace As CrewRace, ByVal bestSkill As CrewSkill) As CrewTalent
         Dim possibleTalents As New List(Of CrewTalent)
-        Select Case bestSkill
-            Case CrewSkill.Leadership : possibleTalents.AddRange({CrewTalent.Charismatic, CrewTalent.Intimidating})
-            Case CrewSkill.Sailing : possibleTalents.Add(CrewTalent.Windsinger)
-            Case CrewSkill.Gunnery, CrewSkill.Firearms : possibleTalents.Add(CrewTalent.Flamelicked)
-            Case CrewSkill.Bracing
-            Case CrewSkill.Cooking : possibleTalents.Add(CrewTalent.Gourmet)
-            Case CrewSkill.Alchemy : possibleTalents.AddRange({CrewTalent.Gourmet, CrewTalent.Leadthumb})
-            Case CrewSkill.Medicine : possibleTalents.Add(CrewTalent.Anatomist)
-        End Select
+        For Each talent In [Enum].GetValues(GetType(CrewTalent))
+            'anything above 100 is a trained talent
+            If talent < 100 Then possibleTalents.Add(talent)
+        Next
         Return Dev.GetRandom(Of CrewTalent)(possibleTalents, World.Rng)
     End Function
     Private Shared NamePrefixes As New List(Of String)
@@ -137,9 +132,9 @@
         Return total
     End Function
 
-    Private Function GenerateScar(ByVal damage As Damage) As CrewBonus
-        Dim scarNames = GenerateScarNames()
-        Dim scarName As String = scarNames(World.Rng.Next(scarNames.Count))
+    Private Function GenerateScar(ByVal damage As Damage, ByVal fleshshapingBonus As Integer) As CrewBonus
+        Dim scarNames As List(Of String) = GenerateScarNames()
+        Dim scarName As String = Dev.GetRandom(Of String)(scarNames, World.Rng, fleshshapingBonus)
 
         Dim total As New CrewBonus
         With total
@@ -176,6 +171,7 @@
 
                 Case "Pegleg"
                     .Slot = "Feet"
+                    .SkillBonuses.Add(CrewSkill.Athletics, -2)
 
                 Case "Touch of Death"
                     .Slot = "Talisman"
@@ -213,9 +209,7 @@
 
                 Case "Writhing Mass"
                     .Slot = "Feet"
-                    .Skill = CrewSkill.Melee
-                    .Damage = 15
-                    .DamageType = DamageType.Blunt
+                    .SkillBonuses.Add(CrewSkill.Athletics, +1)
 
                 Case Else : Throw New Exception("Out of roll range")
             End Select
@@ -578,7 +572,9 @@
             Report.Add("The ship doctor treated " & Name & "'s worst injuries.", ReportType.Doctor)
 
             If Me.Race <> CrewRace.Unrelinquished Then
-                Dim scar As CrewBonus = GenerateScar(currentDamage)
+                Dim scarRollBonus As Integer = 0
+                If doctor.GetTalent(CrewTalent.Fleshshaper) = True Then scarRollBonus = 3
+                Dim scar As CrewBonus = GenerateScar(currentDamage, scarRollBonus)
                 If scar Is Nothing Then Exit Sub
                 AddBonus("scar", scar)
                 Report.Add(Name & " gains a new scar: " & scar.Name, ReportType.Doctor)
