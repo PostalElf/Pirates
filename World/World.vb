@@ -5,6 +5,23 @@
     Public ShipPlayer As ShipPlayer
 
     Private Isles As New List(Of Isle)
+    Default Public Property Item(ByVal isleName As String) As Isle
+        Get
+            For Each i In Isles
+                If i.Name = isleName Then Return i
+            Next
+            Return Nothing
+        End Get
+        Set(ByVal value As Isle)
+            For Each i In Isles
+                If i.Name = isleName Then
+                    i = value
+                    Exit Property
+                End If
+            Next
+        End Set
+    End Property
+    Public BasicRoutes As New List(Of Route)
 
     Public Shared Function Generate() As World
         Dim world As New World
@@ -29,6 +46,16 @@
             .Isles.Add(Isle.Generate("Blackiron Ridge", Rng.Next(1, 4), Rng.Next(1, 4), free))
             .Isles.Add(Isle.Generate("World's Spine", Rng.Next(1, 4), Rng.Next(1, 4), free))
             .Isles.Add(Isle.Generate("Firefalls", Rng.Next(1, 4), Rng.Next(1, 4), free))
+
+            'generate basic routes
+            'this ensures that all isles are reachable from all other isles, albeit terribly
+            For Each Isle1 In .Isles
+                For Each Isle2 In .Isles
+                    If Isle1 <> Isle2 Then
+                        .BasicRoutes.Add(New Route(Isle1, Isle2, 0))
+                    End If
+                Next
+            Next
         End With
         Return world
     End Function

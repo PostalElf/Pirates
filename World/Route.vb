@@ -8,10 +8,6 @@
         isle2 = i2
         Quality = aQuality
     End Sub
-    Public Function Contains(ByVal isle As Isle) As Boolean
-        If isle1 = isle OrElse isle2 = isle Then Return True
-        Return False
-    End Function
     Public Shared Operator =(ByVal r1 As Route, ByVal r2 As Route)
         If r1.isle1 <> r2.isle1 AndAlso r1.isle1 <> r2.isle2 Then Return False
         If r1.isle2 <> r2.isle1 AndAlso r1.isle2 <> r2.isle2 Then Return False
@@ -20,4 +16,26 @@
     Public Shared Operator <>(ByVal r1 As Route, ByVal r2 As Route)
         If r1 = r2 Then Return False Else Return True
     End Operator
+
+    Public Function Contains(ByVal isle As Isle) As Boolean
+        If isle1 = isle OrElse isle2 = isle Then Return True
+        Return False
+    End Function
+    Public Function GetDistance() As Double
+        Dim modifier As Double
+        Select Case Quality
+            Case 0 : modifier = 2
+            Case 1 : modifier = 1.75
+            Case 2 : modifier = 1.5
+            Case 3 : modifier = 1.25
+            Case 4 : modifier = 1
+            Case 5 : modifier = 0.75
+            Case Else : Throw New Exception("Route quality out of range")
+        End Select
+
+        Dim dx As Integer = Math.Abs(isle1.X - isle2.X)
+        Dim dy As Integer = Math.Abs(isle1.Y - isle2.Y)
+        Dim c As Double = Math.Sqrt((dx * dx) + (dy * dy))
+        Return Math.Round(c * modifier, 2)
+    End Function
 End Class
