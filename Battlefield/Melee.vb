@@ -59,7 +59,7 @@
         Const ReinforcementCount As Integer = 2
         If offenders.Count > 0 Then
             For n = 1 To ReinforcementCount
-                Dim c As Crew = Dev.GrabRandom(Of Crew)(offenders)
+                Dim c As Crew = Dev.GrabRandom(Of Crew)(offenders, World.Rng)
                 If c Is Nothing = False Then
                     destination.Add(c)
                     Report.Add("[" & c.Ship.ID & "] " & c.Name & " joins the melee.", ReportType.Melee)

@@ -82,19 +82,20 @@
         Return Nothing
     End Function
 
-    Public Shared Function GetRandom(Of T)(ByRef targetList As List(Of T), Optional ByRef aRng As Random = Nothing) As T
-        If aRng Is Nothing Then aRng = New Random
+    Public Shared Function GetRandom(Of T)(ByRef targetList As List(Of T), ByRef aRng As Random, Optional ByVal modifier As Integer = 0) As T
         If targetList.Count = 0 Then Return Nothing
         If targetList.Count = 1 Then Return targetList(0)
 
-        Dim roll As Integer = aRng.Next(targetList.Count - 1)
+        Dim roll As Integer = aRng.Next(targetList.Count - 1) + modifier
+        roll = Constrain(roll, 0, targetList.Count - 1)
         Return targetList(roll)
     End Function
-    Public Shared Function GrabRandom(Of T)(ByRef targetList As List(Of T), Optional ByRef aRng As Random = Nothing) As T
+    Public Shared Function GrabRandom(Of T)(ByRef targetList As List(Of T), ByRef aRng As Random, Optional ByVal modifier As Integer = 0) As T
         If aRng Is Nothing Then aRng = New Random
         If targetList.Count = 0 Then Return Nothing
 
-        Dim roll As Integer = aRng.Next(targetList.Count - 1)
+        Dim roll As Integer = aRng.Next(targetList.Count - 1) + modifier
+        roll = Constrain(roll, 0, targetList.Count - 1)
         GrabRandom = targetList(roll)
         targetList.RemoveAt(roll)
     End Function

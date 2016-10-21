@@ -55,7 +55,7 @@
             Case CrewSkill.Alchemy : possibleTalents.AddRange({CrewTalent.Gourmet, CrewTalent.Leadthumb})
             Case CrewSkill.Medicine : possibleTalents.Add(CrewTalent.Anatomist)
         End Select
-        Return Dev.GetRandom(Of CrewTalent)(possibleTalents)
+        Return Dev.GetRandom(Of CrewTalent)(possibleTalents, World.Rng)
     End Function
     Private Shared NamePrefixes As New List(Of String)
     Private Shared NameSuffixes As New List(Of String)
@@ -368,7 +368,7 @@
     Private DamageSustained As Integer
 
     Public Sub MeleeAttack(ByRef targets As List(Of Crew))
-        Dim target As Crew = Dev.GrabRandom(targets)
+        Dim target As Crew = Dev.GrabRandom(targets, World.Rng)
         MeleeAttack(target)
     End Sub
     Public Sub MeleeAttack(ByRef target As Crew)
