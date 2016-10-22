@@ -220,18 +220,6 @@
         Return False
     End Function
 
-    Protected ReadOnly Property BaseTravelSpeed() As Double
-        Get
-            Select Case Type
-                Case ShipType.Sloop : Return 50
-                Case ShipType.Schooner : Return 70
-                Case ShipType.Brig : Return 100
-                Case ShipType.Brigantine : Return 120
-                Case ShipType.Frigate : Return 135
-                Case Else : Throw New Exception("Invalid ship type")
-            End Select
-        End Get
-    End Property
     Protected Rigging As ShipRigging
     Public Structure ShipRigging
         Public Masts As Integer

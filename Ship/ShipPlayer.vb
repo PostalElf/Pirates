@@ -61,7 +61,10 @@
             Report.Add(Name & " is facing the wind!", ReportType.WindMoveToken)
         End If
 
-        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+        'split based on rigging
+        'fore-aft only requires fore and aft
+        'all other rigs require full
+        For Each q As ShipQuarter In [Enum].GetValues(GetType(ShipQuarter))
             Dim sailTotal As Integer = 0
             Dim advancedSailTotal As Integer = 0
             For Each Crew In GetCrews(q, CrewRole.Sailor)
@@ -70,25 +73,51 @@
                 If skill >= 3 Then advancedSailTotal += Dev.Constrain(skill, 1, 10)
             Next
 
-            MoveTokenProgress(q) += sailTotal
-            While MoveTokenProgress(q) > MoveTokenThreshold
-                MoveTokenProgress(q) -= MoveTokenThreshold
-                Dim newMoveToken As MoveToken = ConvertQuarterToMoveToken(q, False)
-                If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
-            End While
-
-            AdvancedMoveTokenProgress(q) += advancedSailTotal
-            While AdvancedMoveTokenProgress(q) > AdvancedMoveTokenThreshold
-                AdvancedMoveTokenProgress(q) -= AdvancedMoveTokenThreshold
-                Dim newMoveToken As MoveToken = ConvertQuarterToMoveToken(q, True)
-                If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
-            End While
+            If Rigging.Rig = ShipRigging.ShipRig.ForeAft Then
+                'fore-aft rigging
+                If q = ShipQuarter.Fore Then
+                    'fore generates full sail and half sail
+                    AddMoveTokenProgress(False, ShipQuarter.Fore, sailTotal, newMoves)
+                    AddMoveTokenProgress(False, ShipQuarter.Aft, sailTotal, newMoves)
+                    AddMoveTokenProgress(True, ShipQuarter.Fore, advancedSailTotal, newMoves)
+                    AddMoveTokenProgress(True, ShipQuarter.Aft, advancedSailTotal, newMoves)
+                ElseIf q = ShipQuarter.Aft Then
+                    'aft generates port and starboard
+                    AddMoveTokenProgress(False, ShipQuarter.Port, sailTotal, newMoves)
+                    AddMoveTokenProgress(False, ShipQuarter.Starboard, sailTotal, newMoves)
+                    AddMoveTokenProgress(True, ShipQuarter.Port, advancedSailTotal, newMoves)
+                    AddMoveTokenProgress(True, ShipQuarter.Starboard, advancedSailTotal, newMoves)
+                End If
+            Else
+                'square and mixed rigging
+                AddMoveTokenProgress(False, q, sailTotal, newMoves)
+                AddMoveTokenProgress(True, q, advancedSailTotal, newMoves)
+            End If
         Next
 
+        'add movetokens
         For Each newMoveToken In newMoves
             MoveTokens.Add(newMoveToken)
             Report.Add(Name & " gained a new sailing token: " & newMoveToken.ToString, ReportType.MoveToken)
         Next
+    End Sub
+    Private Sub AddMoveTokenProgress(ByVal isAdvanced As Boolean, ByVal q As ShipQuarter, ByVal value As Integer, ByRef newMoves As List(Of MoveToken))
+        Dim progress As Dictionary(Of ShipQuarter, Integer)
+        Dim threshold As Integer
+        If isAdvanced = True Then
+            progress = AdvancedMoveTokenProgress
+            threshold = AdvancedMoveTokenThreshold
+        Else
+            progress = MoveTokenProgress
+            threshold = MoveTokenThreshold
+        End If
+
+        progress(q) += value
+        While progress(q) > threshold
+            progress(q) -= threshold
+            Dim newMoveToken As MoveToken = ConvertQuarterToMoveToken(q, isAdvanced)
+            If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
+        End While
     End Sub
     Private Function ConvertQuarterToMoveToken(ByVal q As ShipQuarter, ByVal isAdvanced As Boolean) As MoveToken
         Dim newMoveToken As MoveToken = Nothing
@@ -249,6 +278,18 @@
     Private TravelDestination As Isle = Nothing
     Private TravelProgress As Double = 0
     Private TravelTarget As Double = 0
+    Protected ReadOnly Property BaseTravelSpeed() As Double
+        Get
+            Select Case Type
+                Case ShipType.Sloop : Return 50
+                Case ShipType.Schooner : Return 70
+                Case ShipType.Brig : Return 100
+                Case ShipType.Brigantine : Return 120
+                Case ShipType.Frigate : Return 135
+                Case Else : Throw New Exception("Invalid ship type")
+            End Select
+        End Get
+    End Property
     Private Function GetTravelSpeed() As Double
         Dim total As Double = BaseTravelSpeed
         Dim sailSkillModifier As Double = 10
