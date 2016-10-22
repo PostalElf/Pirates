@@ -471,6 +471,7 @@
     End Sub
     Public Sub MoveCrew(ByRef crew As Crew, ByVal targetQuarter As ShipQuarter, Optional ByVal newRole As CrewRole = Nothing)
         Crews(crew.ShipQuarter).Remove(crew)
+        crew.ShipQuarter = targetQuarter
         Crews(targetQuarter).Add(crew)
         If newRole <> Nothing Then crew.Role = newRole
     End Sub
