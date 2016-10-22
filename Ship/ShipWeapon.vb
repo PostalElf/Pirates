@@ -45,7 +45,7 @@
     Public Sub Attack(ByVal attackDirection As BattleDirection, ByVal attackTarget As BattlefieldObject, ByRef crews As List(Of Crew))
         If attackTarget Is Nothing Then Exit Sub
 
-        Dim xp As Double = 0.2
+        Dim xp As Double = 1
         Dim targetQuarter As ShipQuarter = attackTarget.GetTargetQuarter(attackDirection)
         Dim accuracy As Double = 0
         For Each c In crews

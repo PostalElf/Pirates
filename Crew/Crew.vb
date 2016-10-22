@@ -392,6 +392,11 @@
             'miss
             Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off an attack from " & Name & ".", ReportType.CrewAttack)
         End If
+
+        'add xp
+        Dim xp As Double = 0.5
+        AddSkillXP(skill, xp)
+        target.AddSkillXP(skill, xp)
     End Sub
     Public Sub ShipAttack(ByVal accuracy As Integer, ByVal damage As Damage)
         If damage.CrewDamage <= 0 Then Exit Sub
@@ -405,6 +410,9 @@
         Else
             Me.Damage(damage)
         End If
+
+        Dim xp As Double = 1
+        AddSkillXP(CrewSkill.Bracing, xp)
     End Sub
     Private Sub Damage(ByVal damage As Damage)
         If Ship Is Nothing Then Exit Sub
