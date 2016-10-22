@@ -280,14 +280,22 @@
     Private TravelTarget As Double = 0
     Protected ReadOnly Property BaseTravelSpeed() As Double
         Get
+            Dim total As Double = 0
             Select Case Type
-                Case ShipType.Sloop : Return 50
-                Case ShipType.Schooner : Return 70
-                Case ShipType.Brig : Return 100
-                Case ShipType.Brigantine : Return 120
-                Case ShipType.Frigate : Return 135
+                Case ShipType.Sloop : total += 50
+                Case ShipType.Schooner : total += 70
+                Case ShipType.Brig : total += 100
+                Case ShipType.Brigantine : total += 120
+                Case ShipType.Frigate : total += 135
                 Case Else : Throw New Exception("Invalid ship type")
             End Select
+            Select Case Rigging.Masts
+                Case 1 : total += 0
+                Case 2 : total *= 1.5
+                Case 3 : total *= 2
+                Case Else : Throw New Exception("Masts out of range")
+            End Select
+            Return total
         End Get
     End Property
     Private Function GetTravelSpeed() As Double
