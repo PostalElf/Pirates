@@ -233,7 +233,7 @@
 
 #Region "Skills"
     Private Skills As New Dictionary(Of CrewSkill, Integer)
-    Private SkillsXP As New Dictionary(Of CrewSkill, Integer)
+    Private SkillsXP As New Dictionary(Of CrewSkill, Double)
     Private Shared SkillThresholds As Integer() = {0, 100, 300, 600, 1000, 1500}
     Public Function GetSkill(ByVal cs As CrewSkill)
         Dim total As Integer = Skills(cs)
@@ -297,7 +297,7 @@
         Next
         Return bestWeapon
     End Function
-    Public Sub AddSkillXP(ByVal cs As CrewSkill, ByVal value As Integer)
+    Public Sub AddSkillXP(ByVal cs As CrewSkill, ByVal value As Double)
         Dim maxLevel As Integer = SkillThresholds.Count - 1
         Dim maxThreshold As Integer = SkillThresholds(maxLevel)
         If Skills(cs) >= maxLevel Then Exit Sub

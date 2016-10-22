@@ -303,6 +303,9 @@
         Dim sailSkillModifier As Double = 10
         Dim totalModifier As Double = 1
 
+        Dim xp As Integer = Math.Ceiling(GetSkill(Nothing, CrewSkill.Leadership) / 2)
+        xp = Dev.Constrain(xp, 1, 5)
+
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             Dim sailors As List(Of Crew) = GetCrews(q, CrewRole.Sailor)
             If sailors.Count = 0 Then
@@ -311,11 +314,12 @@
                     'fore-aft rigged ships only require someone in the fore and aft
                 Else
                     'penalty for lacking men
-                    totalModifier -= 0.25
+                    If Rigging.Rig = ShipRigging.ShipRig.ForeAft Then totalModifier -= 0.5 Else totalModifier -= 0.25
                 End If
             Else
                 For Each sailor In sailors
                     total += sailor.GetSkillFromRole * sailSkillModifier
+                    sailor.AddSkillXP(CrewSkill.Sailing, xp)
                 Next
             End If
         Next
@@ -358,9 +362,15 @@
     Public Sub Tick()
         'crew tick
         Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
-        For Each Crew In GetCrews(Nothing, Nothing)
+        Dim CrewList As List(Of Crew) = GetCrews(Nothing, Nothing)
+        For Each Crew In CrewList
             Crew.Tick(doctor)
         Next
+        If CrewList.Count > 0 Then
+            Dim xp As Double = CrewList.Count / 2
+            doctor.AddSkillXP(CrewSkill.Medicine, xp)
+        End If
+
 
         'report good consumption
         If GoodsConsumed.Values.Count > 0 Then

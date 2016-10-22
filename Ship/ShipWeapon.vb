@@ -42,13 +42,15 @@
     End Sub
 #End Region
 
-    Public Sub Attack(ByVal attackDirection As BattleDirection, ByVal attackTarget As BattlefieldObject, ByVal crews As List(Of Crew))
+    Public Sub Attack(ByVal attackDirection As BattleDirection, ByVal attackTarget As BattlefieldObject, ByRef crews As List(Of Crew))
         If attackTarget Is Nothing Then Exit Sub
 
+        Dim xp As Double = 0.2
         Dim targetQuarter As ShipQuarter = attackTarget.GetTargetQuarter(attackDirection)
         Dim accuracy As Double = 0
         For Each c In crews
             accuracy += c.GetSkill(CrewSkill.Gunnery)
+            c.AddSkillXP(CrewSkill.Gunnery, xp)
         Next
         accuracy = Math.Round(accuracy / crews.Count, 0, MidpointRounding.AwayFromZero)
 
