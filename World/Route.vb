@@ -38,9 +38,15 @@
             Case Else : Throw New Exception("Route quality out of range")
         End Select
 
+        'pythogoras theorem
         Dim dx As Integer = Math.Abs(isle1.X - isle2.X)
         Dim dy As Integer = Math.Abs(isle1.Y - isle2.Y)
         Dim c As Double = Math.Sqrt((dx * dx) + (dy * dy))
-        Return Math.Round(c * modifier, 2)
+
+        Dim total As Double = Math.Round(c * modifier, 2)
+        Return total
+    End Function
+    Public Overrides Function ToString() As String
+        Return isle1.Name & " - " & isle2.Name
     End Function
 End Class

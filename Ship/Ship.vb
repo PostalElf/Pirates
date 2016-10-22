@@ -256,7 +256,7 @@
         'return per diem consumption
         Dim total As Integer = 0
         For Each r As CrewRace In [Enum].GetValues(GetType(CrewRace))
-            Dim crewCount As Integer = GetCrewsByRace(r).Count
+            Dim crewCount As Integer = GetCrews(r).Count
             Select Case gt
                 Case GoodType.Rations, GoodType.Water : If r <> CrewRace.Unrelinquished Then total += crewCount
                 Case GoodType.Coffee, GoodType.Liqour : If r = CrewRace.Human Then total += crewCount
@@ -456,7 +456,7 @@
         End If
         Return total
     End Function
-    Public Function GetCrewsByRace(ByVal r As CrewRace) As List(Of Crew)
+    Public Function GetCrews(ByVal r As CrewRace) As List(Of Crew)
         Dim total As New List(Of Crew)
         For Each crewlist In Crews.Values
             For Each Crew In crewlist

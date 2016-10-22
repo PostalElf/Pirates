@@ -220,7 +220,7 @@
     End Sub
 #End Region
 
-#Region "World"
+#Region "World Travel"
     Private Routes As New List(Of Route)
     Public Function CheckAddRoute(ByVal route As Route)
         If Routes.Contains(route) Then Return False
@@ -248,26 +248,117 @@
     Private TravelOrigin As Isle = Nothing
     Private TravelDestination As Isle = Nothing
     Private TravelProgress As Double = 0
-    Private ReadOnly Property TravelSpeed As Double
-        Get
+    Private TravelTarget As Double = 0
+    Private Function GetTravelSpeed() As Double
+        Dim total As Double = BaseTravelSpeed
+        Dim sailSkillModifier As Double = 10
+        Dim totalModifier As Double = 1
 
-        End Get
-    End Property
-    Public Function CheckTravelRoute(ByVal route As Route) As Boolean
+        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+            Dim sailors As List(Of Crew) = GetCrews(q, CrewRole.Sailor)
+            If sailors.Count = 0 Then
+                If Rigging.Rig = ShipRigging.ShipRig.ForeAft AndAlso (q = ShipQuarter.Port OrElse q = ShipQuarter.Starboard) Then
+                    'do nothing
+                    'fore-aft rigged ships only require someone in the fore and aft
+                Else
+                    'penalty for lacking men
+                    totalModifier -= 0.25
+                End If
+            Else
+                For Each sailor In sailors
+                    total += sailor.GetSkillFromRole * sailSkillModifier
+                Next
+            End If
+        Next
+
+        Select Case Waterline
+            Case ShipWaterline.Unladen : totalModifier += 0.5
+            Case ShipWaterline.Light : totalModifier += 0.25
+            Case ShipWaterline.Medium : totalModifier += 0
+            Case ShipWaterline.Heavy : totalModifier -= 0.25
+            Case ShipWaterline.Overladen : totalModifier -= 0.5
+        End Select
+
+        Return total * totalModifier
+    End Function
+    Public Function CheckSetTravelRoute(ByVal route As Route) As Boolean
         If Routes.Contains(route) = False Then Return False
-        If Isle Is Nothing = False Then Return False
+        If Isle Is Nothing Then Return False
         If route.Contains(Isle) = False Then Return False
-        If TravelProgress >= 0 Then Return False
+        If TravelProgress > 0 Then Return False
         Return True
     End Function
-    Public Sub TravelRoute(ByVal route As Route)
-        If CheckTravelRoute(route) = False Then Exit Sub
+    Public Sub SetTravelRoute(ByVal route As Route)
+        If CheckSetTravelRoute(route) = False Then Exit Sub
         TravelOrigin = Isle
         TravelDestination = route - TravelOrigin
         Isle = Nothing
         TravelProgress = 0
+        TravelTarget = route.GetDistance
+    End Sub
+    Public Sub Teleport(ByVal target As Isle)
+        Isle = target
+        TravelOrigin = Nothing
+        TravelDestination = Nothing
+        TravelProgress = 0
+        TravelTarget = 0
     End Sub
 
+    Private ReadOnly Property BaseTravelSpeed() As Double
+        Get
+            Select Case MyBase.Type
+                Case ShipType.Sloop : Return 50
+                Case ShipType.Schooner : Return 70
+                Case ShipType.Brig : Return 100
+                Case ShipType.Brigantine : Return 120
+                Case ShipType.Frigate : Return 135
+                Case Else : Throw New Exception("Invalid ship type")
+            End Select
+        End Get
+    End Property
+    Private ReadOnly Property Rigging As ShipRigging
+        Get
+            Select Case MyBase.Type
+                Case ShipType.Sloop : Return New ShipRigging(1, ShipRigging.ShipRig.ForeAft)
+                Case ShipType.Schooner : Return New ShipRigging(2, ShipRigging.ShipRig.ForeAft)
+                Case ShipType.Brig : Return New ShipRigging(2, ShipRigging.ShipRig.Square)
+                Case ShipType.Brigantine : Return New ShipRigging(2, ShipRigging.ShipRig.Mixed)
+                Case ShipType.Frigate : Return New ShipRigging(3, ShipRigging.ShipRig.Square)
+            End Select
+        End Get
+    End Property
+    Private Structure ShipRigging
+        Public Masts As Integer
+        Public Rig As ShipRig
+        Public Sub New(ByVal aMasts As Integer, ByVal aRig As ShipRig)
+            Masts = aMasts
+            Rig = aRig
+        End Sub
+        Public Overrides Function ToString() As String
+            Dim total As String = ""
+            Select Case Masts
+                Case 1 : total &= "Single-Masted"
+                Case 2 : total &= "Double-Masted"
+                Case 3 : total &= "Triple-Masted"
+            End Select
+            total &= " "
+            Select Case Rig
+                Case ShipRig.ForeAft : total &= "Fore-and-Aft Rig"
+                Case ShipRig.Square : total &= "Square Rig"
+                Case ShipRig.Mixed : total &= "Mixed Rig"
+            End Select
+            Return total
+        End Function
+
+        Public Enum ShipRig
+            ForeAft
+            Square
+            Mixed
+        End Enum
+    End Structure
+#End Region
+
+#Region "World"
     Public Sub Tick()
         'crew tick
         Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
@@ -307,7 +398,15 @@
         TickTravel()
     End Sub
     Private Sub TickTravel()
+        If TravelDestination Is Nothing Then Exit Sub
 
+        TravelProgress += GetTravelSpeed()
+        If TravelProgress >= TravelTarget Then
+            Teleport(TravelDestination)
+            Report.Add(Name & " has arrived at " & Isle.Name, ReportType.TravelMain)
+        Else
+            Report.Add(Name & " makes some progress towards " & TravelDestination.Name & " (" & TravelProgress.ToString("0.0") & "/" & TravelTarget.ToString("0.0") & ")", ReportType.TravelProgress)
+        End If
     End Sub
     Public GoodsConsumed As New Dictionary(Of GoodType, Good)
     Public MoraleChange As Integer

@@ -61,4 +61,6 @@ Public Enum ReportType
 
     CrewConsumption
     CrewMorale
+    TravelMain
+    TravelProgress
 End Enum

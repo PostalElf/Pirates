@@ -3,23 +3,13 @@
     Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
 
     Sub Main()
+
         Console.SetWindowSize(Console.WindowWidth, 50)
         world = Pirates.World.Generate
         world.ShipPlayer = SetupPlayerShip(world.Rng)
+        world.ShipPlayer.teleport(world.Item("Commonwealth"))
 
-        Dim pistol As New CrewBonus
-        With pistol
-            .Name = "Pistol"
-            .Damage = 25
-            .DamageType = DamageType.Firearms
-            .AmmoUse = 1
-            .Slot = "Left Hand"
-        End With
-        world.ShipPlayer.AddEquipment(pistol)
-
-        For Each Route In world.BasicRoutes
-            world.ShipPlayer.AddRoute(Route)
-        Next
+        TestSnippets(world.ShipPlayer)
 
         While True
             Console.Clear()
@@ -66,6 +56,23 @@
         End With
         Return ship
     End Function
+    Private Sub TestSnippets(ByRef player As ShipPlayer)
+        Dim pistol As New CrewBonus
+        With pistol
+            .Name = "Pistol"
+            .Damage = 25
+            .DamageType = DamageType.Firearms
+            .AmmoUse = 1
+            .Slot = "Left Hand"
+        End With
+        player.AddEquipment(pistol)
+
+        For Each Route In world.BasicRoutes
+            player.AddRoute(Route)
+        Next
+        Dim r As Route = player.GetRoute(world.Item("Commonwealth"), world.Item("Hallowsreach"))
+        player.SetTravelRoute(r)
+    End Sub
 
     Private Function MainPlayerInput() As Boolean
         'return true when player ends turn

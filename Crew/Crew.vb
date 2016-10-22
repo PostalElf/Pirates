@@ -440,8 +440,8 @@
     Public Ship As Ship
     Public ShipQuarter As ShipQuarter
     Public Role As CrewRole
-    Public Sub SetStation(ByVal station As CrewStation, ByVal inCombat As Boolean)
-        If inCombat = True Then BattleStation = station Else station = station
+    Public Sub SetStation(ByVal aStation As CrewStation, ByVal inCombat As Boolean)
+        If inCombat = True Then BattleStation = aStation Else Station = aStation
     End Sub
 
     Public Quarters As ShipModule
