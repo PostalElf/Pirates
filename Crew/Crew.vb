@@ -553,7 +553,12 @@
                 hasEaten = False
                 change += ConsumeGoods(GoodType.Mordicus, 1, 0, -10)
                 If change > -10 Then
-                    If Ship.GetSkill(Nothing, CrewSkill.Leadership) >= 7 Then change += 1
+                    Dim leadership As Integer = 0
+                    Dim captain As Crew = Ship.GetCrew(Nothing, CrewRole.Captain)
+                    If captain Is Nothing = False Then leadership += captain.GetSkillFromRole * 2
+                    Dim firstmate As Crew = Ship.GetCrew(Nothing, CrewRole.FirstMate)
+                    If firstmate Is Nothing = False Then leadership += firstmate.GetSkillFromRole
+                    If leadership >= 7 Then change += 1
                 End If
         End Select
 
@@ -565,12 +570,9 @@
 
             'cooking
             If hasEaten = True Then
-                Dim cooks As List(Of Crew) = Ship.GetCrews(Nothing, CrewRole.Cook)
-                If cooks.Count = 1 Then
-                    Dim cook As Crew = cooks(0)
-                    Dim cooking As Integer = cook.GetSkillFromRole
-                    change += Math.Ceiling(cooking / 2)
-
+                Dim cook As Crew = Ship.GetCrew(Nothing, CrewRole.Cook)
+                If cook Is Nothing = False Then
+                    change += Math.Ceiling(cook.GetSkillFromRole / 2)
                     Dim xp As Double = 0.25
                     cook.AddSkillXP(CrewSkill.Cooking, xp)
                 End If
@@ -589,6 +591,13 @@
 
         Dim currentDamage As Damage = GetWorstDamage()
         If currentDamage Is Nothing Then Exit Sub
+
+        If doctor Is Nothing Then
+            Report.Add(Name & "'s injuries worsen without a ship doctor.", ReportType.CrewDamage)
+            DamageSustained += 5
+            If DamageSustained > Health Then Death()
+            Exit Sub
+        End If
 
         Dim skill As Integer = doctor.GetSkillFromRole + Dev.FateRoll(World.Rng)
         If doctor.Race <> Me.Race Then skill -= 2

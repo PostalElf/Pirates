@@ -401,7 +401,7 @@
             Return total
         End Get
     End Property
-    Private ReadOnly Property IsSeaworthy As Boolean
+    Protected ReadOnly Property IsSeaworthy As Boolean
         Get
             'check to ensure that ship has helm, quarterdeck, maproom, and at least one quarter
             If GetModules(ShipModule.ModuleType.Helm).Count = 0 Then Return False
@@ -483,6 +483,10 @@
     Public Sub MoveCrewToStation(ByRef crew As Crew)
         If InCombat = True Then MoveCrew(crew, crew.BattleStation) Else MoveCrew(crew, crew.Station)
     End Sub
+    Public Function GetCrew(ByVal quarter As ShipQuarter, ByVal role As CrewRole) As Crew
+        Dim crewlist As List(Of Crew) = GetCrews(quarter, role)
+        If crewlist.Count = 0 Then Return Nothing Else Return crewlist(0)
+    End Function
     Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As CrewRole) As List(Of Crew)
         Dim total As New List(Of Crew)
         If quarter = Nothing Then
@@ -518,24 +522,6 @@
             End If
         Next
         Return bestCrew
-    End Function
-    Public Function GetSkill(ByVal quarter As ShipQuarter, ByVal skill As CrewSkill) As Integer
-        Dim total As Integer = 0
-        Select Case skill
-            Case CrewSkill.Leadership
-                For Each c In GetCrews(quarter, CrewRole.Captain)
-                    total += c.GetSkillFromRole * 2
-                Next
-                For Each c In GetCrews(quarter, CrewRole.FirstMate)
-                    total += c.GetSkillFromRole
-                Next
-            Case Else
-                Dim role As CrewRole = Crew.ConvertSkillToRole(skill)
-                For Each c In GetCrews(quarter, role)
-                    total += c.GetSkillFromRole
-                Next
-        End Select
-        Return total
     End Function
 
     Private Equipment As New List(Of CrewBonus)

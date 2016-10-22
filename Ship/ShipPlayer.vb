@@ -272,8 +272,18 @@
         Next
         Return Nothing
     End Function
+    Private Sub UpgradeRoute(ByVal isle1 As Isle, ByVal isle2 As Isle)
+        For n = 0 To Routes.Count - 1
+            If Routes(n).Contains(isle1) AndAlso Routes(n).Contains(isle2) Then
+                Routes(n) += 1
+                Report.Add("The ship's navigator has improved the maps for " & isle1.Name & " - " & isle2.Name & ".", ReportType.TravelProgress)
+                Exit Sub
+            End If
+        Next
+    End Sub
 
     Private Isle As Isle = Nothing
+    Private TravelRoute As Route = Nothing
     Private TravelOrigin As Isle = Nothing
     Private TravelDestination As Isle = Nothing
     Private TravelProgress As Double = 0
@@ -334,11 +344,11 @@
         If Routes.Contains(route) = False Then Return False
         If Isle Is Nothing Then Return False
         If route.Contains(Isle) = False Then Return False
-        If TravelProgress > 0 Then Return False
         Return True
     End Function
     Public Sub SetTravelRoute(ByVal route As Route)
         If CheckSetTravelRoute(route) = False Then Exit Sub
+        TravelRoute = route
         TravelOrigin = Isle
         TravelDestination = route - TravelOrigin
         Isle = Nothing
@@ -362,7 +372,7 @@
         For Each Crew In CrewList
             Crew.Tick(doctor)
         Next
-        If CrewList.Count > 0 Then
+        If doctor Is Nothing = False AndAlso CrewList.Count > 0 Then
             Dim xp As Double = CrewList.Count / 2
             doctor.AddSkillXP(CrewSkill.Medicine, xp)
         End If
@@ -400,14 +410,19 @@
         TickTravel()
     End Sub
     Private Sub TickTravel()
+        If MyBase.IsSeaworthy = False Then Exit Sub
         If TravelDestination Is Nothing Then Exit Sub
 
         TravelProgress += GetTravelSpeed()
         If TravelProgress >= TravelTarget Then
+            Dim navigator As Crew = GetCrew(Nothing, CrewRole.Navigator)
+            navigator.AddSkillXP(CrewSkill.Navigation, 300)
+            If navigator.GetSkillFromRole > TravelRoute Then UpgradeRoute(TravelOrigin, TravelDestination)
+
             Teleport(TravelDestination)
-            Report.Add(Name & " has arrived at " & Isle.Name, ReportType.TravelMain)
+            Report.Add(Name & " has arrived at " & Isle.Name & ".", ReportType.TravelMain)
         Else
-            Report.Add(Name & " makes some progress towards " & TravelDestination.Name & " (" & TravelProgress.ToString("0.0") & "/" & TravelTarget.ToString("0.0") & ")", ReportType.TravelProgress)
+            Report.Add(Name & " makes some progress towards " & TravelDestination.Name & " (" & TravelProgress.ToString("0") & "/" & TravelTarget.ToString("0") & ").", ReportType.TravelProgress)
         End If
     End Sub
     Public GoodsConsumed As New Dictionary(Of GoodType, Good)

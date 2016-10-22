@@ -21,6 +21,15 @@
         If route.isle2 = isle Then Return route.isle1
         Return Nothing
     End Operator
+    Public Shared Operator >(ByVal i As Integer, ByVal route As Route) As Boolean
+        If i > route.Quality Then Return True Else Return False
+    End Operator
+    Public Shared Operator <(ByVal i As Integer, ByVal route As Route) As Boolean
+        If i < route.Quality Then Return True Else Return False
+    End Operator
+    Public Shared Operator +(ByVal route As Route, ByVal i As Integer) As Route
+        Return New Route(route.isle1, route.isle2, route.Quality + i)
+    End Operator
 
     Public Function Contains(ByVal isle As Isle) As Boolean
         If isle1 = isle OrElse isle2 = isle Then Return True
