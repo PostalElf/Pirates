@@ -504,11 +504,13 @@
     Private Sub TickMorale()
         'morale ranges from 1 to 100
         Dim change As Integer = 0
+        Dim hasEaten As Boolean = True
 
         Select Case Race
             Case CrewRace.Human
                 'humans need rations and water; desire coffee and liqour
                 change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
+                If change = -5 Then hasEaten = False
                 change += ConsumeGoods(GoodType.Water, 1, 0, -10)
                 If change >= -5 Then
                     change += ConsumeGoods(GoodType.Coffee, 1, 1, 0)
@@ -518,6 +520,7 @@
             Case CrewRace.Seatouched
                 'seatouched need rations, water and prayer; desire salt
                 change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
+                If change = -5 Then hasEaten = False
                 change += ConsumeGoods(GoodType.Water, 1, 0, -10)
                 If Shrine Is Nothing Then change -= 5 : Exit Select
                 If change >= -5 Then
@@ -528,6 +531,7 @@
             Case CrewRace.Windsworn
                 'windsworn need rations and water; desire tobacco and spice
                 change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
+                If change = -5 Then hasEaten = False
                 change += ConsumeGoods(GoodType.Water, 1, 0, -5)
                 If change >= -5 Then
                     change += ConsumeGoods(GoodType.Tobacco, 1, 2, 0)
@@ -536,6 +540,7 @@
 
             Case CrewRace.Unrelinquished
                 'unrelinquished need mordicus; desire leadership
+                hasEaten = False
                 change += ConsumeGoods(GoodType.Mordicus, 1, 0, -10)
                 If change > -10 Then
                     If Ship.GetSkill(Nothing, CrewSkill.Leadership) >= 7 Then change += 1
@@ -544,13 +549,21 @@
 
         'other bonuses
         If change >= 0 Then
-            If Quarters Is Nothing = False Then
-                change += (Quarters.Quality - 2)
-                change = Dev.Constrain(change, 0, 100)
-            End If
-            If Race <> CrewRace.Unrelinquished Then
-                Dim cooking As Integer = Ship.GetSkill(Nothing, CrewSkill.Cooking)
-                change += Math.Ceiling(cooking / 2)
+            If Quarters Is Nothing Then Throw New Exception("Crew has no quarters.")
+            change += (Quarters.Quality - 2)
+            change = Dev.Constrain(change, 0, 100)
+
+            'cooking
+            If hasEaten = True Then
+                Dim cooks As List(Of Crew) = Ship.GetCrews(Nothing, CrewRole.Cook)
+                If cooks.Count = 1 Then
+                    Dim cook As Crew = cooks(0)
+                    Dim cooking As Integer = cook.GetSkillFromRole
+                    change += Math.Ceiling(cooking / 2)
+
+                    Dim xp As Double = 0.25
+                    cook.AddSkillXP(CrewSkill.Cooking, xp)
+                End If
             End If
         End If
 
