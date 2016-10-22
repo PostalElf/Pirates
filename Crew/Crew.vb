@@ -500,6 +500,16 @@
     Public Sub Tick(ByVal doctor As Crew)
         TickMorale()
         TickHeal(doctor)
+
+        'add xp for specialist roles
+        Select Case Role
+            Case CrewRole.Captain : AddSkillXP(CrewSkill.Leadership, 1)
+            Case CrewRole.FirstMate : AddSkillXP(CrewSkill.Leadership, 0.5)
+            Case CrewRole.Navigator : AddSkillXP(CrewSkill.Navigation, 1)
+            Case CrewRole.Sailor : AddSkillXP(CrewSkill.Sailing, 1)
+            Case CrewRole.Cook 'handled in crew.tickmorale
+            Case CrewRole.Doctor 'handled in shipplayer.tick
+        End Select
     End Sub
     Private Sub TickMorale()
         'morale ranges from 1 to 100

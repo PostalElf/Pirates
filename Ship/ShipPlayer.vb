@@ -303,9 +303,6 @@
         Dim sailSkillModifier As Double = 10
         Dim totalModifier As Double = 1
 
-        Dim xp As Integer = Math.Ceiling(GetSkill(Nothing, CrewSkill.Leadership) / 2)
-        xp = Dev.Constrain(xp, 1, 5)
-
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             Dim sailors As List(Of Crew) = GetCrews(q, CrewRole.Sailor)
             If sailors.Count = 0 Then
@@ -319,7 +316,6 @@
             Else
                 For Each sailor In sailors
                     total += sailor.GetSkillFromRole * sailSkillModifier
-                    sailor.AddSkillXP(CrewSkill.Sailing, xp)
                 Next
             End If
         Next
