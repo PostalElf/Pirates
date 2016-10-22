@@ -16,6 +16,11 @@
     Public Shared Operator <>(ByVal r1 As Route, ByVal r2 As Route)
         If r1 = r2 Then Return False Else Return True
     End Operator
+    Public Shared Operator -(ByVal route As Route, ByVal isle As Isle) As Isle
+        If route.isle1 = isle Then Return route.isle2
+        If route.isle2 = isle Then Return route.isle1
+        Return Nothing
+    End Operator
 
     Public Function Contains(ByVal isle As Isle) As Boolean
         If isle1 = isle OrElse isle2 = isle Then Return True

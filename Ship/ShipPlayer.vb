@@ -223,25 +223,94 @@
 #Region "World"
     Private Routes As New List(Of Route)
     Public Function CheckAddRoute(ByVal route As Route)
-        If GetRoute(route) = True Then Return False
+        If Routes.Contains(route) Then Return False
         Return True
     End Function
     Public Sub AddRoute(ByVal Route As Route)
         Routes.Add(Route)
     End Sub
     Public Function CheckRemoveRoute(ByVal route As Route)
-        If GetRoute(route) = False Then Return False
+        If Routes.Contains(route) = False Then Return False
         Return True
     End Function
     Public Sub RemoveRoute(ByVal route As Route)
         Routes.Remove(route)
     End Sub
-    Public Function GetRoute(ByVal route As Route) As Boolean
-        For Each r In Routes
-            If r = route Then Return True
+    Public Function GetRoute(ByVal isle1 As Isle, ByVal isle2 As Isle) As Route
+        Dim r As New Route(isle1, isle2, 0)
+        For Each Route In Routes
+            If Route = r Then Return Route
         Next
-        Return False
+        Return Nothing
     End Function
+
+    Private Isle As Isle = Nothing
+    Private TravelOrigin As Isle = Nothing
+    Private TravelDestination As Isle = Nothing
+    Private TravelProgress As Double = 0
+    Private ReadOnly Property TravelSpeed As Double
+        Get
+
+        End Get
+    End Property
+    Public Function CheckTravelRoute(ByVal route As Route) As Boolean
+        If Routes.Contains(route) = False Then Return False
+        If Isle Is Nothing = False Then Return False
+        If route.Contains(Isle) = False Then Return False
+        If TravelProgress >= 0 Then Return False
+        Return True
+    End Function
+    Public Sub TravelRoute(ByVal route As Route)
+        If CheckTravelRoute(route) = False Then Exit Sub
+        TravelOrigin = Isle
+        TravelDestination = route - TravelOrigin
+        Isle = Nothing
+        TravelProgress = 0
+    End Sub
+
+    Public Sub Tick()
+        'crew tick
+        Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
+        For Each Crew In GetCrews(Nothing, Nothing)
+            Crew.Tick(doctor)
+        Next
+
+        'report good consumption
+        If GoodsConsumed.Values.Count > 0 Then
+            Dim rep As String = "The crew consumed "
+            For n = 0 To GoodsConsumed.Values.Count - 1
+                Dim g As Good = GoodsConsumed.Values(n)
+                If n = GoodsConsumed.Values.Count - 1 Then rep &= "and "
+                If g.Qty < 0 Then
+                    rep &= Math.Abs(g.Qty) & " " & g.Type.ToString & ", "
+                End If
+                If n = GoodsConsumed.Values.Count - 1 Then
+                    rep = rep.Remove(rep.Count - 2, 2)
+                    rep &= "."
+                End If
+            Next
+            Report.Add(rep, ReportType.CrewConsumption)
+            GoodsConsumed.Clear()
+        End If
+
+        'report morale change
+        If MoraleChange <> 0 Then
+            Dim rep As String = "The crew's morale"
+            If MoraleChange > 0 Then rep &= " improves by " & MoraleChange
+            If MoraleChange < 0 Then rep &= " worses by " & Math.Abs(MoraleChange)
+            rep &= " in total "
+            rep &= "(avg " & MoraleChange / GetCrews(Nothing, Nothing).Count & ")."
+            Report.Add(rep, ReportType.CrewMorale)
+            MoraleChange = 0
+        End If
+
+        TickTravel()
+    End Sub
+    Private Sub TickTravel()
+
+    End Sub
+    Public GoodsConsumed As New Dictionary(Of GoodType, Good)
+    Public MoraleChange As Integer
 #End Region
 
 #Region "Console"

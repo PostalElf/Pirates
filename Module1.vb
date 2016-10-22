@@ -17,6 +17,10 @@
         End With
         world.ShipPlayer.AddEquipment(pistol)
 
+        For Each Route In world.BasicRoutes
+            world.ShipPlayer.AddRoute(Route)
+        Next
+
         While True
             Console.Clear()
             Console.ForegroundColor = ConsoleColor.White

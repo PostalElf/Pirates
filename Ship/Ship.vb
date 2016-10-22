@@ -643,48 +643,6 @@
     End Sub
 #End Region
 
-#Region "World"
-    Public Sub Tick()
-        Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
-        For Each CrewList In Crews.Values
-            For Each Crew In CrewList
-                Crew.Tick(doctor)
-            Next
-        Next
-
-        'report good consumption
-        If GoodsConsumed.Values.Count > 0 Then
-            Dim rep As String = "The crew consumed "
-            For n = 0 To GoodsConsumed.Values.Count - 1
-                Dim g As Good = GoodsConsumed.Values(n)
-                If n = GoodsConsumed.Values.Count - 1 Then rep &= "and "
-                If g.Qty < 0 Then
-                    rep &= Math.Abs(g.Qty) & " " & g.Type.ToString & ", "
-                End If
-                If n = GoodsConsumed.Values.Count - 1 Then
-                    rep = rep.Remove(rep.Count - 2, 2)
-                    rep &= "."
-                End If
-            Next
-            Report.Add(rep, ReportType.CrewConsumption)
-            GoodsConsumed.Clear()
-        End If
-
-        'report morale change
-        If MoraleChange <> 0 Then
-            Dim rep As String = "The crew's morale"
-            If MoraleChange > 0 Then rep &= " improves by " & MoraleChange
-            If MoraleChange < 0 Then rep &= " worses by " & Math.Abs(MoraleChange)
-            rep &= " in total "
-            rep &= "(avg " & MoraleChange / GetCrews(Nothing, Nothing).Count & ")."
-            Report.Add(rep, ReportType.CrewMorale)
-            MoraleChange = 0
-        End If
-    End Sub
-    Public GoodsConsumed As New Dictionary(Of GoodType, Good)
-    Public MoraleChange As Integer
-#End Region
-
 #Region "Console Display"
     Public Property ConsoleColour As ConsoleColor
     Public Sub ConsoleWrite() Implements BattlefieldObject.ConsoleWrite

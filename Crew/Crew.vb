@@ -471,9 +471,10 @@
         If Ship.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
             Return negativeChange
         Else
-            Ship.AddGood(good)
-            If Ship.GoodsConsumed.ContainsKey(goodType) = False Then Ship.GoodsConsumed.Add(goodType, good.Generate(goodType))
-            Ship.GoodsConsumed(goodType) += good
+            Dim ps As ShipPlayer = CType(Ship, ShipPlayer)
+            ps.AddGood(good)
+            If ps.GoodsConsumed.ContainsKey(goodType) = False Then ps.GoodsConsumed.Add(goodType, good.Generate(goodType))
+            ps.GoodsConsumed(goodType) += good
             Return positiveChange
         End If
     End Function
@@ -547,7 +548,7 @@
 
         'apply
         Morale += change
-        Ship.MoraleChange += change
+        CType(Ship, ShipPlayer).MoraleChange += change
     End Sub
     Private Sub TickHeal(ByVal doctor As Crew)
         'doctors have disadvantage when treating patients not of their race
