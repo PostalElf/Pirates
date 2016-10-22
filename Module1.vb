@@ -3,7 +3,6 @@
     Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
 
     Sub Main()
-
         Console.SetWindowSize(Console.WindowWidth, 50)
         world = Pirates.World.Generate
         world.ShipPlayer = SetupPlayerShip(world.Rng)
@@ -35,8 +34,8 @@
             Next
 
             .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Aft, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
             .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
             .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
             .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
 
