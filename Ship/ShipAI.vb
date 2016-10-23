@@ -74,7 +74,7 @@
 
             'add crew
             For Each cp In newCrews
-                .AddCrew(cp.ShipQuarter, Crew.Generate(.Race), cp.Role)
+                .AddCrew(cp.ShipQuarter, Crew.Generate(.Race, rng, Crew.ConvertRoleToSkill(cp.Role)), cp.Role)
             Next
             newCrews.Clear()
         End With

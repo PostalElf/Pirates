@@ -5,9 +5,7 @@
             SkillsXP.Add(cs, 0)
         Next
     End Sub
-    Public Shared Function Generate(ByVal aRace As CrewRace, Optional ByRef rng As Random = Nothing) As Crew
-        If rng Is Nothing Then rng = New Random
-
+    Public Shared Function Generate(ByVal aRace As CrewRace, ByVal rng As Random, Optional ByVal skillMain As CrewSkill = Nothing, Optional ByVal skillSub As CrewSkill = Nothing) As Crew
         Dim crew As New Crew
         With crew
             .Name = GenerateName(aRace, rng)
@@ -26,12 +24,14 @@
             End With
             .AddBonus("equipment", pin)
 
-            Dim skills As New List(Of CrewSkill)([Enum].GetValues(GetType(CrewSkill)))
-            For n = 1 To 2
-                Dim cs As CrewSkill = Dev.GrabRandom(Of CrewSkill)(skills, rng)
-                .AddSkillXP(cs, SkillThresholds(n))
-                If n = 2 Then .addtalent(GenerateTalent(aRace, cs))
-            Next
+            Dim s As New List(Of CrewSkill)([Enum].GetValues(GetType(CrewSkill)))
+            Dim cs As CrewSkill = Nothing
+            If skillMain <> Nothing Then cs = skillMain Else cs = Dev.GrabRandom(Of CrewSkill)(s, rng)
+            .AddSkillXP(cs, SkillThresholds(2))
+            If skillSub <> Nothing Then cs = skillSub Else cs = Dev.GrabRandom(Of CrewSkill)(s, rng)
+            .AddSkillXP(cs, SkillThresholds(1))
+
+            .AddTalent(GenerateTalent(aRace))
         End With
         Return crew
     End Function
@@ -44,7 +44,7 @@
         Dim suffix As String = Dev.GrabRandom(Of String)(NameSuffixes, rng)
         Return prefix & " " & suffix
     End Function
-    Private Shared Function GenerateTalent(ByVal aRace As CrewRace, ByVal bestSkill As CrewSkill) As CrewTalent
+    Private Shared Function GenerateTalent(ByVal aRace As CrewRace) As CrewTalent
         Dim possibleTalents As New List(Of CrewTalent)
         For Each talent In [Enum].GetValues(GetType(CrewTalent))
             'anything above 100 is a trained talent

@@ -33,18 +33,17 @@
                 .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, CrewRace.Human))
             Next
 
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Aft, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Starboard, Crew.Generate(CrewRace.Human, rng), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng, CrewSkill.Sailing), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Aft, Crew.Generate(CrewRace.Human, rng, CrewSkill.Sailing), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng, CrewSkill.Gunnery), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng, CrewSkill.Gunnery), CrewRole.Gunner)
 
             .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, ShipModule.ModuleQuality.Average, Nothing))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Captain)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng, CrewSkill.Leadership), CrewRole.Captain)
             .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Maproom, ShipModule.ModuleQuality.Average, CrewRace.Human))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Navigator)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng, CrewSkill.Navigation), CrewRole.Navigator)
             .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Helm, ShipModule.ModuleQuality.Average, CrewRace.Human))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng), CrewRole.Helmsman)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng, CrewSkill.Steering), CrewRole.Helmsman)
 
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("cannon"))
             .AddModule(ShipQuarter.Starboard, ShipModule.Generate(ShipModule.ModuleType.Hold, ShipModule.ModuleQuality.Excellent, Nothing))
@@ -318,7 +317,7 @@
             .AddGood(GoodType.Water, 100)
             .GoodsFreeForConsumption(GoodType.Water) = True
 
-            Dim st As Crew = Crew.Generate(CrewRace.Seatouched)
+            Dim st As Crew = Crew.Generate(CrewRace.Seatouched, New Random)
             .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, CrewRace.Seatouched))
             .AddCrew(ShipQuarter.Fore, st)
             .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Shrine, ShipModule.ModuleQuality.Luxurious, CrewRace.Seatouched))
