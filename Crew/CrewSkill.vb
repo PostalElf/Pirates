@@ -1,10 +1,10 @@
 ﻿Public Enum CrewSkill
     Leadership = 1
     Navigation
+    Steering
     Sailing
     Gunnery
     Bracing
-    Athletics
     Cooking
     Alchemy
     Medicine

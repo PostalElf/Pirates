@@ -367,6 +367,10 @@
         m.Quarter = Nothing
         m.Ship = Nothing
     End Sub
+    Public Function GetModule(ByVal type As ShipModule.ModuleType, Optional ByVal quarter As ShipQuarter = Nothing) As ShipModule
+        Dim mlist As List(Of ShipModule) = GetModules(type, quarter)
+        If mlist.Count = 0 Then Return Nothing Else Return mlist(0)
+    End Function
     Public Function GetModules(ByVal type As ShipModule.ModuleType, Optional ByVal quarter As ShipQuarter = Nothing) As List(Of ShipModule)
         Dim total As New List(Of ShipModule)
         For Each q In Modules.Keys

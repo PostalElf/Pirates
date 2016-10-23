@@ -416,7 +416,6 @@
         TravelProgress += GetTravelSpeed()
         If TravelProgress >= TravelTarget Then
             Dim navigator As Crew = GetCrew(Nothing, CrewRole.Navigator)
-            navigator.AddSkillXP(CrewSkill.Navigation, 300)
             If navigator.GetSkillFromRole > TravelRoute Then UpgradeRoute(TravelOrigin, TravelDestination)
 
             Teleport(TravelDestination)

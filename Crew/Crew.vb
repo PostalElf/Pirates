@@ -171,7 +171,7 @@
 
                 Case "Pegleg"
                     .Slot = "Feet"
-                    .SkillBonuses.Add(CrewSkill.Athletics, -2)
+                    .SkillBonuses.Add(CrewSkill.Bracing, -2)
 
                 Case "Touch of Death"
                     .Slot = "Talisman"
@@ -209,7 +209,7 @@
 
                 Case "Writhing Mass"
                     .Slot = "Feet"
-                    .SkillBonuses.Add(CrewSkill.Athletics, +1)
+                    .SkillBonuses.Add(CrewSkill.Bracing, +1)
 
                 Case Else : Throw New Exception("Out of roll range")
             End Select
@@ -244,25 +244,21 @@
             If e.SkillBonuses.ContainsKey(cs) Then total += e.SkillBonuses(cs)
         Next
 
-        'specific bonuses
-        If cs = CrewSkill.Leadership AndAlso (Role = CrewRole.FirstMate OrElse Role = CrewRole.Captain) Then
-            total += ConvertQualityToBonus(ShipModule.ModuleType.Quarterdeck)
-        ElseIf cs = CrewSkill.Sailing AndAlso Role = CrewRole.Helmsman Then
-            total += ConvertQualityToBonus(ShipModule.ModuleType.Helm)
-        ElseIf cs = CrewSkill.Navigation AndAlso Role = CrewRole.Navigator Then
-            total += ConvertQualityToBonus(ShipModule.ModuleType.Maproom)
-        End If
-
-        Return total
-    End Function
-    Private Function ConvertQualityToBonus(ByVal moduleType As ShipModule.ModuleType) As Integer
-        Dim quality As Integer = Ship.GetModules(moduleType)(0).Quality
-        Select Case quality
-            Case 0, 1, 2 : Return 0
-            Case 3, 4 : Return 1
-            Case 5 : Return 2
-            Case Else : Throw New Exception
+        Dim m As ShipModule = Nothing
+        Select Case cs
+            Case CrewSkill.Steering : m = Ship.GetModule(ShipModule.ModuleType.Helm)
+            Case CrewSkill.Navigation : m = Ship.GetModule(ShipModule.ModuleType.Maproom)
+            Case CrewSkill.Cooking : m = Ship.GetModule(ShipModule.ModuleType.Kitchen)
+            Case CrewSkill.Medicine : m = Ship.GetModule(ShipModule.ModuleType.Apothecary)
+            Case CrewSkill.Alchemy : m = Ship.GetModule(ShipModule.ModuleType.Laboratory)
+            Case CrewSkill.Leadership : m = Ship.GetModule(ShipModule.ModuleType.Quarterdeck)
         End Select
+        If m Is Nothing = False Then
+            Dim mCap As Integer = m.Quality + 1
+            Return Math.Min(mCap, total)
+        Else
+            Return total
+        End If
     End Function
     Private Function GetBestSkill(ByVal meleeOnly As Boolean) As CrewSkill
         Dim bestSkill As CrewSkill = Nothing
@@ -321,6 +317,7 @@
         Select Case skill
             Case CrewSkill.Leadership : Return CrewRole.Captain
             Case CrewSkill.Cooking : Return CrewRole.Cook
+            Case CrewSkill.Steering : Return CrewRole.Helmsman
             Case CrewSkill.Gunnery : Return CrewRole.Gunner
             Case CrewSkill.Sailing : Return CrewRole.Sailor
             Case CrewSkill.Navigation : Return CrewRole.Navigator
@@ -334,7 +331,8 @@
             Case CrewRole.Captain, CrewRole.FirstMate : Return CrewSkill.Leadership
             Case CrewRole.Cook : Return CrewSkill.Cooking
             Case CrewRole.Gunner : Return CrewSkill.Gunnery
-            Case CrewRole.Sailor, CrewRole.Helmsman : Return CrewSkill.Sailing
+            Case CrewRole.Helmsman : Return CrewSkill.Steering
+            Case CrewRole.Sailor : Return CrewSkill.Sailing
             Case CrewRole.Navigator : Return CrewSkill.Navigation
             Case CrewRole.Alchemist : Return CrewSkill.Alchemy
             Case CrewRole.Doctor : Return CrewSkill.Medicine
@@ -507,6 +505,8 @@
             Case CrewRole.FirstMate : AddSkillXP(CrewSkill.Leadership, 0.5)
             Case CrewRole.Navigator : AddSkillXP(CrewSkill.Navigation, 1)
             Case CrewRole.Sailor : AddSkillXP(CrewSkill.Sailing, 1)
+            Case CrewRole.Helmsman : AddSkillXP(CrewSkill.Sailing, 1)
+            Case CrewRole.Gunner 'handled in ship.shipattack
             Case CrewRole.Cook 'handled in crew.tickmorale
             Case CrewRole.Doctor 'handled in shipplayer.tick
         End Select

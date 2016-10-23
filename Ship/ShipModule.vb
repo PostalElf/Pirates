@@ -118,6 +118,11 @@
                             .Weight = 12
                     End Select
 
+                Case ModuleType.Apothecary
+                    .Capacity = 1
+                    .HullCost = quality * 2
+                    .Weight = quality
+
                 Case ModuleType.Hold
                     .Capacity = quality * 100
                     .HullCost = 5
@@ -138,6 +143,7 @@
         Kitchen
         Laboratory
         Shrine
+        Apothecary
         Hold
     End Enum
     Public Enum ModuleQuality
