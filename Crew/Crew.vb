@@ -244,6 +244,7 @@
             If e.SkillBonuses.ContainsKey(cs) Then total += e.SkillBonuses(cs)
         Next
 
+        'get module cap
         Dim m As ShipModule = Nothing
         Select Case cs
             Case CrewSkill.Steering : m = Ship.GetModule(ShipModule.ModuleType.Helm)
@@ -255,10 +256,16 @@
         End Select
         If m Is Nothing = False Then
             Dim mCap As Integer = m.Quality + 1
-            Return Math.Min(mCap, total)
-        Else
-            Return total
+            total = Math.Min(mCap, total)
         End If
+
+        'get leadership bonus
+        If cs <> CrewSkill.Leadership Then
+            Dim leadership As Integer = Ship.GetLeadership
+            total += Math.Floor(leadership / 5)
+        End If
+
+        Return total
     End Function
     Private Function GetBestSkill(ByVal meleeOnly As Boolean) As CrewSkill
         Dim bestSkill As CrewSkill = Nothing
@@ -553,11 +560,7 @@
                 hasEaten = False
                 change += ConsumeGoods(GoodType.Mordicus, 1, 0, -10)
                 If change > -10 Then
-                    Dim leadership As Integer = 0
-                    Dim captain As Crew = Ship.GetCrew(Nothing, CrewRole.Captain)
-                    If captain Is Nothing = False Then leadership += captain.GetSkillFromRole * 2
-                    Dim firstmate As Crew = Ship.GetCrew(Nothing, CrewRole.FirstMate)
-                    If firstmate Is Nothing = False Then leadership += firstmate.GetSkillFromRole
+                    Dim leadership As Integer = Ship.GetLeadership
                     If leadership >= 7 Then change += 1
                 End If
         End Select

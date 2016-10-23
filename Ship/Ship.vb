@@ -487,6 +487,18 @@
     Public Sub MoveCrewToStation(ByRef crew As Crew)
         If InCombat = True Then MoveCrew(crew, crew.BattleStation) Else MoveCrew(crew, crew.Station)
     End Sub
+    Public Function GetLeadership() As Integer
+        'captain leadership x2, firstmate just by itself
+        'leadership bonus to all skills = leadership / 5, rounded down
+        'on average you need at least captain leadership 2 + firstmate leadership 1 for first bonus
+
+        Dim leadership As Integer = 0
+        Dim captain As Crew = GetCrew(Nothing, CrewRole.Captain)
+        If captain Is Nothing = False Then leadership += captain.GetSkillFromRole * 2
+        Dim firstmate As Crew = GetCrew(Nothing, CrewRole.FirstMate)
+        If firstmate Is Nothing = False Then leadership += firstmate.GetSkillFromRole
+        Return leadership
+    End Function
     Public Function GetCrew(ByVal quarter As ShipQuarter, ByVal role As CrewRole) As Crew
         Dim crewlist As List(Of Crew) = GetCrews(quarter, role)
         If crewlist.Count = 0 Then Return Nothing Else Return crewlist(0)
@@ -703,6 +715,7 @@
             Console.Write(" - Command " & commandCount)
             Console.WriteLine()
         Next
+        Console.WriteLine(t & Dev.vbTab("Leadership:", s) & GetLeadership() & " (+" & Math.Floor(GetLeadership() / 5) & ")")
         Console.WriteLine(t & Dev.vbTab("Hullspace:", s) & HullSpaceUsed & "/" & HullSpaceMax)
         Console.Write(t & Dev.vbTab("Tonnage:", s) & Tonnage.ToString("0.0") & "/" & TonnageMax)
         Dim ratio As Double = Tonnage / TonnageMax * 100
