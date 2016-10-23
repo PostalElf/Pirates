@@ -427,11 +427,20 @@
     Public Function GetAvailableRoles(ByVal quarter As ShipQuarter) As List(Of CrewRole)
         Dim total As New List(Of CrewRole) From {CrewRole.Sailor}
         If GetWeapons(quarter).Count > 0 Then total.Add(CrewRole.Gunner)
-        If GetModules(ShipModule.ModuleType.Kitchen, quarter).Count > 0 Then total.Add(CrewRole.Cook)
-        If GetModules(ShipModule.ModuleType.Maproom, quarter).Count > 0 Then total.Add(CrewRole.Navigator)
-        If GetModules(ShipModule.ModuleType.Helm, quarter).Count > 0 Then total.AddRange({CrewRole.Helmsman, CrewRole.FirstMate})
-        If GetModules(ShipModule.ModuleType.Quarterdeck, quarter).Count > 0 Then total.Add(CrewRole.Captain)
-        If GetModules(ShipModule.ModuleType.Laboratory, quarter).Count > 0 Then total.Add(CrewRole.Alchemist)
+
+        Dim types As ShipModule.ModuleType() = {ShipModule.ModuleType.Kitchen, ShipModule.ModuleType.Maproom, ShipModule.ModuleType.Helm, ShipModule.ModuleType.Laboratory, ShipModule.ModuleType.Apothecary}
+        Dim roles As CrewRole() = {CrewRole.Cook, CrewRole.Navigator, CrewRole.Helmsman, CrewRole.Alchemist, CrewRole.Doctor}
+        For n = 0 To types.Count - 1
+            Dim type As ShipModule.ModuleType = types(n)
+            Dim role As CrewRole = roles(n)
+            Dim m As ShipModule = GetModule(type, quarter)
+            If m Is Nothing = False Then total.Add(role)
+        Next
+
+        'quarterdeck special
+        Dim q As ShipModule = GetModule(ShipModule.ModuleType.Quarterdeck, quarter)
+        If q Is Nothing = False AndAlso q.CapacityFree > 0 Then total.AddRange({CrewRole.Captain, CrewRole.FirstMate})
+
         Return total
     End Function
     Public Function CheckAddCrew(ByVal quarter As ShipQuarter, ByVal crew As Crew, Optional ByVal role As CrewRole = Nothing) As Boolean
@@ -477,7 +486,9 @@
         Crews(crew.ShipQuarter).Remove(crew)
         crew.ShipQuarter = targetQuarter
         Crews(targetQuarter).Add(crew)
-        If newRole <> Nothing Then crew.Role = newRole
+        If newRole <> Nothing Then
+            crew.Role = newRole
+        End If
     End Sub
     Public Sub MoveCrew(ByRef crew As Crew, ByVal targetStation As CrewStation)
         Dim shipQuarter As ShipQuarter = targetStation.ShipQuarter

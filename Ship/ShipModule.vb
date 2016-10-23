@@ -26,10 +26,8 @@
     Public Sub AddCrew(ByRef Crew As Crew)
         Crews.Add(Crew)
         Select Case Type
-            Case ModuleType.Crew
-                Crew.Quarters = Me
-            Case ModuleType.Shrine
-                Crew.Shrine = Me
+            Case ModuleType.Crew : Crew.Quarters = Me
+            Case ModuleType.Shrine : Crew.Shrine = Me
         End Select
     End Sub
     Public Sub RemoveCrew(ByRef crew As Crew)
@@ -67,33 +65,28 @@
                     .Weight = 5
 
                 Case ModuleType.Quarterdeck
-                    .Capacity = 1
                     .Race = Nothing
                     .HullCost = quality
                     .Weight = 0
                     .IsExclusive = True
 
                 Case ModuleType.Helm
-                    .Capacity = 1
                     .HullCost = quality
                     .Weight = 0
                     .IsExclusive = True
 
                 Case ModuleType.Maproom
                     .Name = quality.ToString & " Map Room"
-                    .Capacity = 1
                     .HullCost = quality
                     .Weight = quality
                     .IsExclusive = True
 
                 Case ModuleType.Kitchen
-                    .Capacity = 1
                     .HullCost = quality
                     .Weight = quality
                     .IsExclusive = True
 
                 Case ModuleType.Laboratory
-                    .Capacity = 3
                     .HullCost = quality * 2
                     .Weight = quality
 
@@ -119,7 +112,6 @@
                     End Select
 
                 Case ModuleType.Apothecary
-                    .Capacity = 1
                     .HullCost = quality * 2
                     .Weight = quality
 
@@ -134,6 +126,16 @@
         End With
         Return total
     End Function
+
+    Public Sub ConsoleReport()
+        Dim s As String = Dev.vbSpace(1)
+        Dim t As Integer = 12
+        Console.WriteLine(Name)
+        If Type = ModuleType.Shrine OrElse Type = ModuleType.Crew Then Console.WriteLine(s & Dev.vbTab("Capacity:", t) & Crews.Count & "/" & Capacity)
+        If Type = ModuleType.Hold Then Console.WriteLine(s & Dev.vbTab("Capacity:", t) & Capacity)
+        Console.WriteLine(s & Dev.vbTab("Hullspace:", t) & HullCost)
+        If Weight > 0 Then Console.WriteLine(s & Dev.vbTab("Weight:", t) & Weight)
+    End Sub
 
     Public Enum ModuleType
         Crew = 1

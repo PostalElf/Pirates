@@ -81,6 +81,7 @@
             .Add("s"c, "View Ship")
             .Add("c"c, "View Crew")
             .Add("g"c, "View Goods")
+            .Add("m"c, "View Modules")
             .Add("z"c, "Tick")
         End With
         Dim input As Char = Menu.getListChoice(choices, 0)
@@ -98,6 +99,8 @@
                 world.ShipPlayer.ConsoleReportGoods()
                 Console.WriteLine()
                 Console.ReadKey()
+            Case "m"c
+                ViewModules(world.ShipPlayer)
             Case "z"c : Return True
         End Select
 
@@ -259,6 +262,14 @@
                     Console.WriteLine()
                 End With
             Next
+        Next
+        Console.WriteLine()
+        Console.ReadKey()
+    End Sub
+    Private Sub ViewModules(ByVal ship As ShipPlayer)
+        For Each ShipModule In ship.GetModules(Nothing, Nothing)
+            ShipModule.ConsoleReport()
+            Console.WriteLine()
         Next
         Console.WriteLine()
         Console.ReadKey()
