@@ -289,7 +289,7 @@
         Next
     End Sub
 
-    Private Isle As Isle = Nothing
+    Public Isle As Isle = Nothing
     Private TravelRoute As Route = Nothing
     Private TravelOrigin As Isle = Nothing
     Private TravelDestination As Isle = Nothing

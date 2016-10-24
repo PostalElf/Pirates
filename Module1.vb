@@ -162,8 +162,15 @@
         Console.ReadKey()
     End Sub
     Private Sub SetCourse(ByVal ship As ShipPlayer)
-        Dim routes As List(Of Route) = ship.GetRoutesFromLocation()
-        Dim targetRoute As Route = Menu.getListChoice(routes, 0, "Select destination:")
+        Dim routes As List(Of Route) = ship.GetRoutesFromLocation
+        Dim destinations As New List(Of Isle)
+        For Each r In routes
+            destinations.Add(r - ship.isle)
+        Next
+
+        Dim targetDestination As Isle = Menu.getListChoice(Of Isle)(destinations, 0, "Select a destination:")
+        Dim index As Integer = destinations.IndexOf(targetDestination)
+        Dim targetRoute As Route = routes(index)
         If ship.CheckSetTravelRoute(targetRoute) = False Then Exit Sub
 
         Dim distance As Double = targetRoute.GetDistance

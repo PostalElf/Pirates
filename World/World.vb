@@ -37,7 +37,7 @@
             .Isles.Add(Isle.Generate("Forsworn Exclave", 2, 1, free))
             .Isles.Add(Isle.Generate("Seatouched Dominion", 3, 2, free))
             .Isles.Add(Isle.Generate("Commonwealth", 2, 3, free))
-            .Isles.Add(Isle.Generate("World's Spine", 2, 2, free))
+            .Isles.Add(Isle.Generate("Court of Dust", 2, 2, free))
 
             .Isles.Add(Isle.Generate("Blasphemy Bay", 1, 1, free))
             .Isles.Add(Isle.Generate("Brass Atoll", 3, 1, free))
@@ -46,7 +46,7 @@
 
             .Isles.Add(Isle.Generate("Sanctuary", Rng.Next(1, 4), Rng.Next(1, 4), free))
             .Isles.Add(Isle.Generate("Blackiron Ridge", Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate("Coral Island", Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate("World's Spine", Rng.Next(1, 4), Rng.Next(1, 4), free))
             .Isles.Add(Isle.Generate("Firefalls", Rng.Next(1, 4), Rng.Next(1, 4), free))
 
             'generate basic routes
