@@ -170,7 +170,8 @@
         Dim speed As Double = ship.GetTravelSpeed()
         Dim days As Integer = Math.Ceiling(distance / speed)
         Console.WriteLine()
-        Console.WriteLine("Distance: " & distance.ToString("0.0"))
+        Console.WriteLine(Dev.vbTab("Distance:", 11) & distance.ToString("0.0") & " miles")
+        Console.WriteLine(Dev.vbTab("Speed:", 11) & speed.ToString("0.0") & " miles per day")
         Console.WriteLine("This journey will take approximately " & days & " days.")
         If Menu.confirmChoice(0) = False Then Exit Sub
 

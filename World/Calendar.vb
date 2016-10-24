@@ -73,8 +73,8 @@
         Silence
         Sail
         Salt
-        Storms
         Shadow
+        Storms
         Scorn
         Sand
         Shore

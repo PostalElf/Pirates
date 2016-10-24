@@ -1,7 +1,7 @@
 ﻿Public Class World
     Public Shared Rng As New Random(5)
     Public Calendar As Calendar
-    Public WorldWind As BattleDirection
+    Public Wind As BattleDirection
     Public ShipPlayer As ShipPlayer
 
     Private Isles As New List(Of Isle)
@@ -29,7 +29,7 @@
         Dim world As New World
         With world
             .Calendar = New Calendar(Calendar.CalendarDay.Duke, 4, Calendar.CalendarSeason.Shore, 106)
-            .WorldWind = BattleDirection.North
+            .Wind = BattleDirection.North
 
             'generate isles
             Dim free As New MapData(3, 3, 3, 3)
@@ -65,14 +65,35 @@
                     End If
                 Next
             Next
+
+            'wind
+            .Wind = .WindChangeChanceBase(.Calendar.Season)
         End With
         Return world
     End Function
 
     Public Sub Tick()
         Calendar.Tick()
+        TickWind()
         ShipPlayer.Tick(Me)
     End Sub
+    Private Sub TickWind()
+        WindChangeChance += WindChangeChanceDaily(Calendar.Season)
+        Dim roll As Integer = Rng.Next(1, 101)
+        If roll <= WindChangeChance Then
+            WindChangeChance = WindChangeChanceBase(Calendar.Season)
+            Dim newWind As BattleDirection = Wind
+            While newWind = Wind
+                newWind = Rng.Next(1, 5)
+            End While
+            Wind = newWind
+            Report.Add("The wind has changed to " & newWind.ToString & ".", ReportType.WindChange)
+        End If
+    End Sub
+    Private WindChangeChanceBase As Integer() = {5, 1, 3, 3, 8, 10, 5, 10, 5}
+    Private WindChangeChanceDaily As Integer() = {1, 1, 2, 1, 2, 3, 3, 2, 2}
+    Private WindChangeChance As Integer
+
 
     Public Class MapData
         Private Points As New Dictionary(Of MapDataPoint, List(Of MapDataPoint))
@@ -139,9 +160,10 @@
             If p1 = p2 Then Return False Else Return True
         End Operator
     End Structure
+
 #Region "Battlefield"
     Public Sub EnterCombat(ByVal enemies As List(Of ShipAI))
-        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 5, WorldWind)
+        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 5, Wind)
         battlefield.AddCombatant(ShipPlayer, battlefield.GetRandomSquare(True, 2, Rng), Rng.Next(1, 5))
         For Each enemy In enemies
             battlefield.AddCombatant(enemy, battlefield.GetRandomSquare(True, 2, Rng), Rng.Next(1, 5))

@@ -352,7 +352,7 @@
         End Select
 
         If world Is Nothing = False Then
-            If GetTravelRouteDirection(TravelOrigin, TravelDestination) = world.WorldWind Then totalModifier *= 1.1
+            If GetTravelRouteDirection(TravelOrigin, TravelDestination) = world.Wind Then totalModifier *= 1.1
         End If
 
         Return total * totalModifier
@@ -450,7 +450,7 @@
             Teleport(TravelDestination)
             Report.Add(Name & " has arrived at " & Isle.Name & ".", ReportType.TravelMain)
         Else
-            If GetTravelRouteDirection(TravelOrigin, TravelDestination) = world.WorldWind Then Report.Add(Name & " is sailing with the wind (+10% speed).", ReportType.TravelProgress)
+            If GetTravelRouteDirection(TravelOrigin, TravelDestination) = world.Wind Then Report.Add(Name & " is sailing with the wind (+10% speed).", ReportType.TravelProgress)
             Report.Add(Name & " makes some progress towards " & TravelDestination.Name & " (" & TravelProgress.ToString("0") & "/" & TravelTarget.ToString("0") & ").", ReportType.TravelProgress)
         End If
     End Sub
