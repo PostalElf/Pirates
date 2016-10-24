@@ -7,6 +7,8 @@
     Public YSector As Integer
     Public YSubSector As Integer
 
+    Private Reputation As New Dictionary(Of IsleFaction, Double)
+
     Public Shared Function Generate(ByVal aName As String, ByVal xSector As Integer, ByVal ySector As Integer, ByRef free As World.MapData)
         Dim isle As New Isle
         With isle

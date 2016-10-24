@@ -25,6 +25,12 @@
     End Property
     Public BasicRoutes As New List(Of Route)
 
+    Private Sub New()
+        'factions
+        For Each IsleFaction In [Enum].GetValues(GetType(IsleFaction))
+            Reputation.Add(IsleFaction, 0)
+        Next
+    End Sub
     Public Shared Function Generate() As World
         Dim world As New World
         With world
@@ -72,6 +78,9 @@
         Return world
     End Function
 
+    Public Reputation As New Dictionary(Of IsleFaction, Double)
+
+#Region "Tick"
     Public Sub Tick()
         Calendar.Tick()
         TickWind()
@@ -93,7 +102,26 @@
     Private WindChangeChanceBase As Integer() = {5, 1, 3, 3, 8, 10, 5, 10, 5}
     Private WindChangeChanceDaily As Integer() = {1, 1, 2, 1, 2, 3, 3, 2, 2}
     Private WindChangeChance As Integer
+#End Region
 
+#Region "Battlefield"
+    Public Sub EnterCombat(ByVal enemies As List(Of ShipAI))
+        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 5, Wind)
+        battlefield.AddCombatant(ShipPlayer, battlefield.GetRandomSquare(True, 2, Rng), Rng.Next(1, 5))
+        For Each enemy In enemies
+            battlefield.AddCombatant(enemy, battlefield.GetRandomSquare(True, 2, Rng), Rng.Next(1, 5))
+        Next
+
+        While battlefield.IsOver = False
+            Module1.Battle(battlefield, ShipPlayer)
+        End While
+
+        If battlefield.PlayerWins = False Then End Else ShipPlayer.EndCombat()
+
+        'loot
+
+    End Sub
+#End Region
 
     Public Class MapData
         Private Points As New Dictionary(Of MapDataPoint, List(Of MapDataPoint))
@@ -160,23 +188,4 @@
             If p1 = p2 Then Return False Else Return True
         End Operator
     End Structure
-
-#Region "Battlefield"
-    Public Sub EnterCombat(ByVal enemies As List(Of ShipAI))
-        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 5, Wind)
-        battlefield.AddCombatant(ShipPlayer, battlefield.GetRandomSquare(True, 2, Rng), Rng.Next(1, 5))
-        For Each enemy In enemies
-            battlefield.AddCombatant(enemy, battlefield.GetRandomSquare(True, 2, Rng), Rng.Next(1, 5))
-        Next
-
-        While battlefield.IsOver = False
-            Module1.Battle(battlefield, ShipPlayer)
-        End While
-
-        If battlefield.PlayerWins = False Then End Else ShipPlayer.EndCombat()
-
-        'loot
-
-    End Sub
-#End Region
 End Class
