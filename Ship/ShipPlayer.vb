@@ -272,6 +272,13 @@
         Next
         Return Nothing
     End Function
+    Public Function GetRoutesFromLocation() As List(Of Route)
+        Dim total As New List(Of Route)
+        For Each r In Routes
+            If r.Contains(Isle) Then total.Add(r)
+        Next
+        Return total
+    End Function
     Private Sub UpgradeRoute(ByVal isle1 As Isle, ByVal isle2 As Isle)
         For n = 0 To Routes.Count - 1
             If Routes(n).Contains(isle1) AndAlso Routes(n).Contains(isle2) Then
@@ -288,6 +295,11 @@
     Private TravelDestination As Isle = Nothing
     Private TravelProgress As Double = 0
     Private TravelTarget As Double = 0
+    Public ReadOnly Property IsAtSea As Boolean
+        Get
+            If TravelRoute Is Nothing Then Return False Else Return True
+        End Get
+    End Property
     Protected ReadOnly Property BaseTravelSpeed() As Double
         Get
             Dim total As Double = 0
@@ -308,7 +320,7 @@
             Return total
         End Get
     End Property
-    Private Function GetTravelSpeed() As Double
+    Public Function GetTravelSpeed(Optional ByVal world As World = Nothing) As Double
         Dim total As Double = BaseTravelSpeed
         Dim sailSkillModifier As Double = 10
         Dim totalModifier As Double = 1
@@ -329,6 +341,7 @@
                 Next
             End If
         Next
+        If totalModifier <= 0 Then Return 0
 
         Select Case Waterline
             Case ShipWaterline.Unladen : totalModifier += 0.5
@@ -337,6 +350,10 @@
             Case ShipWaterline.Heavy : totalModifier -= 0.25
             Case ShipWaterline.Overladen : totalModifier -= 0.5
         End Select
+
+        If world Is Nothing = False Then
+            If GetTravelRouteDirection(TravelOrigin, TravelDestination) = world.WorldWind Then totalModifier *= 1.1
+        End If
 
         Return total * totalModifier
     End Function
@@ -355,8 +372,20 @@
         TravelProgress = 0
         TravelTarget = route.GetDistance
     End Sub
+    Private Function GetTravelRouteDirection(ByVal origin As Isle, ByVal destination As Isle) As BattleDirection
+        Dim xDif As Integer = origin.X - destination.X
+        Dim yDif As Integer = origin.Y - destination.Y
+        If Math.Abs(xDif) > Math.Abs(yDif) Then
+            'check east-west
+            If xDif < 0 Then Return BattleDirection.East Else Return BattleDirection.West
+        Else
+            'check north-south
+            If yDif < 0 Then Return BattleDirection.South Else Return BattleDirection.North
+        End If
+    End Function
     Public Sub Teleport(ByVal target As Isle)
         Isle = target
+        TravelRoute = Nothing
         TravelOrigin = Nothing
         TravelDestination = Nothing
         TravelProgress = 0
@@ -365,7 +394,7 @@
 #End Region
 
 #Region "World"
-    Public Sub Tick()
+    Public Sub Tick(ByVal world As World)
         'crew tick
         Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
         Dim CrewList As List(Of Crew) = GetCrews(Nothing, Nothing)
@@ -407,13 +436,13 @@
             MoraleChange = 0
         End If
 
-        TickTravel()
+        TickTravel(world)
     End Sub
-    Private Sub TickTravel()
+    Private Sub TickTravel(ByVal world As World)
         If MyBase.IsSeaworthy = False Then Exit Sub
         If TravelDestination Is Nothing Then Exit Sub
 
-        TravelProgress += GetTravelSpeed()
+        TravelProgress += GetTravelSpeed(world)
         If TravelProgress >= TravelTarget Then
             Dim navigator As Crew = GetCrew(Nothing, CrewRole.Navigator)
             If navigator.GetSkillFromRole > TravelRoute Then UpgradeRoute(TravelOrigin, TravelDestination)
@@ -421,6 +450,7 @@
             Teleport(TravelDestination)
             Report.Add(Name & " has arrived at " & Isle.Name & ".", ReportType.TravelMain)
         Else
+            If GetTravelRouteDirection(TravelOrigin, TravelDestination) = world.WorldWind Then Report.Add(Name & " is sailing with the wind (+10% speed).", ReportType.TravelProgress)
             Report.Add(Name & " makes some progress towards " & TravelDestination.Name & " (" & TravelProgress.ToString("0") & "/" & TravelTarget.ToString("0") & ").", ReportType.TravelProgress)
         End If
     End Sub

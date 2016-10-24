@@ -29,7 +29,7 @@
         Return New Range(min, max)
     End Function
     Public Overrides Function ToString() As String
-        Return Name & " (" & XSector & "-" & XSubSector & ", " & YSector & "-" & YSubSector & ")"
+        Return Name & " (" & XSector & "x" & YSector & ")"
     End Function
     Public Shared Operator =(ByVal i1 As Isle, ByVal i2 As Isle)
         Return i1.Equals(i2)

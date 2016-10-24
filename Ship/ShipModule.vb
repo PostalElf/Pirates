@@ -131,6 +131,7 @@
         Dim s As String = Dev.vbSpace(1)
         Dim t As Integer = 12
         Console.WriteLine(Name)
+        Console.WriteLine(s & Dev.vbTab("Quarter:", t) & Quarter.ToString)
         If Type = ModuleType.Shrine OrElse Type = ModuleType.Crew Then Console.WriteLine(s & Dev.vbTab("Capacity:", t) & Crews.Count & "/" & Capacity)
         If Type = ModuleType.Hold Then Console.WriteLine(s & Dev.vbTab("Capacity:", t) & Capacity)
         Console.WriteLine(s & Dev.vbTab("Hullspace:", t) & HullCost)

@@ -3,7 +3,7 @@
     Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
 
     Sub Main()
-        Console.SetWindowSize(Console.WindowWidth, 50)
+        Console.SetWindowSize(100, 50)
         world = Pirates.World.Generate
         world.ShipPlayer = SetupPlayerShip(world.Rng)
         world.ShipPlayer.teleport(world.Item("Commonwealth"))
@@ -68,8 +68,6 @@
         For Each Route In world.BasicRoutes
             player.AddRoute(Route)
         Next
-        Dim r As Route = player.GetRoute(world.Item("Commonwealth"), world.Item("Hallowsreach"))
-        player.SetTravelRoute(r)
     End Sub
 
     Private Function MainPlayerInput() As Boolean
@@ -77,8 +75,12 @@
 
         Dim choices As New Dictionary(Of Char, String)
         With choices
-            .Add("a"c, "Attack")
-            .Add("s"c, "View Ship")
+            If world.ShipPlayer.IsAtSea = True Then
+                .Add("a"c, "Attack")
+            Else
+                .Add("s"c, "Set Course")
+            End If
+            .Add("v"c, "View Ship")
             .Add("c"c, "View Crew")
             .Add("g"c, "View Goods")
             .Add("m"c, "View Modules")
@@ -90,6 +92,8 @@
             Case "a"c
                 EnterBattle()
             Case "s"c
+                SetCourse(world.ShipPlayer)
+            Case "v"c
                 world.ShipPlayer.ConsoleReport()
                 Console.ReadKey()
             Case "c"c
@@ -156,6 +160,21 @@
         Console.WriteLine()
         battlefield.ConsoleReportCombatants()
         Console.ReadKey()
+    End Sub
+    Private Sub SetCourse(ByVal ship As ShipPlayer)
+        Dim routes As List(Of Route) = ship.GetRoutesFromLocation()
+        Dim targetRoute As Route = Menu.getListChoice(routes, 0, "Select destination:")
+        If ship.CheckSetTravelRoute(targetRoute) = False Then Exit Sub
+
+        Dim distance As Double = targetRoute.GetDistance
+        Dim speed As Double = ship.GetTravelSpeed()
+        Dim days As Integer = Math.Ceiling(distance / speed)
+        Console.WriteLine()
+        Console.WriteLine("Distance: " & distance.ToString("0.0"))
+        Console.WriteLine("This journey will take approximately " & days & " days.")
+        If Menu.confirmChoice(0) = False Then Exit Sub
+
+        ship.SetTravelRoute(targetRoute)
     End Sub
     Private Sub ManageCrews(ByVal ship As ShipPlayer)
         Dim t As Integer = 12
@@ -294,52 +313,4 @@
         If target Is Nothing Then Exit Sub
         ship.Attack(target)
     End Sub
-
-#Region "Retired Tests"
-    Private Function SetupBattlefield(ByRef rng As Random) As Battlefield
-        Dim battlefield As Battlefield = battlefield.Generate(15, 15, 0, BattleDirection.East)
-        Dim ship As ShipPlayer = SetupPlayerShip(rng)
-        With ship
-            .ConsoleColour = ConsoleColor.Cyan
-            .Name = "Baron's Spear"
-            '.Cheaterbug(True, True, True, True)
-        End With
-        battlefield.AddCombatant(ship, 5, 5, BattleDirection.East)
-
-        Dim ai1 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing)
-        ai1.ConsoleColour = ConsoleColor.Green
-        'ai1.Cheaterbug(True, True, False, False)
-        battlefield.AddCombatant(ai1, 1, 1, BattleDirection.East)
-
-        Dim ai2 As ShipAI = ShipAI.Generate(ShipType.Sloop, Nothing, Nothing)
-        ai2.ConsoleColour = ConsoleColor.Green
-        ai2.Cheaterbug(True, True, False, False)
-        battlefield.AddCombatant(ai2, 8, 8, BattleDirection.West)
-
-        Return battlefield
-    End Function
-    Private Sub TestPlayerShip()
-        Dim ship = SetupPlayerShip((New Random(5)))
-        With ship
-            .AddGood(GoodType.Shot, 100)
-            .GoodsFreeForConsumption(GoodType.Shot) = True
-            .AddGood(GoodType.Rations, 100)
-            .GoodsFreeForConsumption(GoodType.Rations) = True
-            .AddGood(GoodType.Water, 100)
-            .GoodsFreeForConsumption(GoodType.Water) = True
-
-            Dim st As Crew = Crew.Generate(CrewRace.Seatouched, New Random)
-            .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, CrewRace.Seatouched))
-            .AddCrew(ShipQuarter.Fore, st)
-            .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Shrine, ShipModule.ModuleQuality.Luxurious, CrewRace.Seatouched))
-            st.Shrine = .GetModulesFree(ShipModule.ModuleType.Shrine, CrewRace.Seatouched)(0)
-
-            .Tick()
-
-            .ConsoleReport()
-        End With
-        Console.ReadKey()
-        End
-    End Sub
-#End Region
 End Module
