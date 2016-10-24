@@ -249,6 +249,16 @@
     End Sub
 #End Region
 
+#Region "Crew and Equipment"
+    Private Equipment As New List(Of CrewBonus)
+    Public Function GetEquipments() As List(Of CrewBonus)
+        Return Equipment
+    End Function
+    Public Sub AddEquipment(ByVal cb As CrewBonus)
+        Equipment.Add(cb)
+    End Sub
+#End Region
+
 #Region "World Travel"
     Private Routes As New List(Of Route)
     Public Function CheckAddRoute(ByVal route As Route)

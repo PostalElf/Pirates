@@ -43,6 +43,11 @@
             For n = 1 To 3
                 GenerateLoot(ship, World.Rng)
             Next
+
+            'set permissions
+            For Each k In .GoodsFreeForConsumption.Keys
+                .GoodsFreeForConsumption(k) = True
+            Next
         End With
         Return ship
     End Function

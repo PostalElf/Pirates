@@ -551,13 +551,7 @@
         Return bestCrew
     End Function
 
-    Private Equipment As New List(Of CrewBonus)
-    Public Function GetEquipments() As List(Of CrewBonus)
-        Return Equipment
-    End Function
-    Public Sub AddEquipment(ByVal cb As CrewBonus)
-        Equipment.Add(cb)
-    End Sub
+    Public Mascot As ShipMascot
 #End Region
 
 #Region "Attack"

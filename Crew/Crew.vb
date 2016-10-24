@@ -243,6 +243,9 @@
         For Each e In Equipment
             If e.SkillBonuses.ContainsKey(cs) Then total += e.SkillBonuses(cs)
         Next
+        If Ship.mascot Is Nothing = False Then
+            If Ship.Mascot.SkillBonuses.ContainsKey(cs) Then total += Ship.Mascot.SkillBonuses(cs)
+        End If
 
         'get module cap
         Dim m As ShipModule = Nothing
@@ -475,16 +478,17 @@
         End Get
     End Property
     Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer) As Integer
+        If Not (TypeOf Ship Is ShipPlayer) Then Return 0
+        Dim ps As ShipPlayer = CType(Ship, ShipPlayer)
         Dim good As Good = good.Generate(goodType, -qty)
 
         'shortcircuit for Greenskin mutation
         If goodType = Pirates.GoodType.Rations AndAlso GetBonus("scar", "Greenskin") Is Nothing = False Then Return positiveChange
 
 
-        If Ship.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
+        If ps.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
             Return negativeChange
         Else
-            Dim ps As ShipPlayer = CType(Ship, ShipPlayer)
             ps.AddGood(good)
             If ps.GoodsConsumed.ContainsKey(goodType) = False Then ps.GoodsConsumed.Add(goodType, good.Generate(goodType))
             ps.GoodsConsumed(goodType) += good
