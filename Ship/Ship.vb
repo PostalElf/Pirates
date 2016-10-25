@@ -14,7 +14,6 @@
     End Property
     Protected Type As ShipType
     Protected Race As CrewRace
-    Public Faction As faction
 
     Public Sub New()
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))

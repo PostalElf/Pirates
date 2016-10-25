@@ -1,12 +1,14 @@
 ﻿Public Class ShipAI
     Inherits Ship
 
+    Private Faction As WorldFaction
+
     Public Sub New()
         MyBase.New()
     End Sub
-    Public Shared Function Generate(ByVal type As ShipType, Optional ByVal faction As Faction = Nothing, Optional ByVal race As CrewRace = Nothing) As Ship
+    Public Shared Function Generate(ByVal type As ShipType, Optional ByVal faction As WorldFaction = Nothing, Optional ByVal race As CrewRace = Nothing) As Ship
         Dim races As CrewRace() = [Enum].GetValues(GetType(CrewRace))
-        Dim factions As Faction() = [Enum].GetValues(GetType(Faction))
+        Dim factions As WorldFaction() = [Enum].GetValues(GetType(WorldFaction))
         Dim newCrews As New List(Of CrewStation)
 
         Dim ship As New ShipAI

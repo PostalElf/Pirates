@@ -39,21 +39,21 @@
 
             'generate isles
             Dim free As New MapData(3, 3, 3, 3)
-            .Isles.Add(Isle.Generate("Deathless Kingdom", 1, 2, free))
-            .Isles.Add(Isle.Generate("Forsworn Exclave", 2, 1, free))
-            .Isles.Add(Isle.Generate("Seatouched Dominion", 3, 2, free))
-            .Isles.Add(Isle.Generate("Commonwealth", 2, 3, free))
-            .Isles.Add(Isle.Generate("Court of Dust", 2, 2, free))
+            .Isles.Add(Isle.Generate(world, "Deathless Kingdom", 1, 2, free))
+            .Isles.Add(Isle.Generate(world, "Forsworn Exclave", 2, 1, free))
+            .Isles.Add(Isle.Generate(world, "Seatouched Dominion", 3, 2, free))
+            .Isles.Add(Isle.Generate(world, "Commonwealth", 2, 3, free))
+            .Isles.Add(Isle.Generate(world, "Court of Dust", 2, 2, free))
 
-            .Isles.Add(Isle.Generate("Blasphemy Bay", 1, 1, free))
-            .Isles.Add(Isle.Generate("Brass Atoll", 3, 1, free))
-            .Isles.Add(Isle.Generate("Blackreef", 1, 3, free))
-            .Isles.Add(Isle.Generate("Hallowsreach", 3, 3, free))
+            .Isles.Add(Isle.Generate(world, "Blasphemy Bay", 1, 1, free))
+            .Isles.Add(Isle.Generate(world, "Brass Atoll", 3, 1, free))
+            .Isles.Add(Isle.Generate(world, "Blackreef", 1, 3, free))
+            .Isles.Add(Isle.Generate(world, "Hallowsreach", 3, 3, free))
 
-            .Isles.Add(Isle.Generate("Sanctuary", Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate("Blackiron Ridge", Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate("World's Spine", Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate("Firefalls", Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate(world, "Sanctuary", Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate(world, "Blackiron Ridge", Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate(world, "World's Spine", Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate(world, "Firefalls", Rng.Next(1, 4), Rng.Next(1, 4), free))
 
             'generate basic routes
             'this ensures that all isles are reachable from all other isles, albeit terribly
@@ -84,6 +84,9 @@
     Public Sub Tick()
         Calendar.Tick()
         TickWind()
+        For Each Isle In Isles
+            Isle.Tick()
+        Next
         ShipPlayer.Tick(Me)
     End Sub
     Private Sub TickWind()

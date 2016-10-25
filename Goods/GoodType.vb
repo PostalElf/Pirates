@@ -1,9 +1,9 @@
 ﻿Public Enum GoodType
     Grapples = 1
-    Bullets
     Shot
     Explosive
     Grapeshot
+    Bullets
 
     Gold = 101
     Silver

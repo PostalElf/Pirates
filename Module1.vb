@@ -6,7 +6,7 @@
         Console.SetWindowSize(100, 50)
         world = Pirates.World.Generate
         world.ShipPlayer = SetupPlayerShip(world.Rng)
-        world.ShipPlayer.teleport(world.Item("Commonwealth"))
+        world.ShipPlayer.Teleport(world.Item("Deathless Kingdom"))
 
         TestSnippets(world.ShipPlayer)
 
@@ -79,6 +79,7 @@
                 .Add("a"c, "Attack")
             Else
                 .Add("s"c, "Set Course")
+                .Add("b"c, "Buy/Sell Goods")
             End If
             .Add("v"c, "View Ship")
             .Add("c"c, "View Crew")
@@ -93,6 +94,8 @@
                 EnterBattle()
             Case "s"c
                 SetCourse(world.ShipPlayer)
+            Case "b"c
+                BuySell(world.ShipPlayer.Isle)
             Case "v"c
                 world.ShipPlayer.ConsoleReport()
                 Console.ReadKey()
@@ -112,7 +115,7 @@
     End Function
 
     Private Sub EnterBattle()
-        Dim enemies As New List(Of ShipAI) From {ShipAI.Generate(ShipType.Sloop, Faction.Neutral, CrewRace.Human)}
+        Dim enemies As New List(Of ShipAI) From {ShipAI.Generate(ShipType.Sloop, WorldFaction.Neutral, CrewRace.Human)}
         World.EnterCombat(enemies)
     End Sub
     Public Sub Battle(ByVal battlefield As Battlefield, ByVal playerShip As ShipPlayer)
@@ -299,6 +302,49 @@
             Console.WriteLine()
         Next
         Console.WriteLine()
+        Console.ReadKey()
+    End Sub
+    Private Sub BuySell(ByRef isle As Isle)
+        Const buyColour As ConsoleColor = ConsoleColor.Yellow
+        Const sellColour As ConsoleColor = ConsoleColor.Green
+        Const nullColour As ConsoleColor = ConsoleColor.DarkRed
+
+        Console.WriteLine()
+        Console.Write("                  Qty")
+        Console.ForegroundColor = buyColour
+        Console.Write("    Buy")
+        Console.ForegroundColor = sellColour
+        Console.Write("        Sell")
+        Console.ForegroundColor = ConsoleColor.Gray
+        Console.WriteLine()
+        Console.Write("                  ---")
+        Console.ForegroundColor = buyColour
+        Console.Write("    ---")
+        Console.ForegroundColor = sellColour
+        Console.Write("        ----")
+        Console.WriteLine()
+        Dim n = 0
+        For Each gt In [Enum].GetValues(GetType(GoodType))
+            n += 1
+            Console.ForegroundColor = ConsoleColor.Gray
+            Console.Write(Dev.vbSpace(1))
+            Console.Write(n.ToString("00") & ") ")
+            Console.Write(Dev.vbTab(gt.ToString, 12))
+
+            Dim qty As Integer = isle.GetGoodQty(gt)
+            If qty <= 0 Then Console.ForegroundColor = nullColour
+            Console.Write(Dev.vbTab(qty, 7))
+
+            Dim buyPrice As Double = isle.GetGoodPrice(gt, True)
+            If buyPrice <= 0 Then Console.ForegroundColor = nullColour Else Console.ForegroundColor = buyColour
+            Console.Write(Dev.vbTab("$" & buyPrice.ToString("0.00"), 11))
+
+            Dim sellPrice As Double = isle.GetGoodPrice(gt, False)
+            If sellPrice <= 0 Then Console.ForegroundColor = nullColour Else Console.ForegroundColor = sellColour
+            Console.Write("$" & sellPrice.ToString("0.00"))
+            Console.WriteLine()
+        Next
+        Console.ResetColor()
         Console.ReadKey()
     End Sub
     Private Function GetCrew(ByRef ship As ShipPlayer) As Crew

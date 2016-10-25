@@ -1,6 +1,14 @@
 ﻿Public Class ShipPlayer
     Inherits Ship
 
+    Public Sub New()
+        MyBase.New()
+        For Each fac As WorldFaction In [Enum].GetValues(GetType(WorldFaction))
+            If fac <> WorldFaction.Neutral Then Coins.Add(fac, 0)
+        Next
+    End Sub
+
+
 #Region "Specials"
     Protected IgnoresMoveTokens As Boolean = False
     Public Overloads Sub Cheaterbug(ByVal turn As Boolean, ByVal waterline As Boolean, ByVal damage As Boolean, ByVal weapon As Boolean)
@@ -257,6 +265,14 @@
     Public Sub AddEquipment(ByVal cb As CrewBonus)
         Equipment.Add(cb)
     End Sub
+
+    Private Coins As New Dictionary(Of WorldFaction, Double)
+    Public Sub AddCoins(ByVal faction As WorldFaction, ByVal value As Double)
+        Coins(faction) += value
+    End Sub
+    Public Function GetCoins(ByVal faction As WorldFaction) As Double
+        Return Coins(faction)
+    End Function
 #End Region
 
 #Region "World Travel"

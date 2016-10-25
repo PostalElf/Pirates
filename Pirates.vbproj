@@ -92,7 +92,8 @@
     <Compile Include="Goods\Good.vb" />
     <Compile Include="Goods\GoodType.vb" />
     <Compile Include="Report.vb" />
-    <Compile Include="Ship\Derivatives\Faction.vb" />
+    <Compile Include="Goods\SaleDemand.vb" />
+    <Compile Include="World\WorldFaction.vb" />
     <Compile Include="Battlefield\Damage\Damage.vb" />
     <Compile Include="Battlefield\Damage\DamageType.vb" />
     <Compile Include="Ship\Derivatives\ShipMascot.vb" />
