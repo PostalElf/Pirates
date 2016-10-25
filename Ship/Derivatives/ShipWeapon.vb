@@ -8,10 +8,8 @@
     Public CrewCount As Integer
     Public HullCost As Integer
     Public Weight As Integer
+    Public AvailableQuarters As ShipQuarter()
 
-    Private Sub Cooldown(ByVal value As Integer)
-        CooldownCounter -= value
-    End Sub
     Public ReadOnly Property IsReady As Boolean
         Get
             If Ship Is Nothing Then Return False
@@ -70,7 +68,7 @@
         Return attackTarget
     End Function
     Public Sub TickCombat()
-        Cooldown(1)
+        If CooldownCounter > 0 Then CooldownCounter -= 1
     End Sub
     Public ReadOnly Property Heuristic As Double
         Get
@@ -87,7 +85,7 @@
 
     Public Sub New()
     End Sub
-    Public Sub New(ByVal aName As String, ByVal aShipDamage As Damage, ByVal aRange As Integer, ByVal aAmmoType As GoodType, ByVal aAmmoPerShot As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer, ByVal aHullCost As Integer, ByVal aWeight As Integer)
+    Public Sub New(ByVal aName As String, ByVal aShipDamage As Damage, ByVal aRange As Integer, ByVal aAmmoType As GoodType, ByVal aAmmoPerShot As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer, ByVal aHullCost As Integer, ByVal aWeight As Integer, ByVal aAvailableQuarters As ShipQuarter())
         Name = aName
         Damage = aShipDamage
         Damage.Sender = Name
@@ -97,20 +95,21 @@
         CooldownMax = aCoolDown
         HullCost = aHullCost
         Weight = aWeight
+        AvailableQuarters = aAvailableQuarters
     End Sub
     Public Sub New(ByVal aName As String, _
                    ByVal dShipDamage As Integer, ByVal dCrewDamage As Integer, ByVal dType As DamageType, _
-                   ByVal aRange As Integer, ByVal aAmmoType As GoodType, ByVal aAmmoPerShot As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer, ByVal aHullCost As Integer, ByVal aWeight As Integer)
-        Me.New(aName, New Damage(dShipDamage, dCrewDamage, dType, aName), aRange, aAmmoType, aAmmoPerShot, aCrewCount, aCoolDown, aHullCost, aWeight)
+                   ByVal aRange As Integer, ByVal aAmmoType As GoodType, ByVal aAmmoPerShot As Integer, ByVal aCrewCount As Integer, ByVal aCoolDown As Integer, ByVal aHullCost As Integer, ByVal aWeight As Integer, ByVal aAvailableQuarters As ShipQuarter())
+        Me.New(aName, New Damage(dShipDamage, dCrewDamage, dType, aName), aRange, aAmmoType, aAmmoPerShot, aCrewCount, aCoolDown, aHullCost, aWeight, aAvailableQuarters)
     End Sub
     Public Shared Function Generate(ByVal input As String) As ShipWeapon
         Select Case input.ToLower
-            Case "cannon" : Return New ShipWeapon("Cannons", 30, 10, DamageType.Cannon, 2, GoodType.Shot, 3, 1, 3, 5, 15)
-            Case "hooks" : Return New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, GoodType.Grapples, 5, 2, 5, 5, 5)
-            Case "grapeshot" : Return New ShipWeapon("Grapeshot", 10, 25, DamageType.Firearms, 1, GoodType.Grapeshot, 5, 2, 5, 5, 15)
-            Case "swivel" : Return New ShipWeapon("Swivelgun", 10, 10, DamageType.Firearms, 1, GoodType.Bullets, 5, 1, 2, 5, 10)
-            Case "hailshot" : Return New ShipWeapon("Hailshot", 20, 0, DamageType.Cannon, 2, GoodType.Shot, 2, 2, 4, 5, 10)
-            Case "bombard" : Return New ShipWeapon("Bombard", 30, 10, DamageType.Cannon, 2, GoodType.Explosive, 10, 3, 5, 10, 20)
+            Case "cannon" : Return New ShipWeapon("Cannons", 30, 10, DamageType.Cannon, 2, GoodType.Shot, 3, 1, 3, 5, 15, {ShipQuarter.Starboard, ShipQuarter.Port})
+            Case "hooks" : Return New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, GoodType.Grapples, 5, 2, 5, 5, 5, {ShipQuarter.Fore, ShipQuarter.Starboard, ShipQuarter.Aft, ShipQuarter.Port})
+            Case "grapeshot" : Return New ShipWeapon("Grapeshot", 10, 25, DamageType.Firearms, 1, GoodType.Grapeshot, 5, 2, 5, 5, 15, {ShipQuarter.Starboard, ShipQuarter.Port})
+            Case "swivel" : Return New ShipWeapon("Swivelgun", 10, 10, DamageType.Firearms, 1, GoodType.Bullets, 5, 1, 2, 5, 10, {ShipQuarter.Fore, ShipQuarter.Starboard, ShipQuarter.Aft, ShipQuarter.Port})
+            Case "hailshot" : Return New ShipWeapon("Hailshot", 20, 0, DamageType.Cannon, 2, GoodType.Shot, 2, 2, 4, 5, 10, {ShipQuarter.Starboard, ShipQuarter.Port})
+            Case "bombard" : Return New ShipWeapon("Bombard", 30, 10, DamageType.Cannon, 2, GoodType.Explosive, 10, 3, 5, 10, 20, {ShipQuarter.Fore})
             Case Else : Throw New Exception("Unrecognised weapon name")
         End Select
     End Function

@@ -559,6 +559,11 @@
     Protected Weapons As New Dictionary(Of ShipQuarter, List(Of ShipWeapon))
     Public Function CheckAddWeapon(ByVal quarter As ShipQuarter, ByVal weapon As ShipWeapon) As Boolean
         If weapon.HullCost + HullSpaceUsed > HullSpaceMax Then Return False
+        Dim matchedQuarter As Boolean = False
+        For Each q In weapon.AvailableQuarters
+            If q = quarter Then matchedQuarter = True : Exit For
+        Next
+        If matchedQuarter = False Then Return False
 
         Return True
     End Function

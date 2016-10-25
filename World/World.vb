@@ -39,7 +39,7 @@
 
             'generate isles
             Dim free As New MapData(3, 3, 3, 3)
-            .Isles.Add(Isle.Generate("Kingdom of the Dead", 1, 2, free))
+            .Isles.Add(Isle.Generate("Deathless Kingdom", 1, 2, free))
             .Isles.Add(Isle.Generate("Forsworn Exclave", 2, 1, free))
             .Isles.Add(Isle.Generate("Seatouched Dominion", 3, 2, free))
             .Isles.Add(Isle.Generate("Commonwealth", 2, 3, free))

@@ -92,12 +92,13 @@
     <Compile Include="Goods\Good.vb" />
     <Compile Include="Goods\GoodType.vb" />
     <Compile Include="Report.vb" />
-    <Compile Include="Ship\Faction.vb" />
+    <Compile Include="Ship\Derivatives\Faction.vb" />
     <Compile Include="Battlefield\Damage\Damage.vb" />
     <Compile Include="Battlefield\Damage\DamageType.vb" />
-    <Compile Include="Ship\ShipModule.vb" />
+    <Compile Include="Ship\Derivatives\ShipMascot.vb" />
+    <Compile Include="Ship\Derivatives\ShipModule.vb" />
     <Compile Include="Ship\ShipPlayer.vb" />
-    <Compile Include="Ship\ShipQuarter.vb" />
+    <Compile Include="Ship\Derivatives\ShipQuarter.vb" />
     <Compile Include="Dev\Dev.vb" />
     <Compile Include="Module1.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -117,11 +118,12 @@
     </Compile>
     <Compile Include="Ship\Ship.vb" />
     <Compile Include="Ship\ShipAI.vb" />
-    <Compile Include="Ship\ShipType.vb" />
-    <Compile Include="Ship\ShipWaterline.vb" />
-    <Compile Include="Ship\ShipWeapon.vb" />
+    <Compile Include="Ship\Derivatives\ShipType.vb" />
+    <Compile Include="Ship\Derivatives\ShipWaterline.vb" />
+    <Compile Include="Ship\Derivatives\ShipWeapon.vb" />
     <Compile Include="World\Calendar.vb" />
     <Compile Include="World\Isle.vb" />
+    <Compile Include="World\IsleFaction.vb" />
     <Compile Include="World\Route.vb" />
     <Compile Include="World\World.vb" />
   </ItemGroup>
