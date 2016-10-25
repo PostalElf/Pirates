@@ -323,9 +323,13 @@
         Console.ForegroundColor = sellColour
         Console.Write("        ----")
         Console.WriteLine()
+
+        Dim gtList As New List(Of GoodType)
         Dim n = 0
         For Each gt In [Enum].GetValues(GetType(GoodType))
             n += 1
+            gtList.Add(gt)
+
             Console.ForegroundColor = ConsoleColor.Gray
             Console.Write(Dev.vbSpace(1))
             Console.Write(n.ToString("00") & ") ")
@@ -345,7 +349,47 @@
             Console.WriteLine()
         Next
         Console.ResetColor()
-        Console.ReadKey()
+
+        Dim input As Integer = Menu.getNumInput(0, 1, gtList.Count, "> ")
+        Dim choice As GoodType = gtList(input - 1)
+        Console.Write("Buy or sell? ")
+        Dim input2 As ConsoleKeyInfo = Console.ReadKey()
+        Console.WriteLine()
+        If input2.KeyChar = "b"c Then
+            'buy
+            Dim price As Double = isle.GetGoodPrice(choice, True)
+            Dim qty As Integer = isle.GetGoodQty(choice)
+            If qty = 0 Then Exit Sub
+            Console.WriteLine("Buying " & choice.ToString & " at $" & price.ToString("0.00") & " each.")
+            Dim input3 As Integer = Menu.getNumInput(0, 0, qty, "How much? ")
+            If input3 = 0 Then Exit Sub
+
+            Dim totalCost As Double = Math.Round(input3 * price, 2)
+            If Menu.confirmChoice(0, "Buy " & input3 & " " & choice.ToString & " for $" & totalCost.ToString("0.00") & "? ") = False Then Exit Sub
+            If world.ShipPlayer.GetCoins(isle.Faction) < totalCost Then
+                Console.WriteLine("Insufficient funds!")
+                Console.ReadKey()
+                Exit Sub
+            End If
+
+            world.ShipPlayer.AddCoins(isle.Faction, -totalCost)
+            world.ShipPlayer.AddGood(isle.SellGood(choice, input3))
+        ElseIf input2.KeyChar = "s"c Then
+            'sell
+            Dim price As Double = isle.GetGoodPrice(choice, False)
+            Dim qty As Integer = world.ShipPlayer.GetGood(choice).Qty
+            If qty = 0 OrElse price = 0 Then Exit Sub
+            Console.WriteLine("Selling " & choice.ToString & " at $" & price.ToString("0.00") & " each.")
+            Dim input3 As Integer = Menu.getNumInput(0, 0, isle.GetGoodQty(choice), "How much? ")
+            If input3 = 0 Then Exit Sub
+
+            Dim totalCost As Double = Math.Round(input3 * price, 2)
+            If Menu.confirmChoice(0, "Sell " & input3 & " " & choice.ToString & " for $" & totalCost.ToString("0.00") & "? ") = False Then Exit Sub
+
+            isle.BuyGood(choice, input3)
+            world.ShipPlayer.AddCoins(isle.Faction, totalCost)
+        Else : Exit Sub
+        End If
     End Sub
     Private Function GetCrew(ByRef ship As ShipPlayer) As Crew
         Dim roles As New List(Of CrewRole)([Enum].GetValues(GetType(CrewRole)))

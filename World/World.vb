@@ -39,21 +39,21 @@
 
             'generate isles
             Dim free As New MapData(3, 3, 3, 3)
-            .Isles.Add(Isle.Generate(world, "Deathless Kingdom", 1, 2, free))
-            .Isles.Add(Isle.Generate(world, "Forsworn Exclave", 2, 1, free))
-            .Isles.Add(Isle.Generate(world, "Seatouched Dominion", 3, 2, free))
-            .Isles.Add(Isle.Generate(world, "Commonwealth", 2, 3, free))
-            .Isles.Add(Isle.Generate(world, "Court of Dust", 2, 2, free))
+            .Isles.Add(Isle.Generate(world, "Deathless Kingdom", WorldFaction.Deathless, 1, 2, free))
+            .Isles.Add(Isle.Generate(world, "Forsworn Exclave", WorldFaction.Windsworn, 2, 1, free))
+            .Isles.Add(Isle.Generate(world, "Seatouched Dominion", WorldFaction.Seatouched, 3, 2, free))
+            .Isles.Add(Isle.Generate(world, "Commonwealth", WorldFaction.Commonwealth, 2, 3, free))
+            .Isles.Add(Isle.Generate(world, "Court of Dust", WorldFaction.Imperial, 2, 2, free))
 
-            .Isles.Add(Isle.Generate(world, "Blasphemy Bay", 1, 1, free))
-            .Isles.Add(Isle.Generate(world, "Brass Atoll", 3, 1, free))
-            .Isles.Add(Isle.Generate(world, "Blackreef", 1, 3, free))
-            .Isles.Add(Isle.Generate(world, "Hallowsreach", 3, 3, free))
+            .Isles.Add(Isle.Generate(world, "Blasphemy Bay", WorldFaction.Neutral, 1, 1, free))
+            .Isles.Add(Isle.Generate(world, "Brass Atoll", WorldFaction.Neutral, 3, 1, free))
+            .Isles.Add(Isle.Generate(world, "Blackreef", WorldFaction.Neutral, 1, 3, free))
+            .Isles.Add(Isle.Generate(world, "Hallowsreach", WorldFaction.Neutral, 3, 3, free))
 
-            .Isles.Add(Isle.Generate(world, "Sanctuary", Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate(world, "Blackiron Ridge", Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate(world, "World's Spine", Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate(world, "Firefalls", Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate(world, "Sanctuary", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate(world, "Blackiron Ridge", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate(world, "World's Spine", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate(world, "Firefalls", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free))
 
             'generate basic routes
             'this ensures that all isles are reachable from all other isles, albeit terribly

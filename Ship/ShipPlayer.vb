@@ -4,7 +4,7 @@
     Public Sub New()
         MyBase.New()
         For Each fac As WorldFaction In [Enum].GetValues(GetType(WorldFaction))
-            If fac <> WorldFaction.Neutral Then Coins.Add(fac, 0)
+            Coins.Add(fac, 0)
         Next
     End Sub
 

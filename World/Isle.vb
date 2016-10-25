@@ -8,13 +8,16 @@
     Public YSubSector As Integer
     Private World As World
 
-#Region "Reputation and Sale Goods"
+#Region "Politics"
+    Public Faction As WorldFaction
     Private Reputation As New Dictionary(Of IsleFaction, Double)
     Public Sub AddReputation(ByVal islefaction As IsleFaction, ByVal value As Double)
         Reputation(islefaction) += value
         World.Reputation(islefaction) += value
     End Sub
+#End Region
 
+#Region "Sale Goods"
     Private SaleGoodDemand As New Dictionary(Of GoodType, SaleDemand)
     Private SaleGoodProduction As New Dictionary(Of GoodType, SaleDemand)
     Private SaleGoodQty As New Dictionary(Of GoodType, Integer)
@@ -119,11 +122,11 @@
             SaleGoodQty.Add(gt, 0)
         Next
     End Sub
-    Public Shared Function Generate(ByRef aWorld As World, ByVal aName As String, ByVal xSector As Integer, ByVal ySector As Integer, ByRef free As World.MapData)
+    Public Shared Function Generate(ByRef aWorld As World, ByVal aName As String, ByVal aFaction As WorldFaction, ByVal xSector As Integer, ByVal ySector As Integer, ByRef free As World.MapData)
         Dim isle As New Isle(aWorld)
         With isle
             .Name = aName
-
+            .Faction = aFaction
             .XSector = xSector
             .YSector = ySector
             Dim subSector As World.MapDataPoint = free.Grab(xSector, ySector, World.Rng)
