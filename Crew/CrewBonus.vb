@@ -7,8 +7,19 @@
     Public Skill As CrewSkill = Nothing
     Public Damage As Integer = 0
     Public DamageType As DamageType = Nothing
+    Public AmmoUse As Integer = 0
+    Public Function GetAmmoType() As GoodType
+        Select Case DamageType
+            Case Pirates.DamageType.Firearms : Return GoodType.Bullets
+            Case Else : Return Nothing
+        End Select
+    End Function
+    Private CooldownCounter As Integer
+    Private CooldownMax As Integer
+
     Public ReadOnly Property IsReady(ByVal ship As Ship) As Boolean
         Get
+            If CooldownCounter > 0 Then Return False
             If AmmoUse > 0 Then
                 Dim AmmoType As GoodType = GetAmmoType()
                 If ship.GoodsFreeForConsumption(AmmoType) = False Then Return False
@@ -17,14 +28,15 @@
             Return True
         End Get
     End Property
-
-    Public AmmoUse As Integer = 0
-    Public Function GetAmmoType() As GoodType
-        Select Case DamageType
-            Case Pirates.DamageType.Firearms : Return GoodType.Bullets
-            Case Else : Return Nothing
-        End Select
-    End Function
+    Public Sub UseWeapon(ByRef ship As Ship)
+        CooldownCounter = CooldownMax
+        If AmmoUse > 0 Then
+            ship.AddGood(GetAmmoType, -AmmoUse)
+        End If
+    End Sub
+    Public Sub TickCombat()
+        If CooldownCounter > 0 Then CooldownCounter -= 1
+    End Sub
 
     Public Shared Function Generate(ByVal aName As String) As CrewBonus
         Dim item As New CrewBonus
@@ -44,6 +56,7 @@
                     .Damage = 15
                     .DamageType = Pirates.DamageType.Blunt
                     .AmmoUse = 0
+                    .CooldownMax = 2
                     .Slot = "Left Hand"
 
                 Case "Flintlock Pistol"
@@ -51,6 +64,7 @@
                     .Damage = 25
                     .DamageType = DamageType.Firearms
                     .AmmoUse = 1
+                    .CooldownMax = 3
                     .Slot = "Left Hand"
 
                 Case Else

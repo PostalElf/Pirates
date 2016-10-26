@@ -124,6 +124,15 @@
         Next
         Return total
     End Function
+    Private Function GetWeapons() As List(Of CrewBonus)
+        Dim total As New List(Of CrewBonus)
+        For Each cbl In CrewBonuses
+            For Each cb In cbl
+                If cb.IsReady(Ship) = True AndAlso cb.Damage > 0 Then total.Add(cb)
+            Next
+        Next
+        Return total
+    End Function
 
     Private Function GenerateScar(ByVal damage As Damage, ByVal fleshshapingBonus As Integer) As CrewBonus
         Dim scarNames As List(Of String) = GenerateScarNames()
@@ -288,15 +297,6 @@
         If cs = Nothing Then Return -1
         Return GetSkill(cs)
     End Function
-    Private Function GetWeapons() As List(Of CrewBonus)
-        Dim total As New List(Of CrewBonus)
-        For Each cbl In CrewBonuses
-            For Each cb In cbl
-                If cb.IsReady(Ship) = True AndAlso cb.Damage > 0 Then total.Add(cb)
-            Next
-        Next
-        Return total
-    End Function
     Public Sub AddSkillXP(ByVal cs As CrewSkill, ByVal value As Double)
         Dim maxLevel As Integer = SkillThresholds.Count - 1
         Dim maxThreshold As Integer = SkillThresholds(maxLevel)
@@ -387,9 +387,7 @@
                 Dim dmgValue As Integer = Dev.Constrain(weapon.Damage / 2, 1)
                 Dim damage As New Damage(0, dmgValue, weapon.DamageType, Name & "'s " & weapon.Name)
                 target.Damage(damage)
-                If weapon.AmmoUse > 0 Then
-                    Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
-                End If
+                weapon.UseWeapon(Ship)
             Else
                 'miss
                 Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off " & Name & "'s " & weapon.Name & ".", ReportType.CrewAttack)
@@ -416,6 +414,13 @@
 
         Dim xp As Double = 1
         AddSkillXP(CrewSkill.Bracing, xp)
+    End Sub
+    Public Sub TickCombat()
+        For Each cbl In CrewBonuses
+            For Each cb In cbl
+                cb.TickCombat()
+            Next
+        Next
     End Sub
 
     Private Sub Damage(ByVal damage As Damage)

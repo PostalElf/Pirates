@@ -51,6 +51,7 @@
     Private Sub Attack(ByRef offenders As List(Of Crew), ByRef targetList As List(Of Crew))
         Dim targets As New List(Of Crew)(targetList)
         For Each Crew In offenders
+            Crew.tickcombat()
             Crew.MeleeAttack(targets)
             If targets.Count = 0 Then targets = New List(Of Crew)(targetList)
         Next
