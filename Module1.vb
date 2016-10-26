@@ -28,7 +28,7 @@
         With ship
             .ConsoleColour = ConsoleColor.Cyan
             .Name = "Baron's Spear"
-            .Race = CrewRace.Seatouched
+            .Race = CrewRace.Human
             .GenerateBaselines(ShipType.Sloop)
             .AvailableMoves.Add(New MoveToken({BattleMove.Halt}))
 
@@ -81,11 +81,13 @@
         Dim isle As Isle = world("Deathless Kingdom")
         isle.AddReputationXP(IsleFaction.Church, -51)
         isle.AddReputationXP(IsleFaction.Church, 1)
-        isle.Buildings.Add("Crypt")
-        isle.Buildings.Add("Hospital")
-        isle.Buildings.Add("Temple")
+        isle.AddBuilding("Crypt")
+        isle.AddBuilding("Clinic")
+        isle.AddBuilding("Temple")
 
-        player.AddCoins(WorldFaction.Deathless, 1000)
+        'player.AddCoins(WorldFaction.Deathless, 1000)
+        Dim damage As New Damage(0, 25, DamageType.Blunt, "God")
+        player.GetCrew(Nothing, CrewRole.Captain).ShipAttack(100, damage)
     End Sub
 
     Private Function MainPlayerInput() As Boolean

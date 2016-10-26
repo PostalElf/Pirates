@@ -127,7 +127,25 @@
 #End Region
 
 #Region "Buildings"
-    Public Buildings As New List(Of String)
+    Public Doctor As Crew = Nothing
+    Private Buildings As New List(Of String)
+    Public Function GetBuilding(ByVal str As String) As Boolean
+        If Buildings.Contains(str) Then Return True Else Return False
+    End Function
+    Public Sub AddBuilding(ByVal str As String)
+        If Buildings.Contains(str) Then Exit Sub
+
+        Select Case str
+            Case "Clinic"
+                Doctor = Crew.Generate(Race, World.Rng, CrewSkill.Medicine)
+                Doctor.Role = CrewRole.Doctor
+            Case "Hospital"
+                Doctor = Crew.Generate(Race, World.Rng, CrewSkill.Medicine, CrewSkill.Medicine)
+                Doctor.Role = CrewRole.Doctor
+        End Select
+
+        Buildings.Add(str)
+    End Sub
 #End Region
 
 #Region "Tick"

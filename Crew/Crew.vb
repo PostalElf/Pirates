@@ -243,6 +243,11 @@
         For Each e In Equipment
             If e.SkillBonuses.ContainsKey(cs) Then total += e.SkillBonuses(cs)
         Next
+
+        'shortcircuit for non-ship crew
+        If Ship Is Nothing Then Return total
+
+        'get mascot bonus
         If Ship.mascot Is Nothing = False Then
             If Ship.Mascot.SkillBonuses.ContainsKey(cs) Then total += Ship.Mascot.SkillBonuses(cs)
         End If
@@ -422,6 +427,7 @@
         Dim xp As Double = 1
         AddSkillXP(CrewSkill.Bracing, xp)
     End Sub
+
     Private Sub Damage(ByVal damage As Damage)
         If Ship Is Nothing Then Exit Sub
         If damage.CrewDamage <= 0 Then Exit Sub
@@ -434,16 +440,89 @@
 
         If DamageSustained >= Health Then Death()
     End Sub
+    Public Sub TickHeal(ByVal doctor As Crew)
+        'doctors have disadvantage when treating patients not of their race
+        'failure to treat will deal damage
+        'unrelinquished do not gain scars but are harder to treat
+        'seatouched have a chance to gain mutation instead of scar
+
+        Dim currentDamage As Damage = GetWorstDamage()
+        If currentDamage.CrewDamage = 0 Then
+            'no more damage to treat in damage log
+            'check for lingering injuries to treat
+            If doctor Is Nothing = False AndAlso DamageSustained > 0 Then
+                Dim heal As Integer = World.Rng.Next(1, 6)
+                Report.Add(Name & "'s injuries recover under the ministrations of the doctor. (-" & heal & " damage)", ReportType.Doctor)
+                DamageSustained -= heal
+                If DamageSustained < 0 Then DamageSustained = 0
+            End If
+            Exit Sub
+        End If
+
+        If doctor Is Nothing Then
+            Report.Add(Name & "'s injuries worsen without a doctor. (+5 damage)", ReportType.CrewDamage)
+            DamageSustained += 5
+            If DamageSustained > Health Then Death()
+            Exit Sub
+        End If
+
+        Dim skill As Integer = doctor.GetSkillFromRole
+        skill += Dev.FateRoll(World.Rng)
+        If doctor.Race <> Me.Race Then skill -= 1
+        If Me.Race = CrewRace.Unrelinquished Then skill -= 1
+
+        Dim difficulty As Integer
+        Select Case currentDamage.CrewDamage
+            Case Is <= 10 : difficulty = -1
+            Case Is <= 20 : difficulty = 0
+            Case Is <= 30 : difficulty = 1
+            Case Is <= 40 : difficulty = 2
+            Case Else : difficulty = 3
+        End Select
+
+        If skill > difficulty Then
+            DamageLog.Remove(currentDamage)
+            DamageSustained -= currentDamage.CrewDamage
+            Report.Add("The doctor successfully treated " & Name & "'s worst injuries. (-" & currentDamage.CrewDamage & " damage)", ReportType.Doctor)
+        ElseIf skill = difficulty Then
+            DamageLog.Remove(currentDamage)
+            DamageSustained -= currentDamage.CrewDamage
+            Report.Add("The doctor treated " & Name & "'s worst injuries with some difficulty. (-" & currentDamage.CrewDamage & " damage)", ReportType.Doctor)
+
+            If Me.Race <> CrewRace.Unrelinquished Then
+                Dim scarRollBonus As Integer = 0
+                If doctor.GetTalent(CrewTalent.Fleshshaper) = True AndAlso Me.Race = CrewRace.Seatouched Then scarRollBonus += 4
+                Dim scar As CrewBonus = GenerateScar(currentDamage, scarRollBonus)
+                If scar Is Nothing Then Exit Sub
+                AddBonus("scar", scar)
+                Report.Add(Name & " gains a new scar: " & scar.Name, ReportType.Doctor)
+
+                'check for old scars and overwrite if necessary
+                If scar.Slot <> Nothing Then
+                    Dim oldScar As CrewBonus = GetSlot(GetBonusList("scar"), scar.Slot)
+                    If oldScar Is Nothing = False Then
+                        RemoveBonus("scar", scar.Slot)
+                        Report.Add(Name & "'s new scar replaces an old scar: " & oldScar.Name, ReportType.Doctor)
+                    End If
+                End If
+            End If
+        Else
+            Dim dmg As Integer = World.Rng.Next(1, 6)
+            Report.Add("The doctor failed to treat " & Name & "'s worst injuries. (+" & dmg & " damage)", ReportType.Doctor)
+            DamageSustained += dmg
+            If DamageSustained > Health Then Death()
+        End If
+
+    End Sub
     Private Function GetWorstDamage() As Damage
-        Dim worstDmg As Damage = Nothing
+        Dim worstDmg As Damage = New Damage(0, 0, Nothing, "")
         For Each dmg In DamageLog
-            If dmg.CrewDamage < worstDmg.CrewDamage Then worstDmg = dmg
+            If dmg.CrewDamage > worstDmg.CrewDamage Then worstDmg = dmg
         Next
         Return worstDmg
     End Function
     Private Sub Death()
-        Dim battlefield As Battlefield = Ship.BattleSquare.Battlefield
-        If battlefield Is Nothing = False Then battlefield.AddDead(Me)
+        If Ship.BattleSquare Is Nothing = False AndAlso Ship.BattleSquare.Battlefield Is Nothing = False Then Ship.BattleSquare.Battlefield.AddDead(Me)
         Dim repType As ReportType
         If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDeath Else repType = ReportType.EnemyCrewDeath
         Report.Add("[" & Ship.ID & "] " & Name & " has perished!", repType)
@@ -477,54 +556,6 @@
             End Select
         End Get
     End Property
-    Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer, ByVal shoreProvisors As List(Of GoodType)) As Integer
-        If Not (TypeOf Ship Is ShipPlayer) Then Return 0
-        If shoreProvisors Is Nothing = False Then
-            If shoreProvisors.Contains(goodType) Then Return positiveChange Else Return negativeChange
-        Else
-            Dim ps As ShipPlayer = CType(Ship, ShipPlayer)
-            Dim good As Good = good.Generate(goodType, -qty)
-
-            'shortcircuit for Greenskin mutation
-            If goodType = Pirates.GoodType.Rations AndAlso GetBonus("scar", "Greenskin") Is Nothing = False Then Return positiveChange
-
-            If ps.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
-                Return negativeChange
-            Else
-                ps.AddGood(good)
-                If ps.GoodsConsumed.ContainsKey(goodType) = False Then ps.GoodsConsumed.Add(goodType, good.Generate(goodType))
-                ps.GoodsConsumed(goodType) += good
-                Return positiveChange
-            End If
-        End If
-    End Function
-
-    Public Enum CrewMorale
-        Motivated
-        Content
-        Neutral
-        Unhappy
-        Mutinous
-    End Enum
-#End Region
-
-#Region "World"
-    Public Sub Tick(ByVal doctor As Crew)
-        TickMorale()
-        TickHeal(doctor)
-
-        'add xp for specialist roles
-        Select Case Role
-            Case CrewRole.Captain : AddSkillXP(CrewSkill.Leadership, 1)
-            Case CrewRole.FirstMate : AddSkillXP(CrewSkill.Leadership, 0.5)
-            Case CrewRole.Navigator : AddSkillXP(CrewSkill.Navigation, 1)
-            Case CrewRole.Sailor : AddSkillXP(CrewSkill.Sailing, 1)
-            Case CrewRole.Helmsman : AddSkillXP(CrewSkill.Sailing, 1)
-            Case CrewRole.Gunner 'handled in ship.shipattack
-            Case CrewRole.Cook 'handled in crew.tickmorale
-            Case CrewRole.Doctor 'handled in shipplayer.tick
-        End Select
-    End Sub
     Public Sub TickMorale(Optional ByVal shoreProvisors As List(Of GoodType) = Nothing)
         'morale ranges from 1 to 100
         Dim change As Integer = 0
@@ -602,58 +633,51 @@
         Morale = Dev.Constrain(Morale + change, 0, 100)
         CType(Ship, ShipPlayer).MoraleChange += change
     End Sub
-    Public Sub TickHeal(ByVal doctor As Crew)
-        'doctors have disadvantage when treating patients not of their race
-        'failure to treat will deal damage
-        'unrelinquished do not gain scars but are harder to treat
-        'seatouched have a chance to gain mutation instead of scar
+    Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer, ByVal shoreProvisors As List(Of GoodType)) As Integer
+        If Not (TypeOf Ship Is ShipPlayer) Then Return 0
+        If shoreProvisors Is Nothing = False andalso shoreProvisors.Contains(goodType) Then Return positiveChange
 
-        Dim currentDamage As Damage = GetWorstDamage()
-        If currentDamage Is Nothing Then Exit Sub
+        Dim ps As ShipPlayer = CType(Ship, ShipPlayer)
+        Dim good As Good = good.Generate(goodType, -qty)
 
-        If doctor Is Nothing Then
-            Report.Add(Name & "'s injuries worsen without a doctor.", ReportType.CrewDamage)
-            DamageSustained += 5
-            If DamageSustained > Health Then Death()
-            Exit Sub
-        End If
+        'shortcircuit for Greenskin mutation
+        If goodType = Pirates.GoodType.Rations AndAlso GetBonus("scar", "Greenskin") Is Nothing = False Then Return positiveChange
 
-        Dim skill As Integer = doctor.GetSkillFromRole + Dev.FateRoll(World.Rng)
-        If doctor.Race <> Me.Race Then skill -= 2
-        If Me.Race = CrewRace.Unrelinquished Then skill -= 1
-
-        If skill > currentDamage.CrewDamage Then
-            DamageLog.Remove(currentDamage)
-            DamageSustained -= currentDamage.CrewDamage
-            Report.Add("The doctor successfully treated " & Name & "'s worst injuries.", ReportType.Doctor)
-        ElseIf skill = currentDamage.CrewDamage Then
-            DamageLog.Remove(currentDamage)
-            DamageSustained -= currentDamage.CrewDamage
-            Report.Add("The doctor treated " & Name & "'s worst injuries.", ReportType.Doctor)
-
-            If Me.Race <> CrewRace.Unrelinquished Then
-                Dim scarRollBonus As Integer = 0
-                If doctor.GetTalent(CrewTalent.Fleshshaper) = True AndAlso Me.Race = CrewRace.Seatouched Then scarRollBonus += 4
-                Dim scar As CrewBonus = GenerateScar(currentDamage, scarRollBonus)
-                If scar Is Nothing Then Exit Sub
-                AddBonus("scar", scar)
-                Report.Add(Name & " gains a new scar: " & scar.Name, ReportType.Doctor)
-
-                'check for old scars and overwrite if necessary
-                If scar.Slot <> Nothing Then
-                    Dim oldScar As CrewBonus = GetSlot(GetBonusList("scar"), scar.Slot)
-                    If oldScar Is Nothing = False Then
-                        RemoveBonus("scar", scar.Slot)
-                        Report.Add(Name & "'s new scar replaces an old scar: " & oldScar.Name, ReportType.Doctor)
-                    End If
-                End If
-            End If
+        If ps.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
+            Return negativeChange
         Else
-            Report.Add("The doctor failed to treat " & Name & "'s worst injuries.", ReportType.Doctor)
-            DamageSustained += 5
-            If DamageSustained > Health Then Death()
+            ps.AddGood(good)
+            If ps.GoodsConsumed.ContainsKey(goodType) = False Then ps.GoodsConsumed.Add(goodType, good.Generate(goodType))
+            ps.GoodsConsumed(goodType) += good
+            Return positiveChange
         End If
+    End Function
 
+    Public Enum CrewMorale
+        Motivated
+        Content
+        Neutral
+        Unhappy
+        Mutinous
+    End Enum
+#End Region
+
+#Region "World"
+    Public Sub Tick(ByVal doctor As Crew)
+        TickMorale()
+        TickHeal(doctor)
+
+        'add xp for specialist roles
+        Select Case Role
+            Case CrewRole.Captain : AddSkillXP(CrewSkill.Leadership, 1)
+            Case CrewRole.FirstMate : AddSkillXP(CrewSkill.Leadership, 0.5)
+            Case CrewRole.Navigator : AddSkillXP(CrewSkill.Navigation, 1)
+            Case CrewRole.Sailor : AddSkillXP(CrewSkill.Sailing, 1)
+            Case CrewRole.Helmsman : AddSkillXP(CrewSkill.Sailing, 1)
+            Case CrewRole.Gunner 'handled in ship.shipattack
+            Case CrewRole.Cook 'handled in crew.tickmorale
+            Case CrewRole.Doctor 'handled in shipplayer.tick
+        End Select
     End Sub
 #End Region
 
