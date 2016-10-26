@@ -585,6 +585,7 @@
         If weapon.IsReady = False Then Exit Sub
 
         Dim attackTarget As BattlefieldObject = weapon.GetAttackTarget(Facing)
+        If attackTarget Is Nothing Then Exit Sub
         Dim attackDirection As BattleDirection = GetAttackDirection(weapon, attackTarget)
 
         Dim repType As ReportType
@@ -593,7 +594,7 @@
         JustFired(quarter) = True
 
         If weapon.Name <> "Grappling Hooks" Then
-            weapon.Attack(attackDirection, attackTarget, GetCrews(quarter, CrewSkill.Gunnery))
+            weapon.Attack(attackDirection, attackTarget, GetCrews(quarter, CrewRole.Gunner))
         Else
             If TypeOf attackTarget Is Ship = False Then Exit Sub
             Dim attackShip As Ship = CType(attackTarget, Ship)

@@ -38,6 +38,21 @@
                     .AmmoUse = 0
                     .Slot = "Right Hand"
 
+                Case "Bullwhip"
+                    .Name = aName
+                    .Skill = CrewSkill.Melee
+                    .Damage = 15
+                    .DamageType = Pirates.DamageType.Blunt
+                    .AmmoUse = 0
+                    .Slot = "Left Hand"
+
+                Case "Flintlock Pistol"
+                    .Name = "Pistol"
+                    .Damage = 25
+                    .DamageType = DamageType.Firearms
+                    .AmmoUse = 1
+                    .Slot = "Left Hand"
+
                 Case Else
                     Return Nothing
             End Select

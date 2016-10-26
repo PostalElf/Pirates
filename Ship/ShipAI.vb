@@ -47,7 +47,7 @@
             Next
 
             'set permissions
-            For Each k In .GoodsFreeForConsumption.Keys
+            For Each k In [Enum].GetValues(GetType(GoodType))
                 .GoodsFreeForConsumption(k) = True
             Next
         End With

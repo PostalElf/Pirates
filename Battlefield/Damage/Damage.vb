@@ -22,7 +22,6 @@
         End With
         Return d
     End Function
-
     Public Shared Operator =(ByVal d1 As Damage, ByVal d2 As Damage)
         If d1.Type <> d2.Type Then Return False
         If d1.ShipDamage <> d2.ShipDamage Then Return False

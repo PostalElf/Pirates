@@ -60,19 +60,14 @@
             .AddModule(ShipQuarter.Starboard, ShipModule.Generate(ShipModule.ModuleType.Hold, ShipModule.ModuleQuality.Poor, Nothing))
             .AddGood(GoodType.Rations, 100)
             .AddGood(GoodType.Water, 100)
+            .AddGood(GoodType.Shot, 25)
+            .AddGood(GoodType.Grapples, 5)
         End With
         Return ship
     End Function
     Private Sub TestSnippets(ByRef player As ShipPlayer)
-        Dim pistol As New CrewBonus
-        With pistol
-            .Name = "Pistol"
-            .Damage = 25
-            .DamageType = DamageType.Firearms
-            .AmmoUse = 1
-            .Slot = "Left Hand"
-        End With
-        player.AddEquipment(pistol)
+        player.AddEquipment(CrewBonus.Generate("Flintlock Pistol"))
+        player.AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("hooks"))
 
         For Each Route In world.BasicRoutes
             player.AddRoute(Route)
@@ -87,7 +82,9 @@
 
         player.AddCoins(WorldFaction.Deathless, 1000)
         Dim damage As New Damage(0, 25, DamageType.Blunt, "God")
-        player.GetCrew(Nothing, CrewRole.Captain).ShipAttack(100, damage)
+        Dim captain As Crew = player.GetCrew(Nothing, CrewRole.Captain)
+        captain.ShipAttack(100, damage)
+        captain.AddBonus("equipment", CrewBonus.Generate("Bullwhip"))
     End Sub
 
     Private Function MainPlayerInput() As Boolean

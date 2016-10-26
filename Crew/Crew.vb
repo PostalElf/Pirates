@@ -288,18 +288,14 @@
         If cs = Nothing Then Return -1
         Return GetSkill(cs)
     End Function
-    Private Function GetBestWeapon() As CrewBonus
-        Dim bestWeapon As CrewBonus = Nothing
-        Dim bestWeaponValue As Integer = -1
+    Private Function GetWeapons() As List(Of CrewBonus)
+        Dim total As New List(Of CrewBonus)
         For Each cbl In CrewBonuses
             For Each cb In cbl
-                If cb.IsReady(Ship) = True AndAlso cb.Damage > bestWeaponValue Then
-                    bestWeapon = cb
-                    bestWeaponValue = cb.Damage
-                End If
+                If cb.IsReady(Ship) = True AndAlso cb.Damage > 0 Then total.Add(cb)
             Next
         Next
-        Return bestWeapon
+        Return total
     End Function
     Public Sub AddSkillXP(ByVal cs As CrewSkill, ByVal value As Double)
         Dim maxLevel As Integer = SkillThresholds.Count - 1
@@ -372,37 +368,38 @@
         MeleeAttack(target)
     End Sub
     Public Sub MeleeAttack(ByRef target As Crew)
-        Dim weapon As CrewBonus = GetBestWeapon()
-        If weapon Is Nothing Then Exit Sub
-        Dim skill As CrewSkill = weapon.Skill
+        Dim weapons As List(Of CrewBonus) = getWeapons()
+        For Each weapon In weapons
+            Dim skill As CrewSkill = weapon.Skill
 
-        'roll skill vs skill
-        Dim attSkill As Integer = GetSkill(skill) + Dev.FateRoll(World.Rng)
-        Dim defSkill As Integer = target.GetSkill(skill) + Dev.FateRoll(World.Rng)
-        If attSkill > defSkill Then
-            'success, damage
-            Dim damage As New Damage(0, weapon.Damage, weapon.DamageType, Name)
-            target.Damage(damage)
-            If weapon.AmmoUse > 0 Then
-                Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
+            'roll skill vs skill
+            Dim attSkill As Integer = GetSkill(skill) + Dev.FateRoll(World.Rng)
+            Dim defSkill As Integer = target.GetSkill(skill) + Dev.FateRoll(World.Rng)
+            If attSkill > defSkill Then
+                'success, damage
+                Dim damage As New Damage(0, weapon.Damage, weapon.DamageType, Name & "'s " & weapon.Name)
+                target.Damage(damage)
+                If weapon.AmmoUse > 0 Then
+                    Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
+                End If
+            ElseIf attSkill = defSkill Then
+                'glancing hit
+                Dim dmgValue As Integer = Dev.Constrain(weapon.Damage / 2, 1)
+                Dim damage As New Damage(0, dmgValue, weapon.DamageType, Name & "'s " & weapon.Name)
+                target.Damage(damage)
+                If weapon.AmmoUse > 0 Then
+                    Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
+                End If
+            Else
+                'miss
+                Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off " & Name & "'s " & weapon.Name & ".", ReportType.CrewAttack)
             End If
-        ElseIf attSkill = defSkill Then
-            'glancing hit
-            Dim dmgValue As Integer = Dev.Constrain(weapon.Damage / 2, 1)
-            Dim damage As New Damage(0, dmgValue, weapon.DamageType, Name)
-            target.Damage(damage)
-            If weapon.AmmoUse > 0 Then
-                Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
-            End If
-        Else
-            'miss
-            Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off an attack from " & Name & ".", ReportType.CrewAttack)
-        End If
 
-        'add xp
-        Dim xp As Double = 0.5
-        AddSkillXP(skill, xp)
-        target.AddSkillXP(skill, xp)
+            'add xp
+            Dim xp As Double = 0.5
+            AddSkillXP(skill, xp)
+            target.AddSkillXP(skill, xp)
+        Next
     End Sub
     Public Sub ShipAttack(ByVal accuracy As Integer, ByVal damage As Damage)
         If damage.CrewDamage <= 0 Then Exit Sub
@@ -608,7 +605,7 @@
 
             'cooking
             If hasEaten = True Then
-                If shoreProvisors.Contains(GoodType.Rations) Then
+                If shoreProvisors Is Nothing = False AndAlso shoreProvisors.Contains(GoodType.Rations) Then
                     'eating at shore
                     change += 1
                 Else

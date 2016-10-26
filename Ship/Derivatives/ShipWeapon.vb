@@ -50,7 +50,7 @@
             accuracy += c.GetSkill(CrewSkill.Gunnery)
             c.AddSkillXP(CrewSkill.Gunnery, xp)
         Next
-        accuracy = Math.Round(accuracy / crews.Count, 0, MidpointRounding.AwayFromZero)
+        If accuracy > 0 Then accuracy = Math.Round(accuracy / crews.Count, 0, MidpointRounding.AwayFromZero)
 
         attackTarget.Damage(Damage, targetQuarter, accuracy)
         CooldownCounter = CooldownMax + 1
