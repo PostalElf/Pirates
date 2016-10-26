@@ -48,7 +48,7 @@
 
             'set permissions
             For Each k In [Enum].GetValues(GetType(GoodType))
-                .GoodsFreeForConsumption(k) = True
+                .SetGoodsFreeForConsumption(k, True)
             Next
         End With
         Return ship

@@ -14,13 +14,13 @@
         End Set
     End Property
 
-    Private AttackerShip As Ship
+    Private AttackerShip As MeleeHost
     Private Attackers As New List(Of Crew)
     Private AttackersRe As New List(Of Crew)
-    Private DefenderShip As Ship
+    Private DefenderShip As MeleeHost
     Private Defenders As New List(Of Crew)
     Private DefendersRe As New List(Of Crew)
-    Public Sub New(ByRef attacker As Ship, ByVal attackingQuarter As ShipQuarter, ByRef defender As Ship, ByVal defendingQuarter As ShipQuarter)
+    Public Sub New(ByRef attacker As MeleeHost, ByVal attackingQuarter As ShipQuarter, ByRef defender As MeleeHost, ByVal defendingQuarter As ShipQuarter)
         AttackerShip = attacker
         AttackerShip.InMelee = True
         Attackers.AddRange(AttackerShip.GetCrews(attackingQuarter, Nothing))

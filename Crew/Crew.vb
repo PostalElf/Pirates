@@ -379,9 +379,7 @@
                 'success, damage
                 Dim damage As New Damage(0, weapon.Damage, weapon.DamageType, Name & "'s " & weapon.Name)
                 target.Damage(damage)
-                If weapon.AmmoUse > 0 Then
-                    Ship.AddGood(weapon.GetAmmoType, -weapon.AmmoUse)
-                End If
+                weapon.UseWeapon(ship)
             ElseIf attSkill = defSkill Then
                 'glancing hit
                 Dim dmgValue As Integer = Dev.Constrain(weapon.Damage / 2, 1)
@@ -638,7 +636,7 @@
         'shortcircuit for Greenskin mutation
         If goodType = Pirates.GoodType.Rations AndAlso GetBonus("scar", "Greenskin") Is Nothing = False Then Return positiveChange
 
-        If ps.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
+        If ps.CheckGoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
             Return negativeChange
         Else
             ps.AddGood(good)

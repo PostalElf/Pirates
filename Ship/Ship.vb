@@ -1,5 +1,5 @@
 ﻿Public MustInherit Class Ship
-    Implements BattlefieldObject
+    Implements BattlefieldObject, MeleeHost
     Public Property Name As String Implements BattlefieldObject.Name
     Private _ID As String
     Public Property ID As String
@@ -253,7 +253,13 @@
 
 #Region "Goods"
     Private Goods As New Dictionary(Of GoodType, Good)
-    Public GoodsFreeForConsumption As New Dictionary(Of GoodType, Boolean)
+    Private GoodsFreeForConsumption As New Dictionary(Of GoodType, Boolean)
+    Public Function CheckGoodsFreeForConsumption(ByVal gt As GoodType) As Boolean Implements MeleeHost.CheckGoodsFreeForConsumption
+        Return GoodsFreeForConsumption(gt)
+    End Function
+    Public Sub SetGoodsFreeForConsumption(ByVal gt As GoodType, ByVal value As Boolean)
+        GoodsFreeForConsumption(gt) = value
+    End Sub
     Private ReadOnly Property HoldSpaceMax As Double
         Get
             Dim total As Double = 0
@@ -272,7 +278,7 @@
             Return total
         End Get
     End Property
-    Public Function CheckAddGood(ByVal gt As GoodType, ByVal qty As Integer) As Boolean
+    Public Function CheckAddGood(ByVal gt As GoodType, ByVal qty As Integer) As Boolean Implements MeleeHost.CheckAddGood
         Return CheckAddGood(Good.Generate(gt, qty))
     End Function
     Public Function CheckAddGood(ByVal good As Good) As Boolean
@@ -283,7 +289,7 @@
         End If
         Return True
     End Function
-    Public Sub AddGood(ByVal gt As GoodType, ByVal qty As Integer)
+    Public Sub AddGood(ByVal gt As GoodType, ByVal qty As Integer) Implements MeleeHost.AddGood
         AddGood(Good.Generate(gt, qty))
     End Sub
     Public Sub AddGood(ByVal good As Good)
@@ -513,7 +519,7 @@
         Dim crewlist As List(Of Crew) = GetCrews(quarter, role)
         If crewlist.Count = 0 Then Return Nothing Else Return crewlist(0)
     End Function
-    Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As CrewRole) As List(Of Crew)
+    Public Function GetCrews(ByVal quarter As ShipQuarter, ByVal role As CrewRole) As List(Of Crew) Implements MeleeHost.GetCrews
         Dim total As New List(Of Crew)
         If quarter = Nothing Then
             For Each q In [Enum].GetValues(GetType(ShipQuarter))
@@ -658,7 +664,7 @@
     End Function
 
     Public InCombat As Boolean = False
-    Public InMelee As Boolean = False
+    Public Property InMelee As Boolean = False Implements MeleeHost.InMelee
     Private DamageSustained As New Dictionary(Of ShipQuarter, Integer)
     Protected HullPoints As New Dictionary(Of ShipQuarter, Integer)
     Private DamageLog As New List(Of Damage)

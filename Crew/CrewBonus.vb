@@ -17,21 +17,21 @@
     Private CooldownCounter As Integer
     Private CooldownMax As Integer
 
-    Public ReadOnly Property IsReady(ByVal ship As Ship) As Boolean
+    Public ReadOnly Property IsReady(ByVal host As MeleeHost) As Boolean
         Get
             If CooldownCounter > 0 Then Return False
             If AmmoUse > 0 Then
                 Dim AmmoType As GoodType = GetAmmoType()
-                If ship.GoodsFreeForConsumption(AmmoType) = False Then Return False
-                If ship.GetGood(AmmoType).Qty < AmmoUse Then Return False
+                If host.CheckGoodsFreeForConsumption(AmmoType) = False Then Return False
+                If host.checkAddGood(AmmoType, -AmmoUse) = False Then Return False
             End If
             Return True
         End Get
     End Property
-    Public Sub UseWeapon(ByRef ship As Ship)
+    Public Sub UseWeapon(ByRef host As MeleeHost)
         CooldownCounter = CooldownMax
         If AmmoUse > 0 Then
-            ship.AddGood(GetAmmoType, -AmmoUse)
+            host.AddGood(GetAmmoType, -AmmoUse)
         End If
     End Sub
     Public Sub TickCombat()
