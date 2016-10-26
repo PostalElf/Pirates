@@ -6,7 +6,7 @@
         Console.SetWindowSize(100, 50)
         world = Pirates.World.Generate
         world.ShipPlayer = SetupPlayerShip(world.Rng)
-        world.ShipPlayer.Teleport(world.Item("Deathless Kingdom"))
+        world.ShipPlayer.Teleport(world.GetIsle("Deathless Kingdom"))
 
         TestSnippets(world.ShipPlayer)
 
@@ -69,6 +69,9 @@
         For Each Route In world.BasicRoutes
             player.AddRoute(Route)
         Next
+
+        Dim isle As Isle = world("Deathless Kingdom")
+        isle.AddReputationXP(IsleFaction.Church, 300)
     End Sub
 
     Private Function MainPlayerInput() As Boolean

@@ -10,10 +10,22 @@
 
 #Region "Politics"
     Public Faction As WorldFaction
-    Private Reputation As New Dictionary(Of IsleFaction, Double)
-    Public Sub AddReputation(ByVal islefaction As IsleFaction, ByVal value As Double)
-        Reputation(islefaction) += value
-        World.Reputation(islefaction) += value
+    Private Reputation As New Dictionary(Of IsleFaction, Integer)
+    Private ReputationXP As New Dictionary(Of IsleFaction, Double)
+    Private Shared ReputationThresholds As Integer() = {0, 100, 300, 600, 1000, 1500}
+    Public Sub AddReputationXP(ByVal fac As IsleFaction, ByVal value As Double)
+        Dim maxLevel As Integer = ReputationThresholds.Count - 1
+        Dim maxThreshold As Integer = ReputationThresholds(maxLevel)
+        If Reputation(fac) >= maxLevel Then Exit Sub
+
+        ReputationXP(fac) += value
+        If ReputationXP(fac) > maxThreshold Then ReputationXP(fac) = maxThreshold
+
+        Dim level As Integer = Reputation(fac)
+        While ReputationXP(fac) > ReputationThresholds(level)
+            level += 1
+            Reputation(fac) += 1
+        End While
     End Sub
 #End Region
 
@@ -128,6 +140,7 @@
         World = aWorld
         For Each fac In [Enum].GetValues(GetType(IsleFaction))
             Reputation.Add(fac, 0)
+            ReputationXP.Add(fac, 0)
         Next
         For Each gt In [Enum].GetValues(GetType(GoodType))
             SaleGoodPriceModifier.Add(gt, 1)

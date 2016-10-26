@@ -312,15 +312,10 @@
         If SkillsXP(cs) > maxThreshold Then SkillsXP(cs) = maxThreshold
 
         Dim level As Integer = Skills(cs)
-        For n = maxLevel To level Step -1
-            Dim threshold As Integer = SkillThresholds(n)
-            If SkillsXP(cs) < threshold Then
-                Continue For
-            Else
-                Skills(cs) = n
-                Exit For
-            End If
-        Next
+        While SkillsXP(cs) > SkillThresholds(level)
+            level += 1
+            Skills(cs) += 1
+        End While
     End Sub
 
     Public Shared Function ConvertSkillToRole(ByVal skill As CrewSkill) As CrewRole

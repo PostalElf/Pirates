@@ -7,7 +7,7 @@
     Private Isles As New List(Of Isle)
     Private SeaPoints As New List(Of MapDataPoint)
     Private SeaNames As New List(Of String)
-    Default Public Property Item(ByVal isleName As String) As Isle
+    Default Public Property GetIsle(ByVal isleName As String) As Isle
         Get
             For Each i In Isles
                 If i.Name = isleName Then Return i
@@ -78,7 +78,7 @@
         Return world
     End Function
 
-    Public Reputation As New Dictionary(Of IsleFaction, Double)
+    Public Reputation As New Dictionary(Of IsleFaction, Integer)
 
 #Region "Tick"
     Public Sub Tick()
