@@ -424,18 +424,8 @@
 #End Region
 
 #Region "World"
-    Public Sub Tick(ByVal world As World)
-        'crew tick
-        Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
-        Dim CrewList As List(Of Crew) = GetCrews(Nothing, Nothing)
-        For Each Crew In CrewList
-            Crew.Tick(doctor)
-        Next
-        If doctor Is Nothing = False AndAlso CrewList.Count > 0 Then
-            Dim xp As Double = CrewList.Count / 2
-            doctor.AddSkillXP(CrewSkill.Medicine, xp)
-        End If
-
+    Public Sub Tick(ByRef world As World)
+        If IsAtSea = True Then TickSea(world) Else TickShore(world)
 
         'report good consumption
         If GoodsConsumed.Values.Count > 0 Then
@@ -465,8 +455,20 @@
             Report.Add(rep, ReportType.CrewMorale)
             MoraleChange = 0
         End If
-
+    End Sub
+    Private Sub TickSea(ByRef world As World)
         TickTravel(world)
+
+        'crew tick
+        Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
+        Dim CrewList As List(Of Crew) = GetCrews(Nothing, Nothing)
+        For Each Crew In CrewList
+            Crew.Tick(doctor)
+        Next
+        If doctor Is Nothing = False AndAlso CrewList.Count > 0 Then
+            Dim xp As Double = CrewList.Count / 2
+            doctor.AddSkillXP(CrewSkill.Medicine, xp)
+        End If
     End Sub
     Private Sub TickTravel(ByVal world As World)
         If MyBase.IsSeaworthy = False Then Exit Sub
@@ -484,6 +486,53 @@
             If GetTravelRouteDirection(TravelOrigin, TravelDestination) = world.Wind Then Report.Add(Name & " is sailing with the wind (+10% speed).", ReportType.TravelProgress)
             Report.Add(Name & " makes some progress towards " & TravelDestination.Name & " (+" & speed.ToString("0.0") & ").", ReportType.TravelProgress)
         End If
+    End Sub
+    Private Sub TickShore(ByRef world As World)
+        'docked
+        'crew on shore leave
+        Dim coinSpent As Double = 0
+        For Each r As CrewRace In [Enum].GetValues(GetType(CrewRace))
+            For Each Crew In GetCrews(r)
+                If Crew.IsInjured = True Then TickShoreHeal(Crew)
+
+                Dim shoreProvisors As New List(Of GoodType)
+                Select Case r
+                    Case CrewRace.Human
+                        If CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Rations) : shoreProvisors.Add(GoodType.Water)
+                        If Isle.Buildings.Contains("Tavern") AndAlso CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Liqour)
+                        If Isle.Buildings.Contains("Cafe") AndAlso CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Coffee)
+                    Case CrewRace.Windsworn
+                        If CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Rations) : shoreProvisors.Add(GoodType.Water)
+                        If Isle.Buildings.Contains("Smokehouse") AndAlso CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Tobacco)
+                        If Isle.Buildings.Contains("Spice Stall") AndAlso CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Spice)
+                    Case CrewRace.Seatouched
+                        If CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Rations) : shoreProvisors.Add(GoodType.Water)
+                        If Isle.Buildings.Contains("Temple") AndAlso CrewShoreSpend(10, coinSpent) = True Then shoreProvisors.Add(GoodType.Salt)
+                    Case CrewRace.Unrelinquished
+                        If Isle.Buildings.Contains("Crypt") AndAlso CrewShoreSpend(10, coinSpent) = True Then shoreProvisors.Add(GoodType.Mordicus)
+                End Select
+
+                Crew.TickMorale(shoreProvisors)
+            Next
+        Next
+
+        Report.Add("The crew spent $" & coinSpent.ToString("0.00") & " on shore.", ReportType.CrewMorale)
+    End Sub
+    Private Function CrewShoreSpend(ByVal cost As Double, ByRef coinSpent As Double) As Boolean
+        'returns false if there isn't enough money
+        If CheckAddCoins(Isle.Faction, cost) = False Then Return False
+
+        'otherwise return true, deduct money and add to report
+        AddCoins(Isle.Faction, cost)
+        coinSpent += cost
+        Return True
+    End Function
+    Private Sub TickShoreHeal(ByRef crew As Crew)
+        Dim doctor As Crew = Nothing
+        If Isle.Buildings.Contains("Hospital") Then
+            doctor = crew.Generate(Isle.Race, World.Rng, CrewSkill.Medicine, CrewSkill.Medicine)
+        End If
+        crew.tickHeal(doctor)
     End Sub
     Public GoodsConsumed As New Dictionary(Of GoodType, Good)
     Public MoraleChange As Integer

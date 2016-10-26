@@ -13,7 +13,7 @@
         End Set
     End Property
     Protected Type As ShipType
-    Protected Race As CrewRace
+    Public Race As CrewRace
 
     Public Sub New()
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))

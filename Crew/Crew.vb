@@ -363,6 +363,11 @@
     Private DamageLog As New List(Of Damage)
     Private Health As Integer
     Private DamageSustained As Integer
+    Public ReadOnly Property IsInjured As Boolean
+        Get
+            If DamageSustained > 0 Then Return True Else Return False
+        End Get
+    End Property
 
     Public Sub MeleeAttack(ByRef targets As List(Of Crew))
         Dim target As Crew = Dev.GrabRandom(targets, World.Rng)
@@ -472,22 +477,25 @@
             End Select
         End Get
     End Property
-    Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer) As Integer
+    Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer, ByVal shoreProvisors As List(Of GoodType)) As Integer
         If Not (TypeOf Ship Is ShipPlayer) Then Return 0
-        Dim ps As ShipPlayer = CType(Ship, ShipPlayer)
-        Dim good As Good = good.Generate(goodType, -qty)
-
-        'shortcircuit for Greenskin mutation
-        If goodType = Pirates.GoodType.Rations AndAlso GetBonus("scar", "Greenskin") Is Nothing = False Then Return positiveChange
-
-
-        If ps.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
-            Return negativeChange
+        If shoreProvisors Is Nothing = False Then
+            If shoreProvisors.Contains(goodType) Then Return positiveChange Else Return negativeChange
         Else
-            ps.AddGood(good)
-            If ps.GoodsConsumed.ContainsKey(goodType) = False Then ps.GoodsConsumed.Add(goodType, good.Generate(goodType))
-            ps.GoodsConsumed(goodType) += good
-            Return positiveChange
+            Dim ps As ShipPlayer = CType(Ship, ShipPlayer)
+            Dim good As Good = good.Generate(goodType, -qty)
+
+            'shortcircuit for Greenskin mutation
+            If goodType = Pirates.GoodType.Rations AndAlso GetBonus("scar", "Greenskin") Is Nothing = False Then Return positiveChange
+
+            If ps.GoodsFreeForConsumption(goodType) = False OrElse Ship.CheckAddGood(good) = False Then
+                Return negativeChange
+            Else
+                ps.AddGood(good)
+                If ps.GoodsConsumed.ContainsKey(goodType) = False Then ps.GoodsConsumed.Add(goodType, good.Generate(goodType))
+                ps.GoodsConsumed(goodType) += good
+                Return positiveChange
+            End If
         End If
     End Function
 
@@ -517,7 +525,7 @@
             Case CrewRole.Doctor 'handled in shipplayer.tick
         End Select
     End Sub
-    Private Sub TickMorale()
+    Public Sub TickMorale(Optional ByVal shoreProvisors As List(Of GoodType) = Nothing)
         'morale ranges from 1 to 100
         Dim change As Integer = 0
         Dim hasEaten As Boolean = True
@@ -525,39 +533,43 @@
         Select Case Race
             Case CrewRace.Human
                 'humans need rations and water; desire coffee and liqour
-                change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
+                change += ConsumeGoods(GoodType.Rations, 1, 0, -5, shoreProvisors)
                 If change = -5 Then hasEaten = False
-                change += ConsumeGoods(GoodType.Water, 1, 0, -10)
+                change += ConsumeGoods(GoodType.Water, 1, 0, -10, shoreProvisors)
                 If change >= -5 Then
-                    change += ConsumeGoods(GoodType.Coffee, 1, 1, 0)
-                    change += ConsumeGoods(GoodType.Liqour, 1, 2, 0)
+                    change += ConsumeGoods(GoodType.Coffee, 1, 1, 0, shoreProvisors)
+                    change += ConsumeGoods(GoodType.Liqour, 1, 2, 0, shoreProvisors)
                 End If
 
             Case CrewRace.Seatouched
                 'seatouched need rations, water and prayer; desire salt
-                change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
+                change += ConsumeGoods(GoodType.Rations, 1, 0, -5, shoreProvisors)
                 If change = -5 Then hasEaten = False
-                change += ConsumeGoods(GoodType.Water, 1, 0, -10)
-                If Shrine Is Nothing Then change -= 5 : Exit Select
-                If change >= -5 Then
-                    change += ConsumeGoods(GoodType.Salt, 1, 1, 0)
-                    change += Math.Ceiling(Shrine.Quality / 2)
+                change += ConsumeGoods(GoodType.Water, 1, 0, -10, shoreProvisors)
+                If shoreProvisors.Contains(GoodType.Salt) Then
+                    change += 1
+                Else
+                    If Shrine Is Nothing Then change -= 5 : Exit Select
+                    If change >= -5 Then
+                        change += ConsumeGoods(GoodType.Salt, 1, 1, 0, shoreProvisors)
+                        change += Math.Ceiling(Shrine.Quality / 2)
+                    End If
                 End If
 
             Case CrewRace.Windsworn
                 'windsworn need rations and water; desire tobacco and spice
-                change += ConsumeGoods(GoodType.Rations, 1, 0, -5)
+                change += ConsumeGoods(GoodType.Rations, 1, 0, -5, shoreProvisors)
                 If change = -5 Then hasEaten = False
-                change += ConsumeGoods(GoodType.Water, 1, 0, -5)
+                change += ConsumeGoods(GoodType.Water, 1, 0, -5, shoreProvisors)
                 If change >= -5 Then
-                    change += ConsumeGoods(GoodType.Tobacco, 1, 2, 0)
-                    change += ConsumeGoods(GoodType.Spice, 1, 1, 0)
+                    change += ConsumeGoods(GoodType.Tobacco, 1, 2, 0, shoreProvisors)
+                    change += ConsumeGoods(GoodType.Spice, 1, 1, 0, shoreProvisors)
                 End If
 
             Case CrewRace.Unrelinquished
                 'unrelinquished need mordicus; desire leadership
                 hasEaten = False
-                change += ConsumeGoods(GoodType.Mordicus, 1, 0, -10)
+                change += ConsumeGoods(GoodType.Mordicus, 1, 0, -10, shoreProvisors)
                 If change > -10 Then
                     Dim leadership As Integer = Ship.GetLeadership
                     If leadership >= 7 Then change += 1
@@ -572,20 +584,25 @@
 
             'cooking
             If hasEaten = True Then
-                Dim cook As Crew = Ship.GetCrew(Nothing, CrewRole.Cook)
-                If cook Is Nothing = False Then
-                    change += Math.Ceiling(cook.GetSkillFromRole / 2)
-                    Dim xp As Double = 0.25
-                    cook.AddSkillXP(CrewSkill.Cooking, xp)
+                If shoreProvisors.Contains(GoodType.Rations) Then
+                    'eating at shore
+                    change += 1
+                Else
+                    Dim cook As Crew = Ship.GetCrew(Nothing, CrewRole.Cook)
+                    If cook Is Nothing = False Then
+                        change += Math.Ceiling(cook.GetSkillFromRole / 2)
+                        Dim xp As Double = 0.25
+                        cook.AddSkillXP(CrewSkill.Cooking, xp)
+                    End If
                 End If
             End If
         End If
 
         'apply
-        Morale += change
+        Morale = Dev.Constrain(Morale + change, 0, 100)
         CType(Ship, ShipPlayer).MoraleChange += change
     End Sub
-    Private Sub TickHeal(ByVal doctor As Crew)
+    Public Sub TickHeal(ByVal doctor As Crew)
         'doctors have disadvantage when treating patients not of their race
         'failure to treat will deal damage
         'unrelinquished do not gain scars but are harder to treat
@@ -595,7 +612,7 @@
         If currentDamage Is Nothing Then Exit Sub
 
         If doctor Is Nothing Then
-            Report.Add(Name & "'s injuries worsen without a ship doctor.", ReportType.CrewDamage)
+            Report.Add(Name & "'s injuries worsen without a doctor.", ReportType.CrewDamage)
             DamageSustained += 5
             If DamageSustained > Health Then Death()
             Exit Sub
@@ -608,11 +625,11 @@
         If skill > currentDamage.CrewDamage Then
             DamageLog.Remove(currentDamage)
             DamageSustained -= currentDamage.CrewDamage
-            Report.Add("The ship doctor successfully treated " & Name & "'s worst injuries.", ReportType.Doctor)
+            Report.Add("The doctor successfully treated " & Name & "'s worst injuries.", ReportType.Doctor)
         ElseIf skill = currentDamage.CrewDamage Then
             DamageLog.Remove(currentDamage)
             DamageSustained -= currentDamage.CrewDamage
-            Report.Add("The ship doctor treated " & Name & "'s worst injuries.", ReportType.Doctor)
+            Report.Add("The doctor treated " & Name & "'s worst injuries.", ReportType.Doctor)
 
             If Me.Race <> CrewRace.Unrelinquished Then
                 Dim scarRollBonus As Integer = 0
@@ -632,7 +649,7 @@
                 End If
             End If
         Else
-            Report.Add("The ship doctor failed to treat " & Name & "'s worst injuries.", ReportType.Doctor)
+            Report.Add("The doctor failed to treat " & Name & "'s worst injuries.", ReportType.Doctor)
             DamageSustained += 5
             If DamageSustained > Health Then Death()
         End If

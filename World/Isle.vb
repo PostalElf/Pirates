@@ -6,6 +6,7 @@
     Public Y As Integer
     Public YSector As Integer
     Public YSubSector As Integer
+    Public Race As CrewRace
     Private World As World
 
 #Region "Politics"
@@ -125,6 +126,10 @@
     End Function
 #End Region
 
+#Region "Buildings"
+    Public Buildings As New List(Of String)
+#End Region
+
 #Region "Tick"
     Public Sub Tick()
         'update market on King's day
@@ -156,6 +161,10 @@
                 SaleGoodPriceModifier(gt) = modifier
             End If
         Next
+
+        If World.ShipPlayer.IsAtSea = False AndAlso World.ShipPlayer.Isle.Equals(Me) Then
+            Report.Add("The markets have restocked.", ReportType.Commerce)
+        End If
     End Sub
 #End Region
 
@@ -221,6 +230,7 @@
                 SetSaleGood(GoodType.Coffee, SaleDemand.Rare, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Spice, SaleDemand.Uncommon, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.None)
+                Race = CrewRace.Unrelinquished
 
             Case "Windsworn Exclave"
                 'north
@@ -234,6 +244,7 @@
                 SetSaleGood(GoodType.Salt, SaleDemand.None, SaleDemand.Illegal)
                 SetSaleGood(GoodType.Spice, SaleDemand.Rare, SaleDemand.Rare)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Rare, SaleDemand.Rare)
+                Race = CrewRace.Windsworn
 
             Case "Seatouched Dominion"
                 'east
@@ -255,6 +266,7 @@
                 SetSaleGood(GoodType.Coffee, SaleDemand.None, SaleDemand.Illegal)
                 SetSaleGood(GoodType.Spice, SaleDemand.None, SaleDemand.Illegal)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.Illegal)
+                Race = CrewRace.Seatouched
 
             Case "Commonwealth"
                 'south
@@ -269,6 +281,7 @@
                 SetSaleGood(GoodType.Salt, SaleDemand.Rare, SaleDemand.Rare)
                 SetSaleGood(GoodType.Spice, SaleDemand.Rare, SaleDemand.Common)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Abundant, SaleDemand.Common)
+                Race = CrewRace.Human
 
             Case "Court of Dust"
                 'mid
@@ -285,6 +298,7 @@
                 SetSaleGood(GoodType.Coffee, SaleDemand.Common, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Spice, SaleDemand.None, SaleDemand.Rare)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.Uncommon)
+                Race = CrewRace.Human
 
             Case "Blasphemy Bay"
                 'north-west
@@ -299,6 +313,7 @@
                 SetSaleGood(GoodType.Coffee, SaleDemand.Rare, SaleDemand.Uncommon)
                 SetSaleGood(GoodType.Spice, SaleDemand.Common, SaleDemand.Rare)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Common, SaleDemand.Rare)
+                Race = CrewRace.Seatouched
 
             Case "Brass Atoll"
                 'north-east
@@ -311,6 +326,7 @@
                 SetSaleGood(GoodType.Salt, SaleDemand.Rare, SaleDemand.Uncommon)
                 SetSaleGood(GoodType.Liqour, SaleDemand.Rare, SaleDemand.Rare)
                 SetSaleGood(GoodType.Coffee, SaleDemand.None, SaleDemand.Rare)
+                Race = CrewRace.Human
 
             Case "Blackreef"
                 'south-west
@@ -328,6 +344,7 @@
                 SetSaleGood(GoodType.Coffee, SaleDemand.Rare, SaleDemand.Rare)
                 SetSaleGood(GoodType.Spice, SaleDemand.Rare, SaleDemand.Rare)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Rare, SaleDemand.Rare)
+                Race = CrewRace.Human
 
             Case "Hallowsreach"
                 'south-east
@@ -340,12 +357,11 @@
             Case "Firefalls"
         End Select
 
-        'set initials
+        'set initial values
         For Each gt In [Enum].GetValues(GetType(GoodType))
             SaleGoodQty(gt) = GetSaleGoodProductionRange(gt).Roll(World.Rng) * 5
             SaleGoodPriceModifier(gt) = Math.Round(1 + (GetSaleGoodDemandRange(gt).Roll(World.Rng) / 100), 2)
         Next
-        TickMarket()
     End Sub
     Private Sub SetSaleGood(ByVal gt As GoodType, ByVal production As SaleDemand, ByVal demand As SaleDemand)
         SaleGoodProduction(gt) = production

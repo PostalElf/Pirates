@@ -28,27 +28,34 @@
         With ship
             .ConsoleColour = ConsoleColor.Cyan
             .Name = "Baron's Spear"
+            .Race = CrewRace.Seatouched
             .GenerateBaselines(ShipType.Sloop)
             .AvailableMoves.Add(New MoveToken({BattleMove.Halt}))
 
             For n = 1 To 3
-                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, CrewRace.Human))
+                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, .Race))
             Next
 
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng, CrewSkill.Sailing), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Aft, Crew.Generate(CrewRace.Human, rng, CrewSkill.Sailing), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng, CrewSkill.Gunnery), CrewRole.Gunner)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(CrewRace.Human, rng, CrewSkill.Gunnery), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, CrewSkill.Sailing), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Aft, Crew.Generate(.Race, rng, CrewSkill.Sailing), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(.Race, rng, CrewSkill.Gunnery), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(.Race, rng, CrewSkill.Gunnery), CrewRole.Gunner)
 
             .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, ShipModule.ModuleQuality.Average, Nothing))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng, CrewSkill.Leadership), CrewRole.Captain)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, CrewSkill.Leadership), CrewRole.Captain)
             .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Maproom, ShipModule.ModuleQuality.Average, CrewRace.Human))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng, CrewSkill.Navigation), CrewRole.Navigator)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, CrewSkill.Navigation), CrewRole.Navigator)
             .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Helm, ShipModule.ModuleQuality.Average, CrewRace.Human))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(CrewRace.Human, rng, CrewSkill.Steering), CrewRole.Helmsman)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, CrewSkill.Steering), CrewRole.Helmsman)
 
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("cannon"))
             .AddModule(ShipQuarter.Starboard, ShipModule.Generate(ShipModule.ModuleType.Hold, ShipModule.ModuleQuality.Excellent, Nothing))
+
+            'Dim shrine As ShipModule = ShipModule.Generate(ShipModule.ModuleType.Shrine, ShipModule.ModuleQuality.Nice, CrewRace.Seatouched)
+            '.AddModule(ShipQuarter.Starboard, shrine)
+            'For Each Crew In .GetCrews(CrewRace.Seatouched)
+            '    shrine.AddCrew(Crew)
+            'Next
 
             .AddModule(ShipQuarter.Starboard, ShipModule.Generate(ShipModule.ModuleType.Hold, ShipModule.ModuleQuality.Poor, Nothing))
             .AddGood(GoodType.Rations, 100)
@@ -74,6 +81,11 @@
         Dim isle As Isle = world("Deathless Kingdom")
         isle.AddReputationXP(IsleFaction.Church, -51)
         isle.AddReputationXP(IsleFaction.Church, 1)
+        isle.Buildings.Add("Crypt")
+        isle.Buildings.Add("Hospital")
+        isle.Buildings.Add("Temple")
+
+        player.AddCoins(WorldFaction.Deathless, 1000)
     End Sub
 
     Private Function MainPlayerInput() As Boolean
