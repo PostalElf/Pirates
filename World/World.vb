@@ -40,7 +40,7 @@
             'generate isles
             Dim free As New MapData(3, 3, 3, 3)
             .Isles.Add(Isle.Generate(world, "Deathless Kingdom", WorldFaction.Deathless, 1, 2, free))
-            .Isles.Add(Isle.Generate(world, "Forsworn Exclave", WorldFaction.Windsworn, 2, 1, free))
+            .Isles.Add(Isle.Generate(world, "Windsworn Exclave", WorldFaction.Windsworn, 2, 1, free))
             .Isles.Add(Isle.Generate(world, "Seatouched Dominion", WorldFaction.Seatouched, 3, 2, free))
             .Isles.Add(Isle.Generate(world, "Commonwealth", WorldFaction.Commonwealth, 2, 3, free))
             .Isles.Add(Isle.Generate(world, "Court of Dust", WorldFaction.Imperial, 2, 2, free))

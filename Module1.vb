@@ -15,6 +15,7 @@
             Console.ForegroundColor = ConsoleColor.White
             Console.WriteLine(world.Calendar.ToString)
             world.ShipPlayer.ConsoleReportTravelStatus()
+
             Console.ForegroundColor = ConsoleColor.Gray
             Report.ConsoleReport()
             Console.WriteLine()
@@ -71,7 +72,8 @@
         Next
 
         Dim isle As Isle = world("Deathless Kingdom")
-        isle.AddReputationXP(IsleFaction.Church, 300)
+        isle.AddReputationXP(IsleFaction.Church, -51)
+        isle.AddReputationXP(IsleFaction.Church, 1)
     End Sub
 
     Private Function MainPlayerInput() As Boolean

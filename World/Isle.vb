@@ -12,20 +12,26 @@
     Public Faction As WorldFaction
     Private Reputation As New Dictionary(Of IsleFaction, Integer)
     Private ReputationXP As New Dictionary(Of IsleFaction, Double)
-    Private Shared ReputationThresholds As Integer() = {0, 100, 300, 600, 1000, 1500}
+    Private Shared ReputationThresholds As Double() = {0, 10, 20, 50, 100, 150, 200, 400, 600, 1000, 1500}
     Public Sub AddReputationXP(ByVal fac As IsleFaction, ByVal value As Double)
+        ReputationXP(fac) += value
+
         Dim maxLevel As Integer = ReputationThresholds.Count - 1
         Dim maxThreshold As Integer = ReputationThresholds(maxLevel)
-        If Reputation(fac) >= maxLevel Then Exit Sub
-
-        ReputationXP(fac) += value
         If ReputationXP(fac) > maxThreshold Then ReputationXP(fac) = maxThreshold
+        If ReputationXP(fac) < 0 Then ReputationXP(fac) = 0
 
         Dim level As Integer = Reputation(fac)
         While ReputationXP(fac) > ReputationThresholds(level)
             level += 1
             Reputation(fac) += 1
         End While
+        If level > 0 Then
+            While ReputationXP(fac) < ReputationThresholds(level)
+                level -= 1
+                Reputation(fac) -= 1
+            End While
+        End If
     End Sub
 #End Region
 
@@ -61,7 +67,9 @@
         Dim total As Double = Good.GetBasePrice(gt)
         Dim totalModifier As Double = SaleGoodPriceModifier(gt)
         If ShipIsBuying = True Then totalModifier += 0.1
-        Return total * totalModifier
+
+        total = Math.Round(total * totalModifier, 2)
+        Return total
     End Function
     Public Function CheckSellGood(ByVal gt As GoodType, ByVal value As Integer, ByRef ship As ShipPlayer) As Boolean
         If SaleGoodQty(gt) < value Then Return False
@@ -139,8 +147,8 @@
     Private Sub New(ByVal aWorld As World)
         World = aWorld
         For Each fac In [Enum].GetValues(GetType(IsleFaction))
-            Reputation.Add(fac, 0)
-            ReputationXP.Add(fac, 0)
+            Reputation.Add(fac, 5)
+            ReputationXP.Add(fac, ReputationThresholds(5))
         Next
         For Each gt In [Enum].GetValues(GetType(GoodType))
             SaleGoodPriceModifier.Add(gt, 1)
@@ -185,6 +193,7 @@
         Next
         Select Case Name
             Case "Deathless Kingdom"
+                'west
                 SetSaleGood(GoodType.Gold, SaleDemand.None, SaleDemand.None)
                 SetSaleGood(GoodType.Silver, SaleDemand.Uncommon, SaleDemand.Uncommon)
                 SetSaleGood(GoodType.Jewellery, SaleDemand.Rare, SaleDemand.Uncommon)
@@ -193,12 +202,13 @@
                 SetSaleGood(GoodType.Rations, SaleDemand.None, SaleDemand.None)
                 SetSaleGood(GoodType.Water, SaleDemand.Common, SaleDemand.Common)
                 SetSaleGood(GoodType.Salt, SaleDemand.None, SaleDemand.None)
-                SetSaleGood(GoodType.Liqour, SaleDemand.None, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Liqour, SaleDemand.None, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Coffee, SaleDemand.Rare, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Spice, SaleDemand.Uncommon, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.None)
 
-            Case "Forsworn Exclave"
+            Case "Windsworn Exclave"
+                'north
                 SetSaleGood(GoodType.Gold, SaleDemand.None, SaleDemand.Rare)
                 SetSaleGood(GoodType.Silver, SaleDemand.Common, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Jewellery, SaleDemand.Rare, SaleDemand.Rare)
@@ -211,14 +221,104 @@
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Rare, SaleDemand.Rare)
 
             Case "Seatouched Dominion"
+                'east
+                SetSaleGood(GoodType.Grapeshot, SaleDemand.Abundant, SaleDemand.Common)
+                SetSaleGood(GoodType.Shot, SaleDemand.Illegal, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Explosive, SaleDemand.Illegal, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Grapeshot, SaleDemand.Illegal, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Bullets, SaleDemand.Illegal, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Gold, SaleDemand.None, SaleDemand.Common)
+                SetSaleGood(GoodType.Silver, SaleDemand.None, SaleDemand.Common)
+                SetSaleGood(GoodType.Jewellery, SaleDemand.None, SaleDemand.Common)
+                SetSaleGood(GoodType.Cloth, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Metal, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Triaicus, SaleDemand.Uncommon, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Rations, SaleDemand.Abundant, SaleDemand.Common)
+                SetSaleGood(GoodType.Water, SaleDemand.Abundant, SaleDemand.Common)
+                SetSaleGood(GoodType.Salt, SaleDemand.Abundant, SaleDemand.Common)
+                SetSaleGood(GoodType.Liqour, SaleDemand.None, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Coffee, SaleDemand.None, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Spice, SaleDemand.None, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.Illegal)
+
             Case "Commonwealth"
-                SetSaleGood(GoodType.Gold, SaleDemand.Rare, SaleDemand.None)
+                'south
+                SetSaleGood(GoodType.Shot, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Explosive, SaleDemand.Uncommon, SaleDemand.Common)
+                SetSaleGood(GoodType.Grapeshot, SaleDemand.Uncommon, SaleDemand.Common)
+                SetSaleGood(GoodType.Bullets, SaleDemand.Abundant, SaleDemand.Common)
+                SetSaleGood(GoodType.Lumber, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Incantus, SaleDemand.Rare, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Rations, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Water, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Salt, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Spice, SaleDemand.Rare, SaleDemand.Common)
+                SetSaleGood(GoodType.Tobacco, SaleDemand.Abundant, SaleDemand.Common)
 
             Case "Court of Dust"
+                'mid
+                SetSaleGood(GoodType.Gold, SaleDemand.Abundant, SaleDemand.Common)
+                SetSaleGood(GoodType.Silver, SaleDemand.Abundant, SaleDemand.Common)
+                SetSaleGood(GoodType.Jewellery, SaleDemand.Abundant, SaleDemand.Common)
+                SetSaleGood(GoodType.Cloth, SaleDemand.Rare, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Metal, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Boricus, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Triaicus, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Incantus, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Mordicus, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Liqour, SaleDemand.Common, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Coffee, SaleDemand.Common, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Spice, SaleDemand.None, SaleDemand.Rare)
+                SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.Uncommon)
+
             Case "Blasphemy Bay"
+                'north-west
+                SetSaleGood(GoodType.Gold, SaleDemand.None, SaleDemand.Rare)
+                SetSaleGood(GoodType.Silver, SaleDemand.None, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Jewellery, SaleDemand.None, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Cloth, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Lumber, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Triaicus, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Salt, SaleDemand.Illegal, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Liqour, SaleDemand.Uncommon, SaleDemand.Common)
+                SetSaleGood(GoodType.Coffee, SaleDemand.Rare, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Spice, SaleDemand.Common, SaleDemand.Rare)
+                SetSaleGood(GoodType.Tobacco, SaleDemand.Common, SaleDemand.Rare)
+
             Case "Brass Atoll"
+                'north-east
+                SetSaleGood(GoodType.Lumber, SaleDemand.Uncommon, SaleDemand.Common)
+                SetSaleGood(GoodType.Metal, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Boricus, SaleDemand.Rare, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Triaicus, SaleDemand.Rare, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Rations, SaleDemand.Uncommon, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Water, SaleDemand.Uncommon, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Salt, SaleDemand.Rare, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Liqour, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Coffee, SaleDemand.None, SaleDemand.Rare)
+
             Case "Blackreef"
+                'south-west
+                SetSaleGood(GoodType.Shot, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Explosive, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Grapeshot, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Bullets, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Cloth, SaleDemand.None, SaleDemand.Rare)
+                SetSaleGood(GoodType.Lumber, SaleDemand.None, SaleDemand.Rare)
+                SetSaleGood(GoodType.Metal, SaleDemand.Uncommon, SaleDemand.Common)
+                SetSaleGood(GoodType.Incantus, SaleDemand.Abundant, SaleDemand.Abundant)
+                SetSaleGood(GoodType.Rations, SaleDemand.Rare, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Water, SaleDemand.Rare, SaleDemand.Uncommon)
+                SetSaleGood(GoodType.Liqour, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Coffee, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Spice, SaleDemand.Rare, SaleDemand.Rare)
+                SetSaleGood(GoodType.Tobacco, SaleDemand.Rare, SaleDemand.Rare)
+
             Case "Hallowsreach"
+                'south-east
+                SetSaleGood(GoodType.Spice, SaleDemand.Abundant, SaleDemand.Abundant)
+
+
             Case "Sanctuary"
             Case "Blackiron Ridge"
             Case "World's Spine"
@@ -228,7 +328,7 @@
         'set initials
         For Each gt In [Enum].GetValues(GetType(GoodType))
             SaleGoodQty(gt) = GetSaleGoodProductionRange(gt).Roll(World.Rng) * 5
-            SaleGoodPriceModifier(gt) = 1 + (GetSaleGoodDemandRange(gt).Roll(World.Rng) / 100)
+            SaleGoodPriceModifier(gt) = Math.Round(1 + (GetSaleGoodDemandRange(gt).Roll(World.Rng) / 100), 2)
         Next
         TickMarket()
     End Sub
