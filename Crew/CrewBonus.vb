@@ -26,6 +26,24 @@
         End Select
     End Function
 
+    Public Shared Function Generate(ByVal aName As String) As CrewBonus
+        Dim item As New CrewBonus
+        With item
+            Select Case aName
+                Case "Belaying Pin"
+                    .Name = aName
+                    .Skill = CrewSkill.Melee
+                    .Damage = 10
+                    .DamageType = DamageType.Blunt
+                    .AmmoUse = 0
+                    .Slot = "Right Hand"
+
+                Case Else
+                    Return Nothing
+            End Select
+        End With
+        Return item
+    End Function
     Public Overrides Function ToString() As String
         Dim total As String = Name & " (" & Slot.ToString & ")"
         If Damage > 0 Then total &= " - " & Damage & " " & DamageType.ToString

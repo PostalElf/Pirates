@@ -13,18 +13,11 @@
             .Health = 100
             .Morale = 100
 
-            Dim pin As New CrewBonus
-            With pin
-                .Name = "Belaying Pin"
-                .Skill = CrewSkill.Melee
-                .Damage = 10
-                .DamageType = DamageType.Blunt
-                .AmmoUse = 0
-                .Slot = "Right Hand"
-            End With
-            .AddBonus("equipment", pin)
+            .AddBonus("equipment", CrewBonus.Generate("Belaying Pin"))
 
             Dim s As New List(Of CrewSkill)([Enum].GetValues(GetType(CrewSkill)))
+            If skillMain <> Nothing Then s.Remove(skillMain)
+            If skillSub <> Nothing Then s.Remove(skillSub)
             Dim cs As CrewSkill = Nothing
             If skillMain <> Nothing Then cs = skillMain Else cs = Dev.GrabRandom(Of CrewSkill)(s, rng)
             .AddSkillXP(cs, SkillThresholds(2))

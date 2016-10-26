@@ -36,17 +36,17 @@
                 .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, .Race))
             Next
 
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, CrewSkill.Sailing), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Aft, Crew.Generate(.Race, rng, CrewSkill.Sailing), CrewRole.Sailor)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(.Race, rng, CrewSkill.Gunnery), CrewRole.Gunner)
-            .AddCrew(ShipQuarter.Port, Crew.Generate(.Race, rng, CrewSkill.Gunnery), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, Nothing, CrewSkill.Sailing), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Aft, Crew.Generate(.Race, rng, Nothing, CrewSkill.Sailing), CrewRole.Sailor)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(.Race, rng, Nothing, CrewSkill.Gunnery), CrewRole.Gunner)
+            .AddCrew(ShipQuarter.Port, Crew.Generate(.Race, rng, Nothing, CrewSkill.Gunnery), CrewRole.Gunner)
 
             .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarterdeck, ShipModule.ModuleQuality.Average, Nothing))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, CrewSkill.Leadership), CrewRole.Captain)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, Nothing, CrewSkill.Leadership), CrewRole.Captain)
             .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Maproom, ShipModule.ModuleQuality.Average, CrewRace.Human))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, CrewSkill.Navigation), CrewRole.Navigator)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, Nothing, CrewSkill.Navigation), CrewRole.Navigator)
             .AddModule(ShipQuarter.Aft, ShipModule.Generate(ShipModule.ModuleType.Helm, ShipModule.ModuleQuality.Average, CrewRace.Human))
-            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, CrewSkill.Steering), CrewRole.Helmsman)
+            .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, Nothing, CrewSkill.Steering), CrewRole.Helmsman)
 
             .AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("cannon"))
             .AddModule(ShipQuarter.Starboard, ShipModule.Generate(ShipModule.ModuleType.Hold, ShipModule.ModuleQuality.Excellent, Nothing))
@@ -85,7 +85,7 @@
         isle.AddBuilding("Clinic")
         isle.AddBuilding("Temple")
 
-        'player.AddCoins(WorldFaction.Deathless, 1000)
+        player.AddCoins(WorldFaction.Deathless, 1000)
         Dim damage As New Damage(0, 25, DamageType.Blunt, "God")
         player.GetCrew(Nothing, CrewRole.Captain).ShipAttack(100, damage)
     End Sub
@@ -266,12 +266,9 @@
                 End Select
             Case 4
                 Dim gears As List(Of CrewBonus) = ship.GetEquipments()
-                If gears.Count = 0 Then
-                    Console.WriteLine("No spare equipment!")
-                    Console.ReadKey()
-                    Exit Sub
-                End If
+                gears.Add(CrewBonus.generate("Belaying Pin"))
                 Dim targetGear As CrewBonus = Menu.getListChoice(Of CrewBonus)(gears, 0)
+                If targetGear Is Nothing Then Exit Sub
                 Console.WriteLine()
                 If target.CheckAddBonus("equipment", targetGear) = False Then
                     Console.WriteLine("Unable to add equipment!")
