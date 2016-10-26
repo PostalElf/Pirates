@@ -39,6 +39,16 @@
     Private SaleGoodDemand As New Dictionary(Of GoodType, SaleDemand)
     Private SaleGoodProduction As New Dictionary(Of GoodType, SaleDemand)
     Private SaleGoodQty As New Dictionary(Of GoodType, Integer)
+    Private ReadOnly Property SaleGoodQtyMax(ByVal gt As GoodType) As Integer
+        Get
+            Return GetSaleGoodProductionRange(gt).Max * 5
+        End Get
+    End Property
+    Private ReadOnly Property SaleGoodQtyMin(ByVal gt As GoodType) As Integer
+        Get
+            Return GetSaleGoodProductionRange(gt).Min * 2
+        End Get
+    End Property
     Private SaleGoodPriceModifier As New Dictionary(Of GoodType, Double)
     Private Function GetSaleGoodProductionRange(ByVal gt As GoodType) As Range
         Select Case SaleGoodProduction(gt)
@@ -122,18 +132,23 @@
     End Sub
     Private Sub TickMarket()
         For Each gt As GoodType In [Enum].GetValues(GetType(GoodType))
-            'add stock
-            Dim range As Range = GetSaleGoodProductionRange(gt)
-            If range <> 0 Then
-                If (gt = GoodType.Rations OrElse gt = GoodType.Water) Then range *= 2
-                SaleGoodQty(gt) += range.Roll(World.Rng)
+            'set to min if under min; else add stock to max
+            If SaleGoodQty(gt) < SaleGoodQtyMin(gt) Then
+                SaleGoodQty(gt) = SaleGoodQtyMin(gt)
+            Else
+                Dim prodRange As Range = GetSaleGoodProductionRange(gt)
+                If prodRange <> 0 Then
+                    If (gt = GoodType.Rations OrElse gt = GoodType.Water) Then prodRange *= 2
+                    SaleGoodQty(gt) += prodRange.Roll(World.Rng)
+                    If SaleGoodQty(gt) > SaleGoodQtyMax(gt) Then SaleGoodQty(gt) = SaleGoodQtyMax(gt)
+                End If
             End If
 
             'change price modifier
-            range = GetSaleGoodDemandRange(gt)
-            If range <> 0 Then
-                Dim min As Double = 1 + (range.Min / 100)
-                Dim max As Double = 1 + (range.Max / 100)
+            Dim demRange As Range = GetSaleGoodDemandRange(gt)
+            If demRange <> 0 Then
+                Dim min As Double = 1 + (demRange.Min / 100)
+                Dim max As Double = 1 + (demRange.Max / 100)
                 Dim change As Double = (Dev.FateRoll(World.Rng) / 100)
                 Dim modifier As Double = SaleGoodPriceModifier(gt) + change
                 If modifier < min Then modifier = min
