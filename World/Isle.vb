@@ -51,25 +51,37 @@
         If ShipIsBuying = True Then totalModifier += 0.1
         Return total * totalModifier
     End Function
-    Public Function CheckSellGood(ByVal gt As GoodType, ByVal value As Integer) As Boolean
+    Public Function CheckSellGood(ByVal gt As GoodType, ByVal value As Integer, ByRef ship As ShipPlayer) As Boolean
         If SaleGoodQty(gt) < value Then Return False
         If SaleGoodDemand(gt) = SaleDemand.None Then Return False
         If SaleGoodDemand(gt) = SaleDemand.Illegal AndAlso Reputation(IsleFaction.Smuggler) < 2 Then Return False
+
+        Dim totalCost As Double = Math.Round(GetGoodPrice(gt, True) * value, 2)
+        If ship.CheckAddCoins(Faction, -totalCost) = False Then Return False
+
         Return True
     End Function
-    Public Function SellGood(ByVal gt As GoodType, ByVal value As Integer) As Good
+    Public Sub SellGood(ByVal gt As GoodType, ByVal value As Integer, ByRef ship As ShipPlayer)
         'ship buy good
+        Dim totalCost As Double = Math.Round(GetGoodPrice(gt, True) * value, 2)
+        ship.AddCoins(Faction, -totalCost)
         SaleGoodQty(gt) -= value
-        Return Good.Generate(gt, value)
-    End Function
-    Public Function CheckBuyGood(ByVal gt As GoodType, ByVal value As Integer) As Boolean
+        ship.AddGood(gt, value)
+    End Sub
+    Public Function CheckBuyGood(ByVal gt As GoodType, ByVal value As Integer, ByRef ship As ShipPlayer) As Boolean
         If SaleGoodDemand(gt) = SaleDemand.None Then Return False
         If SaleGoodDemand(gt) = SaleDemand.Illegal AndAlso Reputation(IsleFaction.Smuggler) < 3 Then Return False
+
+        If ship.GetGood(gt).Qty < value Then Return False
+
         Return True
     End Function
-    Public Sub BuyGood(ByVal gt As GoodType, ByVal value As Integer)
+    Public Sub BuyGood(ByVal gt As GoodType, ByVal value As Integer, ByRef ship As ShipPlayer)
         'ship sell good
+        Dim totalCost As Double = Math.Round(GetGoodPrice(gt, False) * value, 2)
+        ship.AddGood(gt, -value)
         SaleGoodQty(gt) += value
+        ship.AddCoins(Faction, totalCost)
     End Sub
     Private Shared Function ConvertDemandToPricePercentage(ByVal demand As SaleDemand, ByRef rng As Random) As Integer
         Select Case demand

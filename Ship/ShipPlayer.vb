@@ -267,6 +267,10 @@
     End Sub
 
     Private Coins As New Dictionary(Of WorldFaction, Double)
+    Public Function CheckAddCoins(ByVal faction As WorldFaction, ByVal value As Double) As Boolean
+        If Coins(faction) - value < 0 Then Return False
+        Return True
+    End Function
     Public Sub AddCoins(ByVal faction As WorldFaction, ByVal value As Double)
         Coins(faction) += value
     End Sub
@@ -468,7 +472,8 @@
         If MyBase.IsSeaworthy = False Then Exit Sub
         If TravelDestination Is Nothing Then Exit Sub
 
-        TravelProgress += GetTravelSpeed(world)
+        Dim speed As Double = GetTravelSpeed(world)
+        TravelProgress += speed
         If TravelProgress >= TravelTarget Then
             Dim navigator As Crew = GetCrew(Nothing, CrewRole.Navigator)
             If navigator.GetSkillFromRole > TravelRoute Then UpgradeRoute(TravelOrigin, TravelDestination)
@@ -477,7 +482,7 @@
             Report.Add(Name & " has arrived at " & Isle.Name & ".", ReportType.TravelMain)
         Else
             If GetTravelRouteDirection(TravelOrigin, TravelDestination) = world.Wind Then Report.Add(Name & " is sailing with the wind (+10% speed).", ReportType.TravelProgress)
-            Report.Add(Name & " makes some progress towards " & TravelDestination.Name & " (" & TravelProgress.ToString("0") & "/" & TravelTarget.ToString("0") & ").", ReportType.TravelProgress)
+            Report.Add(Name & " makes some progress towards " & TravelDestination.Name & " (+" & speed.ToString("0.0") & ").", ReportType.TravelProgress)
         End If
     End Sub
     Public GoodsConsumed As New Dictionary(Of GoodType, Good)
@@ -530,6 +535,13 @@
         Console.Write(Dev.vbTab("Tonnage:", s) & Tonnage.ToString("0.0") & "/" & TonnageMax)
         Dim ratio As Double = Tonnage / TonnageMax * 100
         Console.WriteLine(" (" & ratio.ToString("0.0") & "% - " & Waterline.ToString & ")")
+    End Sub
+    Public Sub ConsoleReportTravelStatus()
+        If IsAtSea = True Then
+            Console.WriteLine("Travelling to " & TravelDestination.Name & "... (" & TravelProgress.ToString("0") & "/" & TravelTarget.ToString("0") & ")")
+        Else
+            Console.WriteLine("Docked at " & Isle.Name & ".")
+        End If
     End Sub
 #End Region
 End Class

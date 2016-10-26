@@ -14,6 +14,7 @@
             Console.Clear()
             Console.ForegroundColor = ConsoleColor.White
             Console.WriteLine(world.Calendar.ToString)
+            world.ShipPlayer.ConsoleReportTravelStatus()
             Console.ForegroundColor = ConsoleColor.Gray
             Report.ConsoleReport()
             Console.WriteLine()
@@ -305,23 +306,29 @@
         Console.ReadKey()
     End Sub
     Private Sub BuySell(ByRef isle As Isle)
+        Const stockColour As ConsoleColor = ConsoleColor.Gray
         Const buyColour As ConsoleColor = ConsoleColor.Yellow
         Const sellColour As ConsoleColor = ConsoleColor.Green
         Const nullColour As ConsoleColor = ConsoleColor.DarkRed
 
         Console.WriteLine()
+        Console.ForegroundColor = stockColour
         Console.Write("                  Qty")
         Console.ForegroundColor = buyColour
         Console.Write("    Buy")
+        Console.ForegroundColor = stockColour
+        Console.Write("        Ship")
         Console.ForegroundColor = sellColour
-        Console.Write("        Sell")
+        Console.Write("    Sell")
         Console.ForegroundColor = ConsoleColor.Gray
         Console.WriteLine()
         Console.Write("                  ---")
         Console.ForegroundColor = buyColour
         Console.Write("    ---")
-        Console.ForegroundColor = sellColour
+        Console.ForegroundColor = stockColour
         Console.Write("        ----")
+        Console.ForegroundColor = sellColour
+        Console.Write("    ----")
         Console.WriteLine()
 
         Dim gtList As New List(Of GoodType)
@@ -336,12 +343,16 @@
             Console.Write(Dev.vbTab(gt.ToString, 12))
 
             Dim qty As Integer = isle.GetGoodQty(gt)
-            If qty <= 0 Then Console.ForegroundColor = nullColour
+            If qty <= 0 Then Console.ForegroundColor = nullColour Else Console.ForegroundColor = stockColour
             Console.Write(Dev.vbTab(qty, 7))
 
             Dim buyPrice As Double = isle.GetGoodPrice(gt, True)
             If buyPrice <= 0 Then Console.ForegroundColor = nullColour Else Console.ForegroundColor = buyColour
             Console.Write(Dev.vbTab("$" & buyPrice.ToString("0.00"), 11))
+
+            qty = world.ShipPlayer.GetGood(gt).Qty
+            If qty <= 0 Then Console.ForegroundColor = nullColour Else Console.ForegroundColor = stockColour
+            Console.Write(Dev.vbTab(qty, 8))
 
             Dim sellPrice As Double = isle.GetGoodPrice(gt, False)
             If sellPrice <= 0 Then Console.ForegroundColor = nullColour Else Console.ForegroundColor = sellColour
@@ -349,8 +360,10 @@
             Console.WriteLine()
         Next
         Console.ResetColor()
+        Console.WriteLine()
 
-        Dim input As Integer = Menu.getNumInput(0, 1, gtList.Count, "> ")
+        Dim input As Integer = Menu.getNumInput(0, 0, gtList.Count, "> ")
+        If input = 0 Then Exit Sub
         Dim choice As GoodType = gtList(input - 1)
         Console.Write("Buy or sell? ")
         Dim input2 As ConsoleKeyInfo = Console.ReadKey()
@@ -366,14 +379,8 @@
 
             Dim totalCost As Double = Math.Round(input3 * price, 2)
             If Menu.confirmChoice(0, "Buy " & input3 & " " & choice.ToString & " for $" & totalCost.ToString("0.00") & "? ") = False Then Exit Sub
-            If world.ShipPlayer.GetCoins(isle.Faction) < totalCost Then
-                Console.WriteLine("Insufficient funds!")
-                Console.ReadKey()
-                Exit Sub
-            End If
-
-            world.ShipPlayer.AddCoins(isle.Faction, -totalCost)
-            world.ShipPlayer.AddGood(isle.SellGood(choice, input3))
+            If isle.CheckSellGood(choice, input3, world.ShipPlayer) = False Then Exit Sub
+            isle.SellGood(choice, input3, world.ShipPlayer)
         ElseIf input2.KeyChar = "s"c Then
             'sell
             Dim price As Double = isle.GetGoodPrice(choice, False)
@@ -385,9 +392,8 @@
 
             Dim totalCost As Double = Math.Round(input3 * price, 2)
             If Menu.confirmChoice(0, "Sell " & input3 & " " & choice.ToString & " for $" & totalCost.ToString("0.00") & "? ") = False Then Exit Sub
-
-            isle.BuyGood(choice, input3)
-            world.ShipPlayer.AddCoins(isle.Faction, totalCost)
+            If isle.CheckBuyGood(choice, input3, world.ShipPlayer) = False Then Exit Sub
+            isle.BuyGood(choice, input3, world.ShipPlayer)
         Else : Exit Sub
         End If
     End Sub
