@@ -25,6 +25,25 @@
             .AddSkillXP(cs, SkillThresholds(1))
 
             .AddTalent(GenerateTalent(aRace))
+
+            Select Case .Race
+                Case CrewRace.Human
+                    .MoraleDemands.Add(GoodType.Rations, -5)
+                    .MoraleDemands.Add(GoodType.Water, -10)
+                    .MoraleWants.Add(GoodType.Coffee, 1)
+                    .MoraleWants.Add(GoodType.Liqour, 2)
+                Case CrewRace.Windsworn
+                    .MoraleDemands.Add(GoodType.Rations, -5)
+                    .MoraleDemands.Add(GoodType.Water, -10)
+                    .MoraleWants.Add(GoodType.Tobacco, 1)
+                    .MoraleWants.Add(GoodType.Spice, 2)
+                Case CrewRace.Seatouched
+                    .MoraleDemands.Add(GoodType.Rations, -5)
+                    .MoraleDemands.Add(GoodType.Water, -10)
+                    .MoraleWants.Add(GoodType.Salt, 2)
+                Case CrewRace.Unrelinquished
+                    .MoraleDemands.Add(GoodType.Mordicus, -10)
+            End Select
         End With
         Return crew
     End Function
@@ -538,6 +557,8 @@
 
 #Region "Morale"
     Public Morale As Integer
+    Public MoraleDemands As New Dictionary(Of GoodType, Integer)
+    Public MoraleWants As New Dictionary(Of GoodType, Integer)
     Public ReadOnly Property MoraleLevel As CrewMorale
         Get
             Select Case Morale
@@ -552,53 +573,37 @@
     Public Sub TickMorale(Optional ByVal shoreProvisors As List(Of GoodType) = Nothing)
         'morale ranges from 1 to 100
         Dim change As Integer = 0
-        Dim hasEaten As Boolean = True
+        Dim hasEaten As Boolean = False
+        Dim hasDrunk As Boolean = False
 
+        For Each gt In MoraleDemands.Keys
+            Dim newChange As Integer = ConsumeGoods(gt, 1, 0, MoraleDemands(gt), shoreProvisors)
+            If gt = GoodType.Rations AndAlso newChange >= 0 Then hasEaten = True
+            If gt = GoodType.Water AndAlso newChange >= 0 Then hasDrunk = True
+            change += newChange
+        Next
+        If hasDrunk = True OrElse Race = CrewRace.Unrelinquished Then
+            For Each gt In MoraleWants.Keys
+                Dim newChange As Integer = ConsumeGoods(gt, 1, MoraleWants(gt), 0, shoreProvisors)
+                change += newChange
+            Next
+        End If
+
+        'special cases
         Select Case Race
-            Case CrewRace.Human
-                'humans need rations and water; desire coffee and liqour
-                change += ConsumeGoods(GoodType.Rations, 1, 0, -5, shoreProvisors)
-                If change = -5 Then hasEaten = False
-                change += ConsumeGoods(GoodType.Water, 1, 0, -10, shoreProvisors)
-                If change >= -5 Then
-                    change += ConsumeGoods(GoodType.Coffee, 1, 1, 0, shoreProvisors)
-                    change += ConsumeGoods(GoodType.Liqour, 1, 2, 0, shoreProvisors)
-                End If
-
             Case CrewRace.Seatouched
-                'seatouched need rations, water and prayer; desire salt
-                change += ConsumeGoods(GoodType.Rations, 1, 0, -5, shoreProvisors)
-                If change = -5 Then hasEaten = False
-                change += ConsumeGoods(GoodType.Water, 1, 0, -10, shoreProvisors)
-                If shoreProvisors.Contains(GoodType.Salt) Then
+                If shoreProvisors Is Nothing = False AndAlso shoreProvisors.Contains(GoodType.Salt) Then
                     change += 1
                 Else
                     If Shrine Is Nothing Then change -= 5 : Exit Select
-                    If change >= -5 Then
-                        change += ConsumeGoods(GoodType.Salt, 1, 1, 0, shoreProvisors)
-                        change += Math.Ceiling(Shrine.Quality / 2)
-                    End If
+                    change += Math.Ceiling(Shrine.Quality / 2)
                 End If
-
-            Case CrewRace.Windsworn
-                'windsworn need rations and water; desire tobacco and spice
-                change += ConsumeGoods(GoodType.Rations, 1, 0, -5, shoreProvisors)
-                If change = -5 Then hasEaten = False
-                change += ConsumeGoods(GoodType.Water, 1, 0, -5, shoreProvisors)
-                If change >= -5 Then
-                    change += ConsumeGoods(GoodType.Tobacco, 1, 2, 0, shoreProvisors)
-                    change += ConsumeGoods(GoodType.Spice, 1, 1, 0, shoreProvisors)
-                End If
-
             Case CrewRace.Unrelinquished
-                'unrelinquished need mordicus; desire leadership
                 hasEaten = False
-                change += ConsumeGoods(GoodType.Mordicus, 1, 0, -10, shoreProvisors)
-                If change > -10 Then
-                    Dim leadership As Integer = Ship.GetLeadership
-                    If leadership >= 7 Then change += 1
-                End If
+                hasDrunk = False
+                If Ship.GetLeadership >= 7 Then change += 1
         End Select
+
 
         'other bonuses
         If change >= 0 Then
@@ -682,6 +687,7 @@
 
         Console.WriteLine(Name)
         Console.WriteLine(s & "Race:   " & Race.ToString)
+        Console.WriteLine(s & "Health: " & Health - DamageSustained & "/" & Health)
         Console.WriteLine(s & "Morale: " & Morale & "/100 (" & MoraleLevel.ToString & ")")
 
         Console.WriteLine(s & "Skills: ")

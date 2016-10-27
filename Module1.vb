@@ -413,11 +413,9 @@
     Private Function GetCrew(ByRef ship As ShipPlayer) As Crew
         Dim roles As New List(Of CrewRole)([Enum].GetValues(GetType(CrewRole)))
         Dim role As CrewRole = Menu.getListChoice(Of CrewRole)(roles, 0, "Select crew role:")
-        Dim choiceList As New List(Of Crew)
-        For Each q In quarters
-            choiceList.AddRange(ship.GetCrews(q, role))
-        Next
 
+        Dim choiceList As List(Of Crew) = ship.GetCrews(Nothing, role)
+        If choiceList.Count = 1 Then Return choiceList(0)
         Dim target As Crew = Menu.getListChoice(choiceList, 0, "Which crew member?")
         Return target
     End Function
