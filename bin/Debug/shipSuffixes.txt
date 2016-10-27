@@ -5,6 +5,8 @@ Rover
 Dagger
 Rift
 Blackguard
+Rover
+Marauder
 Storm
 Wind
 Jewel
@@ -14,4 +16,9 @@ Arrow
 Pool
 Wolf
 Shark
+Minnow
+Serpent
 Slaver
+Salver
+Revenge
+Buccaneer

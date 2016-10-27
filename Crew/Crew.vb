@@ -171,7 +171,7 @@
                     .Slot = "Left Hand"
                     .Skill = CrewSkill.Firearms
                     .Damage = 25
-                    .DamageType = DamageType.Firearms
+                    .DamageType = DamageType.Blunt
                     .AmmoUse = 1
 
                 Case "Dimwitted"
@@ -392,8 +392,8 @@
             Dim skill As CrewSkill = weapon.Skill
 
             'roll skill vs skill
-            Dim attSkill As Integer = GetSkill(skill) + Dev.FateRoll(World.Rng)
-            Dim defSkill As Integer = target.GetSkill(skill) + Dev.FateRoll(World.Rng)
+            Dim attSkill As Integer = GetSkill(skill) + weapon.Accuracy + Dev.FateRoll(World.Rng)
+            Dim defSkill As Integer = target.GetSkill(skill) + weapon.Accuracy + Dev.FateRoll(World.Rng)
             If attSkill > defSkill Then
                 'success, damage
                 Dim damage As New Damage(0, weapon.Damage, weapon.DamageType, Name & "'s " & weapon.Name)

@@ -106,8 +106,8 @@
         Select Case input.ToLower
             Case "cannon" : Return New ShipWeapon("Cannons", 30, 10, DamageType.Cannon, 2, GoodType.Shot, 3, 1, 3, 5, 15, {ShipQuarter.Starboard, ShipQuarter.Port})
             Case "hooks" : Return New ShipWeapon("Grappling Hooks", 0, 0, DamageType.Cannon, 1, GoodType.Grapples, 5, 2, 5, 5, 5, {ShipQuarter.Fore, ShipQuarter.Starboard, ShipQuarter.Aft, ShipQuarter.Port})
-            Case "grapeshot" : Return New ShipWeapon("Grapeshot", 10, 25, DamageType.Firearms, 1, GoodType.Grapeshot, 5, 2, 5, 5, 15, {ShipQuarter.Starboard, ShipQuarter.Port})
-            Case "swivel" : Return New ShipWeapon("Swivelgun", 10, 10, DamageType.Firearms, 1, GoodType.Bullets, 5, 1, 2, 5, 10, {ShipQuarter.Fore, ShipQuarter.Starboard, ShipQuarter.Aft, ShipQuarter.Port})
+            Case "grapeshot" : Return New ShipWeapon("Grapeshot", 10, 25, DamageType.Blunt, 1, GoodType.Grapeshot, 5, 2, 5, 5, 15, {ShipQuarter.Starboard, ShipQuarter.Port})
+            Case "swivel" : Return New ShipWeapon("Swivelgun", 10, 10, DamageType.Blunt, 1, GoodType.Bullets, 5, 1, 2, 5, 10, {ShipQuarter.Fore, ShipQuarter.Starboard, ShipQuarter.Aft, ShipQuarter.Port})
             Case "hailshot" : Return New ShipWeapon("Hailshot", 20, 0, DamageType.Cannon, 2, GoodType.Shot, 2, 2, 4, 5, 10, {ShipQuarter.Starboard, ShipQuarter.Port})
             Case "bombard" : Return New ShipWeapon("Bombard", 30, 10, DamageType.Cannon, 2, GoodType.Explosive, 10, 3, 5, 10, 20, {ShipQuarter.Fore})
             Case Else : Throw New Exception("Unrecognised weapon name")

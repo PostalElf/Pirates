@@ -3,7 +3,6 @@
     Fire
     Ramming
 
-    Firearms
     Blade
     Blunt
     Necromancy

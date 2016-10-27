@@ -34,11 +34,55 @@
         Crews = crewlist
         Goods = aGoods
     End Sub
-    Public Shared Function Generate(ByVal difficulty As Integer) As Brawl
-        'difficulty 1 to 10
-        Dim crewlist As New List(Of Crew)
-        Select Case difficulty
+    Public Shared Function Generate(ByVal isle As Isle, ByVal difficulty As Integer, ByVal crewNumber As Integer) As Brawl
+        'difficulty 1 to 5
 
-        End Select
+        Dim aGoods As New Dictionary(Of GoodType, Integer)
+        aGoods.Add(GoodType.Bullets, 0)
+
+        Dim crewlist As New List(Of Crew)
+        For n = 1 To crewNumber
+            Dim crew As Crew = Nothing
+            Select Case difficulty
+                Case 1
+                    crew = crew.Generate(isle.Race, World.Rng, Nothing, CrewSkill.Melee)
+                Case 2
+                    crew = crew.Generate(isle.Race, World.Rng, CrewSkill.Melee)
+                    Dim weapons As New List(Of String) From {"Knife", "Bullwhip", "Brass Knuckles"}
+                    crew.AddBonus("equipment", CrewBonus.Generate(Dev.GetRandom(Of String)(weapons, World.Rng)))
+                Case 3
+                    crew = crew.Generate(isle.Race, World.Rng, CrewSkill.Melee, CrewSkill.Firearms)
+                    crew.RemoveBonus("equipment", "Right Hand")
+                    Dim weapons As New List(Of String) From {"Cutlass", "Rapier", "Mace"}
+                    crew.AddBonus("equipment", CrewBonus.Generate(Dev.GetRandom(Of String)(weapons, World.Rng)))
+                    weapons = New List(Of String) From {"Flintlock Pistol", "Long Knife", "Small Sword"}
+                    crew.AddBonus("equipment", CrewBonus.Generate(Dev.GetRandom(Of String)(weapons, World.Rng)))
+                    aGoods(GoodType.Bullets) += 5
+                Case 4
+                    crew = crew.Generate(isle.Race, World.Rng, CrewSkill.Melee, CrewSkill.Firearms)
+                    crew.AddSkillXP(CrewSkill.Firearms, 200)
+                    crew.RemoveBonus("equipment", "Right Hand")
+                    Dim weapons As New List(Of String) From {"Musket", "Sabre", "Mace", "Blunderbuss"}
+                    crew.AddBonus("equipment", CrewBonus.Generate(Dev.GetRandom(Of String)(weapons, World.Rng)))
+                    weapons = New List(Of String) From {"Wheellock Pistol", "Small Sword"}
+                    crew.AddBonus("equipment", CrewBonus.Generate(Dev.GetRandom(Of String)(weapons, World.Rng)))
+                    aGoods(GoodType.Bullets) += 10
+                Case 5
+                    crew = crew.Generate(isle.Race, World.Rng, CrewSkill.Melee, CrewSkill.Firearms)
+                    crew.AddSkillXP(CrewSkill.Melee, 400)
+                    crew.AddSkillXP(CrewSkill.Firearms, 300)
+                    crew.RemoveBonus("equipment", "Right Hand")
+                    Dim weapons As New List(Of String) From {"Rifle", "Blunderbuss", "Boarding Axe", "Skullcracker"}
+                    crew.AddBonus("equipment", CrewBonus.Generate(Dev.GetRandom(Of String)(weapons, World.Rng)))
+                    weapons = New List(Of String) From {"Sparklock Pistol", "Writhing Knife"}
+                    crew.AddBonus("equipment", CrewBonus.Generate(Dev.GetRandom(Of String)(weapons, World.Rng)))
+                    aGoods(GoodType.Bullets) += 15
+                Case Else
+                    Throw New Exception("Difficulty out of range")
+            End Select
+            crewlist.Add(crew)
+        Next
+
+        Return New Brawl(crewlist, aGoods)
     End Function
 End Class
