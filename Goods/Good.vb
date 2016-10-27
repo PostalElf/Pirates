@@ -43,28 +43,28 @@
     End Property
     Public Shared Function GetBasePrice(ByVal gt As GoodType) As Double
         Select Case gt
-            Case GoodType.Grapples : Return 50
-            Case GoodType.Shot : Return 50
-            Case GoodType.Explosive : Return 85
-            Case GoodType.Grapeshot : Return 70
-            Case GoodType.Bullets : Return 5
-            Case GoodType.Gold : Return 150
-            Case GoodType.Silver : Return 100
-            Case GoodType.Jewellery : Return 150
-            Case GoodType.Cloth : Return 25
-            Case GoodType.Lumber : Return 25
-            Case GoodType.Metal : Return 25
-            Case GoodType.Boricus : Return 100
-            Case GoodType.Triaicus : Return 100
-            Case GoodType.Incantus : Return 100
-            Case GoodType.Mordicus : Return 100
-            Case GoodType.Rations : Return 5
-            Case GoodType.Water : Return 5
-            Case GoodType.Salt : Return 35
-            Case GoodType.Liqour : Return 15
-            Case GoodType.Coffee : Return 15
-            Case GoodType.Spice : Return 45
-            Case GoodType.Tobacco : Return 10
+            Case GoodType.Grapples : Return 5
+            Case GoodType.Shot : Return 5
+            Case GoodType.Explosive : Return 8.5
+            Case GoodType.Grapeshot : Return 7
+            Case GoodType.Bullets : Return 0.5
+            Case GoodType.Gold : Return 15
+            Case GoodType.Silver : Return 10
+            Case GoodType.Jewellery : Return 15
+            Case GoodType.Cloth : Return 2.5
+            Case GoodType.Lumber : Return 2.5
+            Case GoodType.Metal : Return 2.5
+            Case GoodType.Boricus : Return 10
+            Case GoodType.Triaicus : Return 10
+            Case GoodType.Incantus : Return 10
+            Case GoodType.Mordicus : Return 10
+            Case GoodType.Rations : Return 0.5
+            Case GoodType.Water : Return 0.1
+            Case GoodType.Salt : Return 3.5
+            Case GoodType.Liqour : Return 1.5
+            Case GoodType.Coffee : Return 1.5
+            Case GoodType.Spice : Return 4.5
+            Case GoodType.Tobacco : Return 1
             Case Else : Throw New Exception("Goodtype out of range")
         End Select
     End Function

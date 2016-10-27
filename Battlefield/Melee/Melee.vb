@@ -8,37 +8,37 @@
         Set(ByVal value As Boolean)
             _IsOver = value
             If value = True Then
-                AttackerShip.InMelee = False
-                DefenderShip.InMelee = False
+                AttackerHost.InMelee = False
+                DefenderHost.InMelee = False
             End If
         End Set
     End Property
 
-    Private AttackerShip As MeleeHost
+    Private AttackerHost As MeleeHost
     Private Attackers As New List(Of Crew)
     Private AttackersRe As New List(Of Crew)
-    Private DefenderShip As MeleeHost
+    Private DefenderHost As MeleeHost
     Private Defenders As New List(Of Crew)
     Private DefendersRe As New List(Of Crew)
     Public Sub New(ByRef attacker As MeleeHost, ByVal attackingQuarter As ShipQuarter, ByRef defender As MeleeHost, ByVal defendingQuarter As ShipQuarter)
-        AttackerShip = attacker
-        AttackerShip.InMelee = True
-        Attackers.AddRange(AttackerShip.GetCrews(attackingQuarter, Nothing))
+        AttackerHost = attacker
+        AttackerHost.InMelee = True
+        Attackers.AddRange(AttackerHost.GetCrews(attackingQuarter, Nothing))
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             If q <> attackingQuarter Then AttackersRe.AddRange(attacker.GetCrews(q, Nothing))
         Next
 
-        DefenderShip = defender
-        DefenderShip.InMelee = True
-        Defenders.AddRange(DefenderShip.GetCrews(defendingQuarter, Nothing))
+        DefenderHost = defender
+        DefenderHost.InMelee = True
+        Defenders.AddRange(DefenderHost.GetCrews(defendingQuarter, Nothing))
         For Each q In [Enum].GetValues(GetType(ShipQuarter))
             If q <> defendingQuarter Then DefendersRe.AddRange(defender.GetCrews(q, Nothing))
         Next
     End Sub
 
     Public Sub CombatTick()
-        If Attackers.Count = 0 Then Lose(AttackerShip) : Exit Sub
-        If Defenders.Count = 0 Then Lose(DefenderShip) : Exit Sub
+        If Attackers.Count = 0 Then Lose(AttackerHost) : Exit Sub
+        If Defenders.Count = 0 Then Lose(DefenderHost) : Exit Sub
 
         'attackers attack
         Attack(Attackers, Defenders)
@@ -68,8 +68,8 @@
             Next
         End If
     End Sub
-    Public Function Contains(ByVal ship As Ship) As Boolean
-        If AttackerShip.Equals(ship) OrElse DefenderShip.Equals(ship) Then Return True Else Return False
+    Public Function Contains(ByVal host As MeleeHost) As Boolean
+        If AttackerHost.Equals(host) OrElse DefenderHost.Equals(host) Then Return True Else Return False
     End Function
     Public Function Contains(ByVal crew As Crew) As Boolean
         If Attackers.Contains(crew) Then Return True
@@ -80,9 +80,15 @@
         If Attackers.Contains(crew) Then Attackers.Remove(crew)
         If Defenders.Contains(crew) Then Defenders.Remove(crew)
     End Sub
-    Public Sub Lose(ByVal ship As Ship)
-        Report.Add(ship.Name & " has been sunk in the melee!", ReportType.ShipDeath)
-        Battlefield.AddDead(ship)
+    Public Sub Lose(ByVal host As MeleeHost)
+        If TypeOf host Is Ship Then
+            Dim ship As Ship = CType(host, Ship)
+            Report.Add(ship.Name & " has been sunk in the melee!", ReportType.ShipDeath)
+            Battlefield.AddDead(ship)
+        ElseIf TypeOf host Is Brawl Then
+
+        End If
+
         IsOver = True
     End Sub
 End Class

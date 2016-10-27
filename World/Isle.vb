@@ -124,35 +124,7 @@
             Case Else : Throw New Exception("SaleDemand out of range")
         End Select
     End Function
-#End Region
 
-#Region "Buildings"
-    Public Doctor As Crew = Nothing
-    Private Buildings As New List(Of String)
-    Public Function GetBuilding(ByVal str As String) As Boolean
-        If Buildings.Contains(str) Then Return True Else Return False
-    End Function
-    Public Sub AddBuilding(ByVal str As String)
-        If Buildings.Contains(str) Then Exit Sub
-
-        Select Case str
-            Case "Clinic"
-                Doctor = Crew.Generate(Race, World.Rng, CrewSkill.Medicine)
-                Doctor.Role = CrewRole.Doctor
-            Case "Hospital"
-                Doctor = Crew.Generate(Race, World.Rng, CrewSkill.Medicine, CrewSkill.Medicine)
-                Doctor.Role = CrewRole.Doctor
-        End Select
-
-        Buildings.Add(str)
-    End Sub
-#End Region
-
-#Region "Tick"
-    Public Sub Tick()
-        'update market on King's day
-        If World.Calendar.Day = Calendar.CalendarDay.King Then TickMarket()
-    End Sub
     Private Sub TickMarket()
         For Each gt As GoodType In [Enum].GetValues(GetType(GoodType))
             'set to min if under min; else add stock to max
@@ -183,6 +155,35 @@
         If World.ShipPlayer.IsAtSea = False AndAlso World.ShipPlayer.Isle.Equals(Me) Then
             Report.Add("The markets have restocked.", ReportType.Commerce)
         End If
+    End Sub
+#End Region
+
+#Region "Buildings"
+    Public Doctor As Crew = Nothing
+    Private Buildings As New List(Of String)
+    Public Function GetBuilding(ByVal str As String) As Boolean
+        If Buildings.Contains(str) Then Return True Else Return False
+    End Function
+    Public Sub AddBuilding(ByVal str As String)
+        If Buildings.Contains(str) Then Exit Sub
+
+        Select Case str
+            Case "Clinic"
+                Doctor = Crew.Generate(Race, World.Rng, CrewSkill.Medicine)
+                Doctor.Role = CrewRole.Doctor
+            Case "Hospital"
+                Doctor = Crew.Generate(Race, World.Rng, CrewSkill.Medicine, CrewSkill.Medicine)
+                Doctor.Role = CrewRole.Doctor
+        End Select
+
+        Buildings.Add(str)
+    End Sub
+#End Region
+
+#Region "Tick"
+    Public Sub Tick()
+        'update market on King's day
+        If World.Calendar.Day = Calendar.CalendarDay.King Then TickMarket()
     End Sub
 #End Region
 

@@ -506,18 +506,18 @@
                 Dim shoreProvisors As New List(Of GoodType)
                 Select Case r
                     Case CrewRace.Human
-                        If CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Rations) : shoreProvisors.Add(GoodType.Water)
-                        If Isle.GetBuilding("Tavern") AndAlso CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Liqour)
-                        If Isle.GetBuilding("Cafe") AndAlso CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Coffee)
+                        If CrewShoreSpend(Good.GetBasePrice(GoodType.Rations), coinSpent) = True Then shoreProvisors.Add(GoodType.Rations) : shoreProvisors.Add(GoodType.Water)
+                        If Isle.GetBuilding("Tavern") AndAlso CrewShoreSpend(Good.GetBasePrice(GoodType.Liqour), coinSpent) = True Then shoreProvisors.Add(GoodType.Liqour)
+                        If Isle.GetBuilding("Cafe") AndAlso CrewShoreSpend(Good.GetBasePrice(GoodType.Coffee), coinSpent) = True Then shoreProvisors.Add(GoodType.Coffee)
                     Case CrewRace.Windsworn
-                        If CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Rations) : shoreProvisors.Add(GoodType.Water)
-                        If Isle.GetBuilding("Smokehouse") AndAlso CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Tobacco)
-                        If Isle.GetBuilding("Spice Stall") AndAlso CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Spice)
+                        If CrewShoreSpend(Good.GetBasePrice(GoodType.Rations), coinSpent) = True Then shoreProvisors.Add(GoodType.Rations) : shoreProvisors.Add(GoodType.Water)
+                        If Isle.GetBuilding("Smokehouse") AndAlso CrewShoreSpend(Good.GetBasePrice(GoodType.Tobacco), coinSpent) = True Then shoreProvisors.Add(GoodType.Tobacco)
+                        If Isle.GetBuilding("Spice Stall") AndAlso CrewShoreSpend(Good.GetBasePrice(GoodType.Spice), coinSpent) = True Then shoreProvisors.Add(GoodType.Spice)
                     Case CrewRace.Seatouched
-                        If CrewShoreSpend(5, coinSpent) = True Then shoreProvisors.Add(GoodType.Rations) : shoreProvisors.Add(GoodType.Water)
-                        If Isle.GetBuilding("Temple") AndAlso CrewShoreSpend(10, coinSpent) = True Then shoreProvisors.Add(GoodType.Salt)
+                        If CrewShoreSpend(Good.GetBasePrice(GoodType.Rations), coinSpent) = True Then shoreProvisors.Add(GoodType.Rations) : shoreProvisors.Add(GoodType.Water)
+                        If Isle.GetBuilding("Temple") AndAlso CrewShoreSpend(Good.GetBasePrice(GoodType.Salt), coinSpent) = True Then shoreProvisors.Add(GoodType.Salt)
                     Case CrewRace.Unrelinquished
-                        If Isle.GetBuilding("Crypt") AndAlso CrewShoreSpend(10, coinSpent) = True Then shoreProvisors.Add(GoodType.Mordicus)
+                        If Isle.GetBuilding("Crypt") AndAlso CrewShoreSpend(Good.GetBasePrice(GoodType.Mordicus), coinSpent) = True Then shoreProvisors.Add(GoodType.Mordicus)
                 End Select
                 Crew.TickMorale(shoreProvisors)
             Next
