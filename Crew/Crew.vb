@@ -493,13 +493,15 @@
         End Select
 
         If skill > difficulty Then
+            Dim heal As Integer = currentDamage.CrewDamage / 2
             DamageLog.Remove(currentDamage)
-            DamageSustained -= currentDamage.CrewDamage
-            Report.Add("The doctor successfully treated " & Name & "'s worst injuries. (-" & currentDamage.CrewDamage & " damage)", ReportType.Doctor)
+            DamageSustained -= heal
+            Report.Add("The doctor successfully treated " & Name & "'s worst injuries. (-" & heal & " damage)", ReportType.Doctor)
         ElseIf skill = difficulty Then
+            Dim heal As Integer = currentDamage.CrewDamage / 2
             DamageLog.Remove(currentDamage)
-            DamageSustained -= currentDamage.CrewDamage
-            Report.Add("The doctor treated " & Name & "'s worst injuries with some difficulty. (-" & currentDamage.CrewDamage & " damage)", ReportType.Doctor)
+            DamageSustained -= heal
+            Report.Add("The doctor treated " & Name & "'s worst injuries with some difficulty. (-" & heal & " damage)", ReportType.Doctor)
 
             If Me.Race <> CrewRace.Unrelinquished Then
                 Dim scarRollBonus As Integer = 0

@@ -3,7 +3,7 @@
     Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
 
     Sub Main()
-        Console.SetWindowSize(100, 50)
+        Console.SetWindowSize(100, 43)
         world = Pirates.World.Generate
         world.ShipPlayer = SetupPlayerShip(world.Rng)
         world.ShipPlayer.Teleport(world.GetIsle("Deathless Kingdom"))
