@@ -569,6 +569,11 @@
                     Console.WriteLine()
                 Next
             Next
+        Else
+            Console.WriteLine(Dev.vbSpace(1) & "Credit")
+            For Each c As WorldFaction In [Enum].GetValues(GetType(WorldFaction))
+                Console.WriteLine(s & Dev.vbTab(c.ToString & ":", 14) & "$" & GetCoins(c).ToString("0.00"))
+            Next
         End If
     End Sub
     Public Sub ConsoleReportGoods()

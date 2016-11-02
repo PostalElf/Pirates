@@ -79,6 +79,7 @@
         isle.AddBuilding("Crypt")
         isle.AddBuilding("Clinic")
         isle.AddBuilding("Temple")
+        isle.AddBuilding("Guild")
 
         player.AddCoins(WorldFaction.Deathless, 1000)
         Dim damage As New Damage(0, 25, DamageType.Blunt, "God")
@@ -97,6 +98,7 @@
             Else
                 .Add("s"c, "Set Course")
                 .Add("b"c, "Buy/Sell Goods")
+                If world.ShipPlayer.Isle.GetBuilding("Guild") = True Then .Add("x"c, "Exchange Money")
             End If
             .Add("v"c, "View Ship")
             .Add("c"c, "View Crew")
@@ -113,6 +115,8 @@
                 SetCourse(world.ShipPlayer)
             Case "b"c
                 BuySell(world.ShipPlayer.Isle)
+            Case "x"c
+                ExchangeMoney(world.ShipPlayer)
             Case "v"c
                 world.ShipPlayer.ConsoleReport()
                 Console.ReadKey()
@@ -203,6 +207,36 @@
         If Menu.confirmChoice(0) = False Then Exit Sub
 
         ship.SetTravelRoute(targetRoute)
+    End Sub
+    Private Sub ExchangeMoney(ByVal ship As ShipPlayer)
+        If ship.Isle.GetBuilding("Guild") = False Then Exit Sub
+        Console.WriteLine()
+
+        Dim currencies As New Dictionary(Of Integer, String)
+        Dim n As Integer = 0
+        For Each c In ([Enum].GetValues(GetType(WorldFaction)))
+            n += 1
+            currencies.Add(n, c.ToString)
+        Next
+        Dim currency As WorldFaction = Menu.getListChoice(currencies, 0, "Which curency? ")
+
+        Dim money As Double = ship.GetCoins(currency)
+        If money <= 0 Then Exit Sub
+        Console.WriteLine("You have $" & money.ToString("0.00") & " in " & currency.ToString & " credit.")
+        Dim change As Integer = Menu.getNumInput(0, 10, Math.Floor(money), "Change how much? ")
+
+        Dim currency2 As WorldFaction = Menu.getListChoice(currencies, 0, "To which currency? ")
+        If currency = currency2 Then Exit Sub
+        Dim changer As Double = Math.Round(change * 0.05, 2)
+        Console.WriteLine("Guild moneychangers will take $" & changer & " for services rendered.")
+        If Menu.confirmChoice(0) = False Then Exit Sub
+
+        ship.AddCoins(currency, -change)
+        ship.AddCoins(currency2, change - changer)
+        Console.WriteLine()
+        Console.WriteLine("You now have $" & ship.GetCoins(currency) & " in " & currency.ToString & " credit.")
+        Console.WriteLine("You now have $" & ship.GetCoins(currency2) & " in " & currency2.ToString & " credit.")
+        Console.ReadKey()
     End Sub
     Private Sub ManageCrews(ByVal ship As ShipPlayer)
         Dim t As Integer = 12
