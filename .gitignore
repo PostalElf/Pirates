@@ -1,1 +1,3 @@
 *.cache
+obj/x86/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+obj/x86/Debug/Pirates.vbproj.GenerateResource.Cache
