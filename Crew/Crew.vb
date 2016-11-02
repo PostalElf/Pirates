@@ -277,19 +277,29 @@
             If Ship.Mascot.SkillBonuses.ContainsKey(cs) Then total += Ship.Mascot.SkillBonuses(cs)
         End If
 
-        'get module cap
+        'get module cap and bonus
         Dim m As ShipModule = Nothing
+        Dim t As CrewTalent = Nothing
         Select Case cs
-            Case CrewSkill.Steering : m = Ship.GetModule(ShipModule.ModuleType.Helm)
-            Case CrewSkill.Navigation : m = Ship.GetModule(ShipModule.ModuleType.Maproom)
-            Case CrewSkill.Cooking : m = Ship.GetModule(ShipModule.ModuleType.Kitchen)
-            Case CrewSkill.Medicine : m = Ship.GetModule(ShipModule.ModuleType.Apothecary)
-            Case CrewSkill.Alchemy : m = Ship.GetModule(ShipModule.ModuleType.Laboratory)
             Case CrewSkill.Leadership : m = Ship.GetModule(ShipModule.ModuleType.Quarterdeck)
+            Case CrewSkill.Navigation : m = Ship.GetModule(ShipModule.ModuleType.Maproom) : t = CrewTalent.Saltblooded
+            Case CrewSkill.Steering : m = Ship.GetModule(ShipModule.ModuleType.Helm) : t = CrewTalent.Saltblooded
+            Case CrewSkill.Sailing : t = CrewTalent.Windtouched
+            Case CrewSkill.Gunnery : t = CrewTalent.Flamelicked
+            Case CrewSkill.Bracing : t = CrewTalent.Deathkissed
+            Case CrewSkill.Cooking : m = Ship.GetModule(ShipModule.ModuleType.Kitchen) : t = CrewTalent.Hyperosmia
+            Case CrewSkill.Alchemy : m = Ship.GetModule(ShipModule.ModuleType.Laboratory) : t = CrewTalent.Hyperosmia
+            Case CrewSkill.Medicine : m = Ship.GetModule(ShipModule.ModuleType.Apothecary) : t = CrewTalent.Deathkissed
+            Case CrewSkill.Firearms : t = CrewTalent.Flamelicked
+            Case CrewSkill.Melee : t = CrewTalent.Windtouched
         End Select
         If m Is Nothing = False Then
             Dim mCap As Integer = m.Quality + 1
             total = Math.Min(mCap, total)
+        End If
+        If t <> Nothing Then
+            If total = 1 Then total = 2
+            If total = 0 Then total = 1
         End If
 
         'get leadership bonus
@@ -486,6 +496,7 @@
         skill += Dev.FateRoll(World.Rng)
         If doctor.Race <> Me.Race Then skill -= 1
         If Me.Race = CrewRace.Unrelinquished Then skill -= 1
+        If GetTalent(CrewTalent.Fatebound) = True Then skill += 1
 
         Dim difficulty As Integer
         Select Case currentDamage.CrewDamage
