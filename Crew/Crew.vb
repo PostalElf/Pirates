@@ -24,7 +24,11 @@
             If skillSub <> Nothing Then cs = skillSub Else cs = Dev.GrabRandom(Of CrewSkill)(s, rng)
             .AddSkillXP(cs, SkillThresholds(1))
 
-            .AddTalent(GenerateTalent(aRace))
+            Dim selectTalent As CrewTalent = GenerateTalent(aRace)
+            Select Case SelectTalent
+                Case CrewTalent.Ironwilled : .Health += 10
+            End Select
+            .AddTalent(selectTalent)
 
             Select Case .Race
                 Case CrewRace.Human
@@ -60,7 +64,7 @@
         Dim possibleTalents As New List(Of CrewTalent)
         For Each talent In [Enum].GetValues(GetType(CrewTalent))
             'anything above 100 is a trained talent
-            If talent < 100 Then possibleTalents.Add(talent)
+            If talent < 100 Then possibleTalents.Add(talent) Else Exit For
         Next
         Return Dev.GetRandom(Of CrewTalent)(possibleTalents, World.Rng)
     End Function
@@ -522,6 +526,7 @@
             End If
         Else
             Dim dmg As Integer = World.Rng.Next(1, 6)
+            If GetTalent(CrewTalent.Tough) = True Then dmg = 1
             Report.Add("The doctor failed to treat " & Name & "'s worst injuries. (+" & dmg & " damage)", ReportType.Doctor)
             DamageSustained += dmg
             If DamageSustained > Health Then Death()
