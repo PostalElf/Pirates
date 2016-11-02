@@ -58,7 +58,7 @@
             Case GoodType.Triaicus : Return 10
             Case GoodType.Incantus : Return 10
             Case GoodType.Mordicus : Return 10
-            Case GoodType.Rations : Return 0.5
+            Case GoodType.Rations : Return 0.3
             Case GoodType.Water : Return 0.1
             Case GoodType.Salt : Return 3.5
             Case GoodType.Liqour : Return 1.5

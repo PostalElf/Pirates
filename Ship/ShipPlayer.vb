@@ -523,7 +523,7 @@
             Next
         Next
 
-        Report.Add("The crew spent $" & coinSpent.ToString("0.00") & " on shore.", ReportType.CrewMorale)
+        Report.Add("The crew spent $" & coinSpent.ToString("0.00") & " on shore leave.", ReportType.CrewMorale)
     End Sub
     Private Function CrewShoreSpend(ByVal cost As Double, ByRef coinSpent As Double) As Boolean
         'returns false if there isn't enough money
