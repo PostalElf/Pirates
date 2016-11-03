@@ -297,7 +297,7 @@
             Dim mCap As Integer = m.Quality + 1
             total = Math.Min(mCap, total)
         End If
-        If t <> Nothing Then
+        If t <> Nothing AndAlso GetTalent(t) = True Then
             If total = 1 Then total = 2
             If total = 0 Then total = 1
         End If

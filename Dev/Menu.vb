@@ -48,6 +48,7 @@
             Console.WriteLine()
             Console.Write(ind & prompt)
             Dim input As String = Console.ReadLine
+            If input = Nothing Then Return Nothing
             Dim inputNum As Integer = CInt(input)
 
             If objList.ContainsKey(inputNum) OrElse inputNum = 0 Then
