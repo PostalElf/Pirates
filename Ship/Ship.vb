@@ -19,6 +19,7 @@
         For Each quarter In [Enum].GetValues(GetType(ShipQuarter))
             Weapons.Add(quarter, New List(Of ShipWeapon))
 
+            DamageLog.Add(quarter, New List(Of Damage))
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 100)
             Crews.Add(quarter, New List(Of Crew))
@@ -211,7 +212,7 @@
             End If
         Next
         Dim targetQuarter As ShipQuarter = GetTargetQuarter(attackDirection)
-        Damage(rammedDamage, targetQuarter, 5)
+        AddDamage(rammedDamage, targetQuarter, 5)
 
         Dim rammerDamage As New Damage(10, 0, DamageType.Ramming, Name)
         bo.Damage(rammerDamage, ShipQuarter.Fore, 5)
@@ -664,17 +665,18 @@
     End Function
 
     Public InCombat As Boolean = False
+    Public HasHealed As Boolean = False
     Public Property InMelee As Boolean = False Implements MeleeHost.InMelee
     Private DamageSustained As New Dictionary(Of ShipQuarter, Integer)
     Protected HullPoints As New Dictionary(Of ShipQuarter, Integer)
-    Private DamageLog As New List(Of Damage)
-    Private Sub Damage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
+    Private DamageLog As New Dictionary(Of ShipQuarter, List(Of Damage))
+    Public Sub AddDamage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
         If IgnoresDamage = True Then Exit Sub
 
         If damage.ShipDamage > 0 Then
-            Report.Add(Name & " suffered " & damage.ShipDamage & " damage (" & targetQuarter.ToString & ").", ReportType.ShipDamage)
+            Report.Add(Name & " " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.", ReportType.ShipDamage)
             DamageSustained(targetQuarter) += damage.ShipDamage
-            DamageLog.Add(damage)
+            DamageLog(targetQuarter).Add(damage)
         End If
         If damage.CrewDamage > 0 Then
             For Each Crew In GetCrews(targetQuarter, Nothing)
@@ -687,6 +689,28 @@
             Report.Add(Name & " has been destroyed!", ReportType.ShipDeath)
         End If
     End Sub
+    Public Sub RepairDamage(ByVal dmg As Damage, Optional ByVal quarter As ShipQuarter = Nothing)
+        If quarter = Nothing Then
+            For Each q In [Enum].GetValues(GetType(ShipQuarter))
+                If DamageLog(q).Contains(dmg) Then quarter = q : Exit For
+            Next
+        End If
+        If quarter = Nothing Then Exit Sub
+
+        DamageLog(quarter).Remove(dmg)
+        DamageSustained(quarter) -= dmg.ShipDamage
+    End Sub
+    Public Function GetWorstDamage() As Damage
+        If DamageLog.Count = 0 Then Return Nothing
+
+        Dim worstDamage As New Damage(-1, -1, Nothing, "")
+        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+            For Each dmg In DamageLog(q)
+                If dmg.ShipDamage > worstDamage.ShipDamage Then worstDamage = dmg
+            Next
+        Next
+        If worstDamage.ShipDamage = -1 Then Return Nothing Else Return worstDamage
+    End Function
     Public Sub EnterCombat()
         InCombat = True
     End Sub

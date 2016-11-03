@@ -80,17 +80,21 @@
         isle.AddBuilding("Clinic")
         isle.AddBuilding("Temple")
         isle.AddBuilding("Guild")
+        isle.AddBuilding("Shipyard")
 
         player.AddCoins(WorldFaction.Deathless, 1000)
         Dim damage As New Damage(0, 25, DamageType.Blunt, "God")
         Dim captain As Crew = player.GetCrew(Nothing, CrewRole.Captain)
         captain.ShipAttack(100, damage)
         captain.AddBonus("equipment", CrewBonus.Generate("Bullwhip"))
+        damage = New Damage(10, 0, DamageType.Cannon, "God")
+        player.AddDamage(damage, ShipQuarter.Fore, 100)
     End Sub
 
     Private Function MainPlayerInput() As Boolean
         'return true when player ends turn
 
+        Dim player As ShipPlayer = world.ShipPlayer
         Dim choices As New Dictionary(Of Char, String)
         With choices
             If world.ShipPlayer.IsAtSea = True Then
@@ -98,7 +102,8 @@
             Else
                 .Add("s"c, "Set Course")
                 .Add("b"c, "Buy/Sell Goods")
-                If world.ShipPlayer.Isle.GetBuilding("Guild") = True Then .Add("x"c, "Exchange Money")
+                If player.Isle.GetBuilding("Guild") = True Then .Add("x"c, "Exchange Money")
+                If player.Isle.GetBuilding("Shipyard") = True Then .Add("r"c, "Repair Ship") : .Add("u"c, "Upgrade Ship")
             End If
             .Add("v"c, "View Ship")
             .Add("c"c, "View Crew")
@@ -117,6 +122,10 @@
                 BuySell(world.ShipPlayer.Isle)
             Case "x"c
                 ExchangeMoney(world.ShipPlayer)
+            Case "r"c
+                RepairShip(player)
+            Case "u"c
+                UpgradeShip(player)
             Case "v"c
                 world.ShipPlayer.ConsoleReport()
                 Console.ReadKey()
@@ -237,6 +246,23 @@
         Console.WriteLine("You now have $" & ship.GetCoins(currency) & " in " & currency.ToString & " credit.")
         Console.WriteLine("You now have $" & ship.GetCoins(currency2) & " in " & currency2.ToString & " credit.")
         Console.ReadKey()
+    End Sub
+    Private Sub RepairShip(ByVal ship As ShipPlayer)
+        Dim dmg As Damage = ship.GetWorstDamage
+        If dmg Is Nothing Then Exit Sub
+
+        Dim cost As Double = dmg.ShipDamage * 2
+        Console.Write("It will cost you $" & cost.ToString("0.00") & " to repair ")
+        Console.Write(dmg.ShipDamage & " " & dmg.Type.ToString & " damage from " & dmg.Sender & ".")
+        Console.WriteLine()
+        If Menu.confirmChoice(0) = False Then Exit Sub
+        If ship.CheckAddCoins(ship.Isle.Faction, -cost) = False Then Exit Sub
+
+        ship.AddCoins(ship.Isle.Faction, -cost)
+        ship.RepairDamage(dmg)
+    End Sub
+    Private Sub UpgradeShip(ByVal ship As ShipPlayer)
+
     End Sub
     Private Sub ManageCrews(ByVal ship As ShipPlayer)
         Dim t As Integer = 12
