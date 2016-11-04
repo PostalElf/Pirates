@@ -79,6 +79,7 @@
     End Function
 
     Public Reputation As New Dictionary(Of IsleFaction, Integer)
+    Public Peerage As New Dictionary(Of IsleNoble.Rank, List(Of IsleNoble))
 
 #Region "Tick"
     Public Sub Tick()

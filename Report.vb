@@ -59,6 +59,7 @@ Public Enum ReportType
     WindMoveToken
     MoveToken
 
+    Politics
     Commerce
     CrewConsumption
     CrewMorale

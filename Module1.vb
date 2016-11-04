@@ -266,9 +266,9 @@
         Console.Write(dmg.ShipDamage & " " & dmg.Type.ToString & " damage from " & dmg.Sender & ".")
         Console.WriteLine()
         If Menu.confirmChoice(0) = False Then Exit Sub
-        If ship.CheckAddCoins(ship.Isle.Faction, -cost) = False Then Exit Sub
+        If ship.CheckAddCoins(ship.Isle.WorldFaction, -cost) = False Then Exit Sub
 
-        ship.AddCoins(ship.Isle.Faction, -cost)
+        ship.AddCoins(ship.Isle.WorldFaction, -cost)
         ship.RepairDamage(dmg)
     End Sub
     Private Sub BuyModule(ByVal player As ShipPlayer)
@@ -304,10 +304,10 @@
         Dim cost As Double = m.Cost
         Console.WriteLine("Adding a " & type.ToString & " will cost you $" & cost.ToString("0.00") & ".")
         If Menu.confirmChoice(0) = False Then Exit Sub
-        If player.CheckAddCoins(player.Isle.Faction, -cost) = False Then Exit Sub
+        If player.CheckAddCoins(player.Isle.WorldFaction, -cost) = False Then Exit Sub
 
         Dim q As ShipQuarter = Menu.getListChoice(Of ShipQuarter)(quarters, 0)
-        player.AddCoins(player.Isle.Faction, -cost)
+        player.AddCoins(player.Isle.WorldFaction, -cost)
         player.AddModule(q, m)
         Console.WriteLine(m.Name & " successfully added to " & player.Name & "'s " & q.ToString & ".")
         Console.ReadKey()
@@ -325,7 +325,7 @@
         If Menu.confirmChoice(0) = False Then Exit Sub
 
         player.RemoveModule(Nothing, m)
-        player.AddCoins(player.Isle.Faction, cost)
+        player.AddCoins(player.Isle.WorldFaction, cost)
     End Sub
     Private Sub UpgradeModule(ByVal player As ShipPlayer)
         Console.WriteLine()
@@ -342,9 +342,9 @@
         Dim cost As Double = newM.Cost - m.Cost
         Console.WriteLine("It will cost you $" & cost & " to upgrade your " & m.Name & ".")
         If Menu.confirmChoice(0) = False Then Exit Sub
-        If player.CheckAddCoins(player.Isle.Faction, -cost) = False Then Exit Sub
+        If player.CheckAddCoins(player.Isle.WorldFaction, -cost) = False Then Exit Sub
 
-        player.AddCoins(player.Isle.Faction, -cost)
+        player.AddCoins(player.Isle.WorldFaction, -cost)
         Console.WriteLine()
         Console.WriteLine("Your " & m.Name & " are now " & newM.Quality.ToString & ".")
         m.Quality = newM.Quality

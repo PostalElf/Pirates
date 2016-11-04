@@ -532,10 +532,10 @@
     End Sub
     Private Function CrewShoreSpend(ByVal cost As Double, ByRef coinSpent As Double) As Boolean
         'returns false if there isn't enough money
-        If CheckAddCoins(Isle.Faction, cost) = False Then Return False
+        If CheckAddCoins(Isle.WorldFaction, cost) = False Then Return False
 
         'otherwise return true, deduct money and add to report
-        AddCoins(Isle.Faction, cost)
+        AddCoins(Isle.WorldFaction, cost)
         coinSpent += cost
         Return True
     End Function

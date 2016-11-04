@@ -10,7 +10,51 @@
     Private World As World
 
 #Region "Politics"
-    Public Faction As WorldFaction
+    Public ReadOnly Property Wealth As Integer
+        Get
+            Dim total As Integer = 0
+            For Each building In Buildings
+                Select Case building
+                    Case "Guild" : total += 100
+                    Case "Shipyard" : total += 100
+                    Case Else : total += 50
+                End Select
+            Next
+            Return total
+        End Get
+    End Property
+    Private WealthThresholds As Integer() = {0, 100, 300, 500, 700, 1000}
+    Private Noble As IsleNoble
+    Private PoliticalQty As New Dictionary(Of IsleFaction, Integer)
+    Private PoliticalVote As New Dictionary(Of IsleFaction, IsleNoble)
+    Private Sub TickRevolution()
+        'tally votes (n.b. votes should total 100)
+        Dim votes As New Dictionary(Of IsleNoble, Integer)
+        For Each fac As IsleFaction In PoliticalQty.Keys
+            Dim n As IsleNoble = PoliticalVote(fac)
+            Dim v As Integer = PoliticalQty(fac)
+            If votes.ContainsKey(n) = False Then votes.Add(n, 0)
+            votes(n) += v
+        Next
+
+        'get highest vote
+        Dim highestValue As Integer = -1
+        Dim highestNoble As IsleNoble = Nothing
+        For Each fac In votes.Keys
+            If votes(fac) > highestValue Then
+                highestNoble = fac
+                highestValue = votes(fac)
+            End If
+        Next
+
+        'assign new noble
+        If Noble Is Nothing = False Then Noble.Isle = Nothing
+        Noble = highestNoble
+        Noble.Isle = Me
+        Report.Add(Noble.ToString & " is the new ruler of " & Name & ".", ReportType.Politics)
+    End Sub
+
+    Public WorldFaction As WorldFaction
     Private Reputation As New Dictionary(Of IsleFaction, Integer)
     Private ReputationXP As New Dictionary(Of IsleFaction, Double)
     Private Shared ReputationThresholds As Double() = {0, 10, 20, 50, 100, 150, 200, 400, 600, 1000, 1500}
@@ -88,14 +132,14 @@
         If SaleGoodDemand(gt) = SaleDemand.Illegal AndAlso Reputation(IsleFaction.Smuggler) < 2 Then Return False
 
         Dim totalCost As Double = Math.Round(GetGoodPrice(gt, True) * value, 2)
-        If ship.CheckAddCoins(Faction, -totalCost) = False Then Return False
+        If ship.CheckAddCoins(WorldFaction, -totalCost) = False Then Return False
 
         Return True
     End Function
     Public Sub SellGood(ByVal gt As GoodType, ByVal value As Integer, ByRef ship As ShipPlayer)
         'ship buy good
         Dim totalCost As Double = Math.Round(GetGoodPrice(gt, True) * value, 2)
-        ship.AddCoins(Faction, -totalCost)
+        ship.AddCoins(WorldFaction, -totalCost)
         SaleGoodQty(gt) -= value
         ship.AddGood(gt, value)
     End Sub
@@ -112,7 +156,7 @@
         Dim totalCost As Double = Math.Round(GetGoodPrice(gt, False) * value, 2)
         ship.AddGood(gt, -value)
         SaleGoodQty(gt) += value
-        ship.AddCoins(Faction, totalCost)
+        ship.AddCoins(WorldFaction, totalCost)
     End Sub
     Private Shared Function ConvertDemandToPricePercentage(ByVal demand As SaleDemand, ByRef rng As Random) As Integer
         Select Case demand
@@ -182,6 +226,9 @@
 
 #Region "Tick"
     Public Sub Tick()
+        'check for political revolt
+        If Wealth > WealthThresholds(Noble.Title + 1) Then TickRevolution()
+
         'update market on King's day
         If World.Calendar.Day = Calendar.CalendarDay.King Then TickMarket()
     End Sub
@@ -190,6 +237,8 @@
     Private Sub New(ByVal aWorld As World)
         World = aWorld
         For Each fac In [Enum].GetValues(GetType(IsleFaction))
+            PoliticalQty.Add(fac, 0)
+            PoliticalVote.Add(fac, Nothing)
             Reputation.Add(fac, 5)
             ReputationXP.Add(fac, ReputationThresholds(5))
         Next
@@ -202,7 +251,7 @@
         Dim isle As New Isle(aWorld)
         With isle
             .Name = aName
-            .Faction = aFaction
+            .WorldFaction = aFaction
             .XSector = xSector
             .YSector = ySector
             Dim subSector As World.MapDataPoint = free.Grab(xSector, ySector, World.Rng)
