@@ -444,6 +444,9 @@
     Public Sub Tick(ByRef world As World)
         If IsAtSea = True Then TickSea(world) Else TickShore(world)
 
+        'reset booleans
+        HasHealed = False
+
         'report good consumption
         If GoodsConsumed.Values.Count > 0 Then
             Dim rep As String = "The crew consumed "

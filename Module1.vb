@@ -89,6 +89,7 @@
         captain.AddBonus("equipment", CrewBonus.Generate("Bullwhip"))
         damage = New Damage(10, 0, DamageType.Cannon, "God")
         player.AddDamage(damage, ShipQuarter.Fore, 100)
+        player.AddDamage(damage.Clone, ShipQuarter.Aft, 100)
     End Sub
 
     Private Function MainPlayerInput() As Boolean
@@ -128,9 +129,11 @@
                 Dim choices1 As New Dictionary(Of Char, String)
                 choices1.Add("b"c, "Buy")
                 choices1.Add("s"c, "Sell")
+                choices1.Add("u"c, "Upgrade")
                 Select Case Menu.getListChoice(choices1, 0)
                     Case "b"c : BuyModule(player)
                     Case "s"c : SellModule(player)
+                    Case "u"c : UpgradeModule(player)
                 End Select
             Case "v"c
                 world.ShipPlayer.ConsoleReport()
@@ -256,6 +259,7 @@
     Private Sub RepairShip(ByVal ship As ShipPlayer)
         Dim dmg As Damage = ship.GetWorstDamage
         If dmg Is Nothing Then Exit Sub
+        If ship.HasHealed = True Then Exit Sub
 
         Dim cost As Double = dmg.ShipDamage * 2
         Console.Write("It will cost you $" & cost.ToString("0.00") & " to repair ")
@@ -291,9 +295,60 @@
         If quality = Nothing Then Exit Sub
 
         Dim m As ShipModule = ShipModule.Generate(type, quality, player.Race)
+        If m.IsExclusive = True AndAlso player.GetModule(type) Is Nothing = False Then
+            Console.WriteLine("You already have a " & type.ToString & ".")
+            Console.WriteLine("Choose the upgrade option instead of buying another one.")
+            Console.ReadKey()
+            Exit Sub
+        End If
+        Dim cost As Double = m.Cost
+        Console.WriteLine("Adding a " & type.ToString & " will cost you $" & cost.ToString("0.00") & ".")
+        If Menu.confirmChoice(0) = False Then Exit Sub
+        If player.CheckAddCoins(player.Isle.Faction, -cost) = False Then Exit Sub
+
+        Dim q As ShipQuarter = Menu.getListChoice(Of ShipQuarter)(quarters, 0)
+        player.AddCoins(player.Isle.Faction, -cost)
+        player.AddModule(q, m)
+        Console.WriteLine(m.Name & " successfully added to " & player.Name & "'s " & q.ToString & ".")
+        Console.ReadKey()
     End Sub
     Private Sub SellModule(ByVal player As ShipPlayer)
+        Dim m As ShipModule = Menu.getListChoice(Of ShipModule)(player.GetModules(Nothing, Nothing), 0, "Select a module:")
+        If m Is Nothing Then Exit Sub
+        Dim cost As Double = Math.Round(m.Cost * 0.8, 2)
+        Console.WriteLine("Selling " & m.Name & " will give you $" & cost & ".")
+        If m.Type = ShipModule.ModuleType.Helm OrElse m.Type = ShipModule.ModuleType.Maproom OrElse m.Type = ShipModule.ModuleType.Quarterdeck Then
+            Console.ForegroundColor = ConsoleColor.Red
+            Console.WriteLine("WARNING: selling this module will render your ship un-seaworthy.")
+            Console.ForegroundColor = ConsoleColor.Gray
+        End If
+        If Menu.confirmChoice(0) = False Then Exit Sub
 
+        player.RemoveModule(Nothing, m)
+        player.AddCoins(player.Isle.Faction, cost)
+    End Sub
+    Private Sub UpgradeModule(ByVal player As ShipPlayer)
+        Console.WriteLine()
+        Dim m As ShipModule = Menu.getListChoice(Of ShipModule)(player.GetModules(Nothing, Nothing), 0, "Select a module:")
+        If m Is Nothing Then Exit Sub
+        Dim qualities As New List(Of ShipModule.ModuleQuality)
+        For Each q As ShipModule.ModuleQuality In ([Enum].GetValues(GetType(ShipModule.ModuleQuality)))
+            If q > m.Quality Then qualities.Add(q)
+        Next
+        If qualities.Count = 0 Then Console.WriteLine(m.Name & " is already fully upgraded.") : Console.ReadKey() : Exit Sub
+        Dim quality As ShipModule.ModuleQuality = Menu.getListChoice(Of ShipModule.ModuleQuality)(qualities, 0)
+
+        Dim newM As ShipModule = ShipModule.Generate(m.Type, quality, player.Race)
+        Dim cost As Double = newM.Cost - m.Cost
+        Console.WriteLine("It will cost you $" & cost & " to upgrade your " & m.Name & ".")
+        If Menu.confirmChoice(0) = False Then Exit Sub
+        If player.CheckAddCoins(player.Isle.Faction, -cost) = False Then Exit Sub
+
+        player.AddCoins(player.Isle.Faction, -cost)
+        Console.WriteLine()
+        Console.WriteLine("Your " & m.Name & " are now " & newM.Quality.ToString & ".")
+        m.Quality = newM.Quality
+        Console.ReadKey()
     End Sub
     Private Sub ManageCrews(ByVal ship As ShipPlayer)
         Dim t As Integer = 12

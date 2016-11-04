@@ -699,6 +699,7 @@
 
         DamageLog(quarter).Remove(dmg)
         DamageSustained(quarter) -= dmg.ShipDamage
+        HasHealed = True
     End Sub
     Public Function GetWorstDamage() As Damage
         If DamageLog.Count = 0 Then Return Nothing

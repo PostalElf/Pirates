@@ -1,5 +1,9 @@
 ﻿Public Class ShipModule
-    Public Name As String
+    Public ReadOnly Property Name As String
+        Get
+            If Type = ModuleType.Quarters Then Return Quality.ToString & " " & Race.ToString & " Quarters" Else Return Quality.ToString & " " & Type.ToString
+        End Get
+    End Property
     Public Type As ModuleType
     Public Quality As ModuleQuality
     Public Capacity As Integer
@@ -10,6 +14,34 @@
     End Property
     Public HullCost As Integer
     Public Weight As Integer
+    Public ReadOnly Property Cost As Double
+        Get
+            Dim baseCost As Double = 0
+            Select Case Type
+                Case ModuleType.Quarters : baseCost = 100
+                Case ModuleType.Quarterdeck : baseCost = 250
+                Case ModuleType.Helm : baseCost = 250
+                Case ModuleType.Maproom : baseCost = 250
+                Case ModuleType.Kitchen : baseCost = 100
+                Case ModuleType.Laboratory : baseCost = 350
+                Case ModuleType.Shrine : baseCost = 300
+                Case ModuleType.Apothecary : baseCost = 150
+                Case ModuleType.Hold : baseCost = 100
+                Case Else : Return Nothing
+            End Select
+            Dim modifier As Double = 0
+            Select Case Quality
+                Case ModuleQuality.Poor : modifier = 0.5
+                Case ModuleQuality.Shoddy : modifier = 0.8
+                Case ModuleQuality.Average : modifier = 1
+                Case ModuleQuality.Nice : modifier = 1.25
+                Case ModuleQuality.Excellent : modifier = 1.75
+                Case ModuleQuality.Luxurious : modifier = 2
+                Case Else : Return Nothing
+            End Select
+            Return Math.Round(baseCost * modifier, 2)
+        End Get
+    End Property
     Public IsExclusive As Boolean = False
 
     Public Ship As Ship
@@ -52,14 +84,12 @@
         quality = Dev.Constrain(quality, 0, 5)
         Dim total As New ShipModule
         With total
-            .Name = quality.ToString & " " & type.ToString
             .Type = type
             .Quality = quality
             .Race = race
 
             Select Case type
                 Case ModuleType.Quarters
-                    .Name = quality.ToString & " " & .Race.ToString & " Quarters"
                     .Capacity = 5
                     .HullCost = 2
                     .Weight = 5
@@ -76,7 +106,6 @@
                     .IsExclusive = True
 
                 Case ModuleType.Maproom
-                    .Name = quality.ToString & " Map Room"
                     .HullCost = quality
                     .Weight = quality
                     .IsExclusive = True
