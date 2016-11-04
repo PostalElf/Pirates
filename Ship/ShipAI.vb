@@ -76,7 +76,7 @@
             Dim crewCount As Integer = newCrews.Count
             For n = 1 To Math.Ceiling(crewCount / 5)
                 Dim quarter As ShipQuarter = rng.Next(1, 5)
-                .AddModule(quarter, ShipModule.Generate(ShipModule.ModuleType.Crew, 1, .Race))
+                .AddModule(quarter, ShipModule.Generate(ShipModule.ModuleType.Quarters, 1, .Race))
             Next
 
             'add crew

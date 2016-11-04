@@ -26,7 +26,7 @@
     Public Sub AddCrew(ByRef Crew As Crew)
         Crews.Add(Crew)
         Select Case Type
-            Case ModuleType.Crew : Crew.Quarters = Me
+            Case ModuleType.Quarters : Crew.Quarters = Me
             Case ModuleType.Shrine : Crew.Shrine = Me
         End Select
     End Sub
@@ -35,7 +35,7 @@
 
         Crews.Remove(crew)
         Select Case Type
-            Case ModuleType.Crew
+            Case ModuleType.Quarters
                 crew.Quarters = Nothing
             Case ModuleType.Shrine
                 crew.Shrine = Nothing
@@ -58,7 +58,7 @@
             .Race = race
 
             Select Case type
-                Case ModuleType.Crew
+                Case ModuleType.Quarters
                     .Name = quality.ToString & " " & .Race.ToString & " Quarters"
                     .Capacity = 5
                     .HullCost = 2
@@ -114,6 +114,7 @@
                 Case ModuleType.Apothecary
                     .HullCost = quality * 2
                     .Weight = quality
+                    .IsExclusive = True
 
                 Case ModuleType.Hold
                     .Capacity = quality * 100
@@ -132,14 +133,14 @@
         Dim t As Integer = 12
         Console.WriteLine(Name)
         Console.WriteLine(s & Dev.vbTab("Quarter:", t) & Quarter.ToString)
-        If Type = ModuleType.Shrine OrElse Type = ModuleType.Crew Then Console.WriteLine(s & Dev.vbTab("Capacity:", t) & Crews.Count & "/" & Capacity)
+        If Type = ModuleType.Shrine OrElse Type = ModuleType.Quarters Then Console.WriteLine(s & Dev.vbTab("Capacity:", t) & Crews.Count & "/" & Capacity)
         If Type = ModuleType.Hold Then Console.WriteLine(s & Dev.vbTab("Capacity:", t) & Capacity)
         Console.WriteLine(s & Dev.vbTab("Hullspace:", t) & HullCost)
         If Weight > 0 Then Console.WriteLine(s & Dev.vbTab("Weight:", t) & Weight)
     End Sub
 
     Public Enum ModuleType
-        Crew = 1
+        Quarters = 1
         Quarterdeck
         Helm
         Maproom

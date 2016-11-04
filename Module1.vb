@@ -33,7 +33,7 @@
             .AvailableMoves.Add(New MoveToken({BattleMove.Halt}))
 
             For n = 1 To 3
-                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Crew, ShipModule.ModuleQuality.Average, .Race))
+                .AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Quarters, ShipModule.ModuleQuality.Average, .Race))
             Next
 
             .AddCrew(ShipQuarter.Fore, Crew.Generate(.Race, rng, Nothing, CrewSkill.Sailing), CrewRole.Sailor)
@@ -125,7 +125,13 @@
             Case "r"c
                 RepairShip(player)
             Case "u"c
-                UpgradeShip(player)
+                Dim choices1 As New Dictionary(Of Char, String)
+                choices1.Add("b"c, "Buy")
+                choices1.Add("s"c, "Sell")
+                Select Case Menu.getListChoice(choices1, 0)
+                    Case "b"c : BuyModule(player)
+                    Case "s"c : SellModule(player)
+                End Select
             Case "v"c
                 world.ShipPlayer.ConsoleReport()
                 Console.ReadKey()
@@ -261,7 +267,32 @@
         ship.AddCoins(ship.Isle.Faction, -cost)
         ship.RepairDamage(dmg)
     End Sub
-    Private Sub UpgradeShip(ByVal ship As ShipPlayer)
+    Private Sub BuyModule(ByVal player As ShipPlayer)
+        Console.WriteLine()
+        Dim choices As New List(Of String)
+        For Each mt As ShipModule.ModuleType In [Enum].GetValues(GetType(ShipModule.ModuleType))
+            choices.Add(mt.ToString)
+        Next
+        Dim type As ShipModule.ModuleType = Nothing
+        Dim choice As String = Menu.getListChoice(Of String)(choices, 0, "Select a module:")
+        For Each mt In [Enum].GetValues(GetType(ShipModule.ModuleType))
+            If mt.ToString = choice Then type = mt : Exit For
+        Next
+        If type = Nothing Then Exit Sub
+        choices.Clear()
+        For Each mq As ShipModule.ModuleQuality In [Enum].GetValues(GetType(ShipModule.ModuleQuality))
+            choices.Add(mq.ToString)
+        Next
+        Dim quality As ShipModule.ModuleQuality = Nothing
+        choice = Menu.getListChoice(Of String)(choices, 0, "Select quality:")
+        For Each mq In [Enum].GetValues(GetType(ShipModule.ModuleQuality))
+            If mq.ToString = choice Then quality = mq : Exit For
+        Next
+        If quality = Nothing Then Exit Sub
+
+        Dim m As ShipModule = ShipModule.Generate(type, quality, player.Race)
+    End Sub
+    Private Sub SellModule(ByVal player As ShipPlayer)
 
     End Sub
     Private Sub ManageCrews(ByVal ship As ShipPlayer)
@@ -323,7 +354,7 @@
                 End Select
             Case 4
                 Dim gears As List(Of CrewBonus) = ship.GetEquipments()
-                gears.Add(CrewBonus.generate("Belaying Pin"))
+                gears.Add(CrewBonus.Generate("Belaying Pin"))
                 Dim targetGear As CrewBonus = Menu.getListChoice(Of CrewBonus)(gears, 0)
                 If targetGear Is Nothing Then Exit Sub
                 Console.WriteLine()

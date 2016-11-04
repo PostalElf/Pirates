@@ -417,7 +417,7 @@
             If GetModules(ShipModule.ModuleType.Helm).Count = 0 Then Return False
             If GetModules(ShipModule.ModuleType.Quarterdeck).Count = 0 Then Return False
             If GetModules(ShipModule.ModuleType.Maproom).Count = 0 Then Return False
-            If GetModules(ShipModule.ModuleType.Crew).Count = 0 Then Return False
+            If GetModules(ShipModule.ModuleType.Quarters).Count = 0 Then Return False
 
             If GetCrews(Nothing, CrewRole.Helmsman).Count = 0 Then Return False
             If GetCrews(Nothing, CrewRole.Captain).Count = 0 Then Return False
@@ -450,7 +450,7 @@
         Return total
     End Function
     Public Function CheckAddCrew(ByVal quarter As ShipQuarter, ByVal crew As Crew, Optional ByVal role As CrewRole = Nothing) As Boolean
-        Dim qlist As List(Of ShipModule) = GetModulesFree(ShipModule.ModuleType.Crew, crew.Race, Nothing)
+        Dim qlist As List(Of ShipModule) = GetModulesFree(ShipModule.ModuleType.Quarters, crew.Race, Nothing)
         If qlist.Count = 0 Then Return False
         If qlist(0).CapacityFree - 1 < 0 Then Return False
 
@@ -466,7 +466,7 @@
             crew.Role = role
         End If
 
-        Dim qlist As List(Of ShipModule) = GetModulesFree(ShipModule.ModuleType.Crew, crew.Race, Nothing)
+        Dim qlist As List(Of ShipModule) = GetModulesFree(ShipModule.ModuleType.Quarters, crew.Race, Nothing)
         If qlist.Count = 0 Then Exit Sub
         qlist(0).AddCrew(crew)
     End Sub
