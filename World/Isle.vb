@@ -59,6 +59,14 @@
         Noble = electedNoble
         Noble.Isle = Me
         Report.Add(Noble.ToString & " is the new ruler of " & Name & ".", ReportType.Politics)
+        If Race <> Noble.Race Then
+            Race = Noble.Race
+            Report.Add(Name & " is now a predominantly " & Race.ToString & " stronghold.", ReportType.Politics)
+        End If
+        If WorldFaction <> Noble.SupportedWorldFaction Then
+            WorldFaction = Noble.SupportedWorldFaction
+            Report.Add(Name & " declares for the " & WorldFaction.ToString & ".", ReportType.Politics)
+        End If
     End Sub
 
     Public WorldFaction As WorldFaction
