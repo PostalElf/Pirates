@@ -46,10 +46,11 @@
         Dim currentTitle As IsleNoble.Rank = Noble.Title
         While eligiblePeers.Count = 0
             currentTitle += 1
-            If currentTitle > IsleNoble.Rank.Duke Then Exit While
+            If currentTitle > IsleNoble.Rank.Duke Then currentTitle = Noble.Title 'if past Duke, one last pass for same rank
             For Each peer In World.GetFreePeers(currentTitle, currentTitle)
                 If peer.SupportedIsleFaction = highestFac Then eligiblePeers.Add(peer)
             Next
+            If currentTitle = Noble.Title Then Exit While 'shortcircuit for last pass
         End While
         If eligiblePeers.Count = 0 Then Exit Sub
         Dim electedNoble As IsleNoble = Dev.GetRandom(Of IsleNoble)(eligiblePeers, World.Rng)
