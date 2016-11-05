@@ -69,7 +69,7 @@
         King
     End Enum
     Public Enum CalendarSeason
-        Secrets
+        Secrets = 1
         Silence
         Sail
         Salt

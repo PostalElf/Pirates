@@ -25,17 +25,81 @@
     End Property
     Private WealthThresholds As Integer() = {0, 100, 300, 500, 700, 1000}
     Private Noble As IsleNoble
-    Private PoliticalQty As New Dictionary(Of IsleFaction, Integer)
-    Private Sub TickRevolution()
+    Private PoliticalPower As New Dictionary(Of IsleFaction, Integer)
+    Private PoliticalStatus As IslePoliticalStatus
+    Private PoliticalTimer As Integer = 0
+    Private PoliticalCandidate As IsleNoble
+    Private Sub TickPolitics()
+        Select Case PoliticalStatus
+            Case IslePoliticalStatus.Stable
+                If Wealth > WealthThresholds(Noble.Title) Then
+                    PoliticalStatus = IslePoliticalStatus.Dissemination
+                    PoliticalTimer = Math.Round(GetLongestRoute().GetDistance / 100)
+                    Report.Add("News about " & Name & "'s newfound wealth is starting to spread...", ReportType.Politics)
+                End If
+
+            Case IslePoliticalStatus.Dissemination
+                PoliticalTimer -= 1
+                If PoliticalTimer = 0 Then
+                    PoliticalStatus = IslePoliticalStatus.Travelling
+                    PoliticalTimer = Math.Round(GetLongestRoute.GetDistance / 100)
+                    PoliticalCandidate = GetEligiblePeer()
+                    Report.Add(PoliticalCandidate.ToString & " is planning to attack " & Name & "!", ReportType.Politics)
+                Else
+                    Report.Add("News about " & Name & "'s newfound wealth will fully spread in " & PoliticalTimer & " days.", ReportType.Politics)
+                End If
+
+            Case IslePoliticalStatus.Travelling
+                PoliticalTimer -= 1
+                If PoliticalTimer = 0 Then
+                    PoliticalStatus = IslePoliticalStatus.Blockade
+                    PoliticalTimer = (Noble.Title * 7) + World.Rng.Next(1, 7)
+                    Report.Add(PoliticalCandidate.ToString & "'s navy has blockaded " & Name & "!", ReportType.PoliticsMain)
+                Else
+                    Report.Add(PoliticalCandidate.ToString & " will reach " & Name & " in " & PoliticalTimer & " days.", ReportType.Politics)
+                End If
+
+            Case IslePoliticalStatus.Blockade
+                PoliticalTimer -= 1
+                If PoliticalTimer = 0 Then
+                    PoliticalStatus = IslePoliticalStatus.Revolution
+                    PoliticalTimer = World.Rng.Next(5, 8)
+                    Report.Add("The populace of " & Name & " are in revolt.", ReportType.PoliticsMain)
+                Else
+                    Report.Add(Noble.ToString & " of " & Name & " will likely surrender in " & PoliticalTimer & " days.", ReportType.Politics)
+                End If
+
+            Case IslePoliticalStatus.Revolution
+                PoliticalTimer -= 1
+                If PoliticalTimer = 0 Then
+                    PoliticalStatus = IslePoliticalStatus.Stable
+                    If Noble Is Nothing = False Then Noble.Isle = Nothing
+                    Noble = PoliticalCandidate
+                    Noble.Isle = Me
+                    Report.Add(Noble.ToString & " is the new ruler of " & Name & ".", ReportType.PoliticsMain)
+                    If Race <> Noble.Race Then
+                        Race = Noble.Race
+                        Report.Add(Name & " is now a predominantly " & Race.ToString & " stronghold.", ReportType.PoliticsMain)
+                    End If
+                    If WorldFaction <> Noble.SupportedWorldFaction Then
+                        WorldFaction = Noble.SupportedWorldFaction
+                        Report.Add(Name & " declares for the " & WorldFaction.ToString & ".", ReportType.PoliticsMain)
+                    End If
+                Else
+                    Report.Add("The populace of " & Name & " will revolt for " & PoliticalTimer & " more days.", ReportType.Politics)
+                End If
+        End Select
+    End Sub
+    Private Function GetEligiblePeer() As IsleNoble
         'get highest vote
         'in the event of tie, get random tied faction
         Dim highestValue As Integer = -1
         Dim highestFacs As New List(Of IsleFaction)
-        For Each fac In PoliticalQty.Keys
-            If PoliticalQty(fac) > highestValue Then
+        For Each fac In PoliticalPower.Keys
+            If PoliticalPower(fac) > highestValue Then
                 highestFacs.Clear()
                 highestFacs.Add(fac)
-                highestValue = PoliticalQty(fac)
+                highestValue = PoliticalPower(fac)
             End If
         Next
         Dim highestFac As IsleFaction = Dev.GetRandom(Of IsleFaction)(highestFacs, World.Rng)
@@ -52,23 +116,24 @@
             Next
             If currentTitle = Noble.Title Then Exit While 'shortcircuit for last pass
         End While
-        If eligiblePeers.Count = 0 Then Exit Sub
+        If eligiblePeers.Count = 0 Then Return Nothing
         Dim electedNoble As IsleNoble = Dev.GetRandom(Of IsleNoble)(eligiblePeers, World.Rng)
 
-        'assign new noble
-        If Noble Is Nothing = False Then Noble.Isle = Nothing
-        Noble = electedNoble
-        Noble.Isle = Me
-        Report.Add(Noble.ToString & " is the new ruler of " & Name & ".", ReportType.Politics)
-        If Race <> Noble.Race Then
-            Race = Noble.Race
-            Report.Add(Name & " is now a predominantly " & Race.ToString & " stronghold.", ReportType.Politics)
-        End If
-        If WorldFaction <> Noble.SupportedWorldFaction Then
-            WorldFaction = Noble.SupportedWorldFaction
-            Report.Add(Name & " declares for the " & WorldFaction.ToString & ".", ReportType.Politics)
-        End If
-    End Sub
+        Return electedNoble
+    End Function
+    Private Function GetLongestRoute() As Route
+        Dim longestRoute As Route = Nothing
+        Dim longestDistance As Double = -1
+        For Each Route In World.BasicRoutes
+            If Route.Contains(Me) Then
+                If Route.GetDistance > longestDistance Then
+                    longestRoute = Route
+                    longestDistance = Route.GetDistance
+                End If
+            End If
+        Next
+        Return longestRoute
+    End Function
 
     Public WorldFaction As WorldFaction
     Private Reputation As New Dictionary(Of IsleFaction, Integer)
@@ -243,7 +308,7 @@
 #Region "Tick"
     Public Sub Tick()
         'check for political revolt
-        If Wealth > WealthThresholds(Noble.Title) Then TickRevolution()
+        TickPolitics()
 
         'update market on King's day
         If World.Calendar.Day = Calendar.CalendarDay.King Then TickMarket()
@@ -485,7 +550,7 @@
         For Each fac In [Enum].GetValues(GetType(IsleFaction))
             Dim power As Integer = World.Rng.Next(1, 11) + 20
             If fac = Noble.SupportedIsleFaction Then power = CInt(power * 1.5)
-            PoliticalQty.Add(fac, power)
+            PoliticalPower.Add(fac, power)
         Next
     End Sub
     Public Overrides Function ToString() As String

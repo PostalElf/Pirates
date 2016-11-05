@@ -60,6 +60,7 @@ Public Enum ReportType
     MoveToken
 
     Politics
+    PoliticsMain
     Commerce
     CrewConsumption
     CrewMorale

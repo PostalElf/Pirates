@@ -127,8 +127,8 @@
             Report.Add("The wind has changed to " & newWind.ToString & ".", ReportType.WindChange)
         End If
     End Sub
-    Private WindChangeChanceBase As Integer() = {5, 1, 3, 3, 8, 10, 5, 10, 5}
-    Private WindChangeChanceDaily As Integer() = {1, 1, 2, 1, 2, 3, 3, 2, 2}
+    Private WindChangeChanceBase As Integer() = {0, 5, 1, 3, 3, 8, 10, 5, 10, 5}
+    Private WindChangeChanceDaily As Integer() = {0, 1, 1, 2, 1, 2, 3, 3, 2, 2}
     Private WindChangeChance As Integer
 #End Region
 
