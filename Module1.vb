@@ -82,7 +82,7 @@
         isle.AddBuilding("Guild")
         isle.AddBuilding("Shipyard")
 
-        player.AddCoins(WorldFaction.Deathless, 1000)
+        player.AddCoins(WorldFaction.Neutral, 1000)
         Dim damage As New Damage(0, 25, DamageType.Blunt, "God")
         Dim captain As Crew = player.GetCrew(Nothing, CrewRole.Captain)
         captain.ShipAttack(100, damage)

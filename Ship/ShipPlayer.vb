@@ -471,7 +471,7 @@
             If MoraleChange > 0 Then rep &= " improves by " & MoraleChange
             If MoraleChange < 0 Then rep &= " worses by " & Math.Abs(MoraleChange)
             rep &= " in total "
-            rep &= "(avg " & MoraleChange / GetCrews(Nothing, Nothing).Count & ")."
+            rep &= "(avg " & Math.Round(MoraleChange / GetCrews(Nothing, Nothing).Count, 2) & ")."
             Report.Add(rep, ReportType.CrewMorale)
             MoraleChange = 0
         End If
@@ -513,18 +513,20 @@
                     If Isle.GetBuilding("Crypt") AndAlso CrewShoreSpend(Good.GetBasePrice(GoodType.Mordicus), coinSpent) = True Then shoreProvisors.Add(GoodType.Mordicus)
             End Select
 
-            For Each Crew In GetCrews(r)
-                'heal
-                If Crew.IsInjured = True Then
+            Dim crewlist As List(Of Crew) = GetCrews(r)
+            For n = crewlist.Count - 1 To 0 Step -1
+                Dim crew As Crew = crewlist(n)
+                If crew.IsInjured = True Then
+                    'heal
                     If Isle.Doctor Is Nothing = False Then
-                        If CrewShoreSpend(10, coinSpent) = True Then Crew.TickHeal(Isle.Doctor) Else Crew.TickHeal(Nothing)
+                        If CrewShoreSpend(10, coinSpent) = True Then crew.TickHeal(Isle.Doctor) Else crew.TickHeal(Nothing)
                     Else
-                        Crew.TickHeal(Nothing)
+                        crew.TickHeal(Nothing)
                     End If
+                Else
+                    'morale
+                    crew.TickMorale(shoreProvisors)
                 End If
-
-                'morale
-                Crew.TickMorale(shoreProvisors)
             Next
         Next
 

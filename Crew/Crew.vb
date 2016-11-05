@@ -552,10 +552,10 @@
         Return worstDmg
     End Function
     Private Sub Death()
-        If Ship.BattleSquare Is Nothing = False AndAlso Ship.BattleSquare.Battlefield Is Nothing = False Then Ship.BattleSquare.Battlefield.AddDead(Me)
         Dim repType As ReportType
         If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDeath Else repType = ReportType.EnemyCrewDeath
         Report.Add("[" & Ship.ID & "] " & Name & " has perished!", repType)
+        If Ship.BattleSquare Is Nothing = False AndAlso Ship.BattleSquare.Battlefield Is Nothing = False Then Ship.BattleSquare.Battlefield.AddDead(Me) Else Ship.RemoveCrew(Me)
     End Sub
 #End Region
 
