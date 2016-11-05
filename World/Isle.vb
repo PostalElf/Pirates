@@ -26,30 +26,37 @@
     Private WealthThresholds As Integer() = {0, 100, 300, 500, 700, 1000}
     Private Noble As IsleNoble
     Private PoliticalQty As New Dictionary(Of IsleFaction, Integer)
-    Private PoliticalVote As New Dictionary(Of IsleFaction, IsleNoble)
     Private Sub TickRevolution()
-        'tally votes (n.b. votes should total 100)
-        Dim votes As New Dictionary(Of IsleNoble, Integer)
-        For Each fac As IsleFaction In PoliticalQty.Keys
-            Dim n As IsleNoble = PoliticalVote(fac)
-            Dim v As Integer = PoliticalQty(fac)
-            If votes.ContainsKey(n) = False Then votes.Add(n, 0)
-            votes(n) += v
-        Next
-
         'get highest vote
+        'in the event of tie, get random tied faction
         Dim highestValue As Integer = -1
-        Dim highestNoble As IsleNoble = Nothing
-        For Each fac In votes.Keys
-            If votes(fac) > highestValue Then
-                highestNoble = fac
-                highestValue = votes(fac)
+        Dim highestFacs As New List(Of IsleFaction)
+        For Each fac In PoliticalQty.Keys
+            If PoliticalQty(fac) > highestValue Then
+                highestFacs.Clear()
+                highestFacs.Add(fac)
+                highestValue = PoliticalQty(fac)
             End If
         Next
+        Dim highestFac As IsleFaction = Dev.GetRandom(Of IsleFaction)(highestFacs, World.Rng)
+
+        'get random eligible noble that supports the ruling faction
+        'start at one rank higher before working up the chain
+        Dim eligiblePeers As New List(Of IsleNoble)
+        Dim currentTitle As IsleNoble.Rank = Noble.Title
+        While eligiblePeers.Count = 0
+            currentTitle += 1
+            If currentTitle > IsleNoble.Rank.Duke Then Exit While
+            For Each peer In World.GetFreePeers(currentTitle, currentTitle)
+                If peer.SupportedIsleFaction = highestFac Then eligiblePeers.Add(peer)
+            Next
+        End While
+        If eligiblePeers.Count = 0 Then Exit Sub
+        Dim electedNoble As IsleNoble = Dev.GetRandom(Of IsleNoble)(eligiblePeers, World.Rng)
 
         'assign new noble
         If Noble Is Nothing = False Then Noble.Isle = Nothing
-        Noble = highestNoble
+        Noble = electedNoble
         Noble.Isle = Me
         Report.Add(Noble.ToString & " is the new ruler of " & Name & ".", ReportType.Politics)
     End Sub
@@ -227,7 +234,7 @@
 #Region "Tick"
     Public Sub Tick()
         'check for political revolt
-        If Wealth > WealthThresholds(Noble.Title + 1) Then TickRevolution()
+        If Wealth > WealthThresholds(Noble.Title) Then TickRevolution()
 
         'update market on King's day
         If World.Calendar.Day = Calendar.CalendarDay.King Then TickMarket()
@@ -237,8 +244,6 @@
     Private Sub New(ByVal aWorld As World)
         World = aWorld
         For Each fac In [Enum].GetValues(GetType(IsleFaction))
-            PoliticalQty.Add(fac, 0)
-            PoliticalVote.Add(fac, Nothing)
             Reputation.Add(fac, 5)
             ReputationXP.Add(fac, ReputationThresholds(5))
         Next
@@ -247,7 +252,8 @@
             SaleGoodQty.Add(gt, 0)
         Next
     End Sub
-    Public Shared Function Generate(ByRef aWorld As World, ByVal aName As String, ByVal aFaction As WorldFaction, ByVal xSector As Integer, ByVal ySector As Integer, ByRef free As World.MapData)
+    Public Shared Function Generate(ByRef aWorld As World, ByVal aName As String, ByVal aFaction As WorldFaction, ByVal xSector As Integer, ByVal ySector As Integer, _
+                                    ByRef free As World.MapData, ByRef peerage As List(Of IsleNoble))
         Dim isle As New Isle(aWorld)
         With isle
             .Name = aName
@@ -259,11 +265,12 @@
             .YSubSector = subSector.Y
             .X = ConvertSectorToRange(.XSector, .XSubSector).Roll(World.Rng)
             .Y = ConvertSectorToRange(.YSector, .YSubSector).Roll(World.Rng)
-            .GenerateSaleGoods()
+            .GenerateDefaults(peerage)
+            .GeneratePolitics()
         End With
         Return isle
     End Function
-    Private Sub GenerateSaleGoods()
+    Private Sub GenerateDefaults(ByRef peerage As List(Of IsleNoble))
         'rarer the demand, the higher the price
         'demand at none = will not buy; demand at illegal = will buy at rare prices
         'sale price always 10% higher than purchase price
@@ -299,6 +306,7 @@
                 SetSaleGood(GoodType.Spice, SaleDemand.Uncommon, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.None)
                 Race = CrewRace.Unrelinquished
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Duke, Race, World.Rng, WorldFaction)
 
             Case "Windsworn Exclave"
                 'north
@@ -313,6 +321,7 @@
                 SetSaleGood(GoodType.Spice, SaleDemand.Rare, SaleDemand.Rare)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Rare, SaleDemand.Rare)
                 Race = CrewRace.Windsworn
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Duke, Race, World.Rng, WorldFaction)
 
             Case "Seatouched Dominion"
                 'east
@@ -335,6 +344,7 @@
                 SetSaleGood(GoodType.Spice, SaleDemand.None, SaleDemand.Illegal)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.Illegal)
                 Race = CrewRace.Seatouched
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Duke, Race, World.Rng, WorldFaction)
 
             Case "Commonwealth"
                 'south
@@ -350,6 +360,7 @@
                 SetSaleGood(GoodType.Spice, SaleDemand.Rare, SaleDemand.Common)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Abundant, SaleDemand.Common)
                 Race = CrewRace.Human
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Duke, Race, World.Rng, WorldFaction)
 
             Case "Court of Dust"
                 'mid
@@ -367,6 +378,7 @@
                 SetSaleGood(GoodType.Spice, SaleDemand.None, SaleDemand.Rare)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.Uncommon)
                 Race = CrewRace.Human
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Marquis, Race, World.Rng, WorldFaction)
 
             Case "Blasphemy Bay"
                 'north-west
@@ -382,6 +394,7 @@
                 SetSaleGood(GoodType.Spice, SaleDemand.Common, SaleDemand.Rare)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Common, SaleDemand.Rare)
                 Race = CrewRace.Seatouched
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Earl, Race, World.Rng, WorldFaction)
 
             Case "Brass Atoll"
                 'north-east
@@ -395,6 +408,7 @@
                 SetSaleGood(GoodType.Liqour, SaleDemand.Rare, SaleDemand.Rare)
                 SetSaleGood(GoodType.Coffee, SaleDemand.None, SaleDemand.Rare)
                 Race = CrewRace.Human
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Earl, Race, World.Rng, WorldFaction)
 
             Case "Blackreef"
                 'south-west
@@ -413,16 +427,29 @@
                 SetSaleGood(GoodType.Spice, SaleDemand.Rare, SaleDemand.Rare)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Rare, SaleDemand.Rare)
                 Race = CrewRace.Human
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Earl, Race, World.Rng, WorldFaction)
 
             Case "Hallowsreach"
                 'south-east
                 SetSaleGood(GoodType.Spice, SaleDemand.Abundant, SaleDemand.Abundant)
-
+                Race = CrewRace.Human
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Baron, Race, World.Rng, WorldFaction)
 
             Case "Sanctuary"
+                Race = CrewRace.Human
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Baron, Race, World.Rng, WorldFaction)
+
             Case "Blackiron Ridge"
+                Race = CrewRace.Human
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Baron, Race, World.Rng, WorldFaction)
+
             Case "World's Spine"
+                Race = CrewRace.Human
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Baron, Race, World.Rng, WorldFaction)
+
             Case "Firefalls"
+                Race = CrewRace.Human
+                Noble = IsleNoble.Generate(IsleNoble.Rank.Baron, Race, World.Rng, WorldFaction)
         End Select
 
         'set initial values
@@ -430,6 +457,9 @@
             SaleGoodQty(gt) = GetSaleGoodProductionRange(gt).Roll(World.Rng) * 5
             SaleGoodPriceModifier(gt) = Math.Round(1 + (GetSaleGoodDemandRange(gt).Roll(World.Rng) / 100), 2)
         Next
+
+        'add peer
+        peerage.Add(Noble)
     End Sub
     Private Sub SetSaleGood(ByVal gt As GoodType, ByVal production As SaleDemand, ByVal demand As SaleDemand)
         SaleGoodProduction(gt) = production
@@ -441,6 +471,14 @@
         Dim min As Integer = max - 99
         Return New Range(min, max)
     End Function
+    Private Sub GeneratePolitics()
+        'supported fac gets 1.5x votes
+        For Each fac In [Enum].GetValues(GetType(IsleFaction))
+            Dim power As Integer = World.Rng.Next(1, 11) + 20
+            If fac = Noble.SupportedIsleFaction Then power = CInt(power * 1.5)
+            PoliticalQty.Add(fac, power)
+        Next
+    End Sub
     Public Overrides Function ToString() As String
         Return Name
     End Function

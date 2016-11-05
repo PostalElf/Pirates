@@ -39,21 +39,34 @@
 
             'generate isles
             Dim free As New MapData(3, 3, 3, 3)
-            .Isles.Add(Isle.Generate(world, "Deathless Kingdom", WorldFaction.Deathless, 1, 2, free))
-            .Isles.Add(Isle.Generate(world, "Windsworn Exclave", WorldFaction.Windsworn, 2, 1, free))
-            .Isles.Add(Isle.Generate(world, "Seatouched Dominion", WorldFaction.Seatouched, 3, 2, free))
-            .Isles.Add(Isle.Generate(world, "Commonwealth", WorldFaction.Commonwealth, 2, 3, free))
-            .Isles.Add(Isle.Generate(world, "Court of Dust", WorldFaction.Imperial, 2, 2, free))
+            .Isles.Add(Isle.Generate(world, "Deathless Kingdom", WorldFaction.Deathless, 1, 2, free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "Windsworn Exclave", WorldFaction.Windsworn, 2, 1, free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "Seatouched Dominion", WorldFaction.Seatouched, 3, 2, free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "Commonwealth", WorldFaction.Commonwealth, 2, 3, free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "Court of Dust", WorldFaction.Imperial, 2, 2, free, .Peerage))
 
-            .Isles.Add(Isle.Generate(world, "Blasphemy Bay", WorldFaction.Neutral, 1, 1, free))
-            .Isles.Add(Isle.Generate(world, "Brass Atoll", WorldFaction.Neutral, 3, 1, free))
-            .Isles.Add(Isle.Generate(world, "Blackreef", WorldFaction.Neutral, 1, 3, free))
-            .Isles.Add(Isle.Generate(world, "Hallowsreach", WorldFaction.Neutral, 3, 3, free))
+            .Isles.Add(Isle.Generate(world, "Blasphemy Bay", WorldFaction.Neutral, 1, 1, free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "Brass Atoll", WorldFaction.Neutral, 3, 1, free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "Blackreef", WorldFaction.Neutral, 1, 3, free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "Hallowsreach", WorldFaction.Neutral, 3, 3, free, .Peerage))
 
-            .Isles.Add(Isle.Generate(world, "Sanctuary", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate(world, "Blackiron Ridge", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate(world, "World's Spine", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free))
-            .Isles.Add(Isle.Generate(world, "Firefalls", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free))
+            .Isles.Add(Isle.Generate(world, "Sanctuary", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "Blackiron Ridge", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "World's Spine", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free, .Peerage))
+            .Isles.Add(Isle.Generate(world, "Firefalls", WorldFaction.Neutral, Rng.Next(1, 4), Rng.Next(1, 4), free, .Peerage))
+
+
+            'generate free peers
+            For n = 1 To 5
+                .Peerage.Add(IsleNoble.Generate(IsleNoble.Rank.Baron, Rng.Next(1, 5), world.Rng))
+            Next
+            For n = 1 To 3
+                .Peerage.Add(IsleNoble.Generate(IsleNoble.Rank.Viscount, Rng.Next(1, 5), world.Rng))
+                .Peerage.Add(IsleNoble.Generate(IsleNoble.Rank.Earl, Rng.Next(1, 5), world.Rng))
+            Next
+            .Peerage.Add(IsleNoble.Generate(IsleNoble.Rank.Marquis, Rng.Next(1, 5), world.Rng))
+            .Peerage.Add(IsleNoble.Generate(IsleNoble.Rank.Duke, Rng.Next(1, 5), world.Rng))
+
 
             'generate basic routes
             'this ensures that all isles are reachable from all other isles, albeit terribly
@@ -72,6 +85,7 @@
                 Next
             Next
 
+
             'wind
             .Wind = .WindChangeChanceBase(.Calendar.Season)
         End With
@@ -79,7 +93,17 @@
     End Function
 
     Public Reputation As New Dictionary(Of IsleFaction, Integer)
-    Public Peerage As New Dictionary(Of IsleNoble.Rank, List(Of IsleNoble))
+    Private Peerage As New List(Of IsleNoble)
+    Public Function GetFreePeers(Optional ByVal minRank As IsleNoble.Rank = Nothing, Optional ByVal maxRank As IsleNoble.Rank = Nothing) As List(Of IsleNoble)
+        Dim total As New List(Of IsleNoble)
+        For Each noble In Peerage
+            If noble.Isle Is Nothing = False Then Continue For
+            If minRank <> Nothing AndAlso noble.Title < minRank Then Continue For
+            If maxRank <> Nothing AndAlso noble.Title > maxRank Then Continue For
+            total.Add(noble)
+        Next
+        Return total
+    End Function
 
 #Region "Tick"
     Public Sub Tick()
