@@ -477,7 +477,7 @@
             'no more damage to treat in damage log
             'check for lingering injuries to treat
             If doctor Is Nothing = False AndAlso DamageSustained > 0 Then
-                Dim heal As Integer = World.Rng.Next(1, 6)
+                Dim heal As Integer = doctor.GetSkillFromRole
                 Report.Add(Name & "'s injuries recover under the ministrations of the doctor. (-" & heal & " damage)", ReportType.Doctor)
                 DamageSustained -= heal
                 If DamageSustained < 0 Then DamageSustained = 0
@@ -490,6 +490,16 @@
             DamageSustained += 5
             If DamageSustained > Health Then Death()
             Exit Sub
+            End if
+        If doctor.Ship Is Nothing = False Then
+            'if doctor is shipdoctor, spend medicine
+            If Ship.CheckAddGood(GoodType.Medicine, -1) = False Then
+                Report.Add(Name & "'s injuries worsen without medicine. (+1 damage)", ReportType.CrewDamage)
+                DamageSustained += 1
+                If DamageSustained > Health Then Death()
+                Exit Sub
+            End If
+            Ship.AddGood(GoodType.Medicine, -1)
         End If
 
         Dim skill As Integer = doctor.GetSkillFromRole

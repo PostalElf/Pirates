@@ -7,11 +7,13 @@
                 Case GoodType.Grapples, GoodType.Grapeshot, GoodType.Shot : Return 0.1
                 Case GoodType.Bullets : Return 0.01
                 Case GoodType.Explosive : Return 0.2
+                Case GoodType.Sparkpowder : Return 0.01
                 Case GoodType.Gold, GoodType.Silver : Return 0.001
                 Case GoodType.Jewellery, GoodType.Cloth, GoodType.Lumber, GoodType.Metal : Return 0.1
                 Case GoodType.Boricus, GoodType.Triaicus, GoodType.Incantus, GoodType.Mordicus : Return 0.01
                 Case GoodType.Rations, GoodType.Water : Return 0.01
                 Case GoodType.Salt, GoodType.Liqour, GoodType.Coffee, GoodType.Spice, GoodType.Tobacco : Return 0.01
+                Case GoodType.Medicine : Return 0.01
                 Case Else : Throw New Exception("Unrecognised goodtype")
             End Select
         End Get
@@ -27,11 +29,13 @@
                 Case GoodType.Grapples, GoodType.Grapeshot, GoodType.Shot : Return 0.1
                 Case GoodType.Bullets : Return 0.01
                 Case GoodType.Explosive : Return 0.2
+                Case GoodType.Sparkpowder : Return 0.01
                 Case GoodType.Gold, GoodType.Silver : Return 0.001
                 Case GoodType.Jewellery, GoodType.Cloth, GoodType.Lumber, GoodType.Metal : Return 1
                 Case GoodType.Boricus, GoodType.Triaicus, GoodType.Incantus, GoodType.Mordicus : Return 0.01
                 Case GoodType.Rations, GoodType.Water : Return 0.01
                 Case GoodType.Salt, GoodType.Liqour, GoodType.Coffee, GoodType.Spice, GoodType.Tobacco : Return 0.01
+                Case GoodType.Medicine : Return 0.01
                 Case Else : Throw New Exception("Unrecognised goodtype")
             End Select
         End Get
@@ -48,6 +52,7 @@
             Case GoodType.Explosive : Return 8.5
             Case GoodType.Grapeshot : Return 7
             Case GoodType.Bullets : Return 0.5
+            Case GoodType.Sparkpowder : Return 2.5
             Case GoodType.Gold : Return 15
             Case GoodType.Silver : Return 10
             Case GoodType.Jewellery : Return 15
@@ -65,6 +70,7 @@
             Case GoodType.Coffee : Return 1.5
             Case GoodType.Spice : Return 4.5
             Case GoodType.Tobacco : Return 1
+            Case GoodType.Medicine : Return 3
             Case Else : Throw New Exception("Goodtype out of range")
         End Select
     End Function

@@ -75,11 +75,17 @@
                     PoliticalStatus = IslePoliticalStatus.Stable
                     If Noble Is Nothing = False Then Noble.Isle = Nothing
                     Noble = PoliticalCandidate
+                    PoliticalCandidate = Nothing
                     Noble.Isle = Me
                     Report.Add(Noble.ToString & " is the new ruler of " & Name & ".", ReportType.PoliticsMain)
                     If Race <> Noble.Race Then
                         Race = Noble.Race
                         Report.Add(Name & " is now a predominantly " & Race.ToString & " stronghold.", ReportType.PoliticsMain)
+                        If GetBuilding("Clinic") = True Then
+                            SetDoctor("Clinic")
+                        ElseIf GetBuilding("Hospital") = True Then
+                            SetDoctor("Hospital")
+                        End If
                     End If
                     If WorldFaction <> Noble.SupportedWorldFaction Then
                         WorldFaction = Noble.SupportedWorldFaction
@@ -293,6 +299,14 @@
         If Buildings.Contains(str) Then Exit Sub
 
         Select Case str
+            Case "Clinic" : SetDoctor(str)
+            Case "Hospital" : If Buildings.Contains("Clinic") Then Buildings.Remove("Clinic") : SetDoctor(str)
+        End Select
+
+        Buildings.Add(str)
+    End Sub
+    Private Sub SetDoctor(ByVal buildingName As String)
+        Select Case buildingName
             Case "Clinic"
                 Doctor = Crew.Generate(Race, World.Rng, CrewSkill.Medicine)
                 Doctor.Role = CrewRole.Doctor
@@ -300,8 +314,6 @@
                 Doctor = Crew.Generate(Race, World.Rng, CrewSkill.Medicine, CrewSkill.Medicine)
                 Doctor.Role = CrewRole.Doctor
         End Select
-
-        Buildings.Add(str)
     End Sub
 #End Region
 
@@ -379,6 +391,7 @@
                 SetSaleGood(GoodType.Coffee, SaleDemand.Rare, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Spice, SaleDemand.Uncommon, SaleDemand.Abundant)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.None)
+                SetSaleGood(GoodType.Medicine, SaleDemand.None, SaleDemand.None)
                 Race = CrewRace.Unrelinquished
                 Noble = IsleNoble.Generate(IsleNoble.Rank.Duke, Race, World.Rng, WorldFaction)
 
@@ -417,6 +430,7 @@
                 SetSaleGood(GoodType.Coffee, SaleDemand.None, SaleDemand.Illegal)
                 SetSaleGood(GoodType.Spice, SaleDemand.None, SaleDemand.Illegal)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.None, SaleDemand.Illegal)
+                SetSaleGood(GoodType.Medicine, SaleDemand.Abundant, SaleDemand.Common)
                 Race = CrewRace.Seatouched
                 Noble = IsleNoble.Generate(IsleNoble.Rank.Duke, Race, World.Rng, WorldFaction)
 
@@ -467,6 +481,7 @@
                 SetSaleGood(GoodType.Coffee, SaleDemand.Rare, SaleDemand.Uncommon)
                 SetSaleGood(GoodType.Spice, SaleDemand.Common, SaleDemand.Rare)
                 SetSaleGood(GoodType.Tobacco, SaleDemand.Common, SaleDemand.Rare)
+                SetSaleGood(GoodType.Medicine, SaleDemand.Abundant, SaleDemand.Common)
                 Race = CrewRace.Seatouched
                 Noble = IsleNoble.Generate(IsleNoble.Rank.Earl, Race, World.Rng, WorldFaction)
 

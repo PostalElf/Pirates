@@ -90,6 +90,9 @@
         damage = New Damage(10, 0, DamageType.Cannon, "God")
         player.AddDamage(damage, ShipQuarter.Fore, 100)
         player.AddDamage(damage.Clone, ShipQuarter.Aft, 100)
+
+        player.AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Apothecary, ShipModule.ModuleQuality.Average, CrewRace.Human))
+        player.AddGood(GoodType.Medicine, 10)
     End Sub
 
     Private Function MainPlayerInput() As Boolean

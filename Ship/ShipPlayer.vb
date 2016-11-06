@@ -517,14 +517,16 @@
             For n = crewlist.Count - 1 To 0 Step -1
                 Dim crew As Crew = crewlist(n)
                 If crew.IsInjured = True Then
-                    'heal
-                    If Isle.Doctor Is Nothing = False Then
-                        If CrewShoreSpend(10, coinSpent) = True Then crew.TickHeal(Isle.Doctor) Else crew.TickHeal(Nothing)
+                    'heal if injured
+                    If Isle.Doctor Is Nothing = False AndAlso CrewShoreSpend(10, coinSpent) = True Then
+                        crew.TickHeal(Isle.Doctor)
                     Else
-                        crew.TickHeal(Nothing)
+                        Dim doctor As Crew = GetBestCrew(Nothing, CrewRole.Doctor)
+                        crew.TickHeal(doctor)
+                        If doctor Is Nothing = False Then doctor.AddSkillXP(CrewSkill.Medicine, 0.5)
                     End If
                 Else
-                    'morale
+                    'morale if uninjuried
                     crew.TickMorale(shoreProvisors)
                 End If
             Next

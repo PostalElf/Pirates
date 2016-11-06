@@ -4,6 +4,7 @@
     Explosive
     Grapeshot
     Bullets
+    Sparkpowder
 
     Gold = 101
     Silver
@@ -24,4 +25,5 @@
     Coffee
     Spice
     Tobacco
+    Medicine
 End Enum
