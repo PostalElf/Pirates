@@ -257,34 +257,68 @@
     End Function
 
     Private Sub TickMarket()
-        For Each gt As GoodType In [Enum].GetValues(GetType(GoodType))
-            'set to min if under min; else add stock to max
-            If SaleGoodQty(gt) < SaleGoodQtyMin(gt) Then
-                SaleGoodQty(gt) = SaleGoodQtyMin(gt)
-            Else
-                Dim prodRange As Range = GetSaleGoodProductionRange(gt)
-                If prodRange <> 0 Then
-                    If (gt = GoodType.Rations OrElse gt = GoodType.Water) Then prodRange *= 2
-                    SaleGoodQty(gt) += prodRange.Roll(World.Rng)
+        If World.Calendar.Day = Calendar.CalendarDay.King Then
+            'refresh market on King's Day
+            For Each gt As GoodType In [Enum].GetValues(GetType(GoodType))
+                'set to min if under min; else add stock to max
+                If SaleGoodQty(gt) < SaleGoodQtyMin(gt) Then
+                    SaleGoodQty(gt) = SaleGoodQtyMin(gt)
+                Else
+                    Dim prodRange As Range = GetSaleGoodProductionRange(gt)
+                    If prodRange <> 0 Then
+                        If (gt = GoodType.Rations OrElse gt = GoodType.Water) Then prodRange *= 2
+                        SaleGoodQty(gt) += prodRange.Roll(World.Rng)
+                        If SaleGoodQty(gt) > SaleGoodQtyMax(gt) Then SaleGoodQty(gt) = SaleGoodQtyMax(gt)
+                    End If
+                End If
+
+                'change price modifier
+                Dim demRange As Range = GetSaleGoodDemandRange(gt)
+                If demRange <> 0 Then
+                    Dim min As Double = 1 + (demRange.Min / 100)
+                    Dim max As Double = 1 + (demRange.Max / 100)
+                    Dim change As Double = (Dev.FateRoll(World.Rng) / 100)
+                    Dim modifier As Double = SaleGoodPriceModifier(gt) + change
+                    If modifier < min Then modifier = min
+                    If modifier > max Then modifier = max
+                    SaleGoodPriceModifier(gt) = modifier
+                End If
+            Next
+
+            If World.ShipPlayer.IsAtSea = False AndAlso World.ShipPlayer.Isle.Equals(Me) Then
+                Report.Add("The markets have restocked.", ReportType.Commerce)
+            End If
+        Else
+            'not King's Day; simulate daily trade at market
+            For Each gt As GoodType In [Enum].GetValues(GetType(GoodType))
+                If World.Rng.Next(1, 5) <= 3 Then
+                    '75% chance per day to lose goods
+                    Dim range As Range
+                    Select Case SaleGoodDemand(gt)
+                        Case SaleDemand.None : Exit Sub
+                        Case SaleDemand.Rare, SaleDemand.Illegal : range = New Range(1, 5)
+                        Case SaleDemand.Uncommon : range = New Range(5, 10)
+                        Case SaleDemand.Common : range = New Range(10, 20)
+                        Case SaleDemand.Abundant : range = New Range(15, 30)
+                    End Select
+                    SaleGoodQty(gt) -= range.Roll(World.Rng)
+                    If SaleGoodQty(gt) < 0 Then SaleGoodQty(gt) = 0
+                    If SaleGoodQty(gt) > SaleGoodQtyMax(gt) Then SaleGoodQty(gt) = SaleGoodQtyMax(gt)
+                Else
+                    '25% chance per day to gain goods
+                    Dim range As Range
+                    Select Case SaleGoodDemand(gt)
+                        Case SaleDemand.None : Exit Sub
+                        Case SaleDemand.Rare, SaleDemand.Illegal : range = New Range(1, 3)
+                        Case SaleDemand.Uncommon : range = New Range(3, 7)
+                        Case SaleDemand.Common : range = New Range(5, 10)
+                        Case SaleDemand.Abundant : range = New Range(5, 15)
+                    End Select
+                    SaleGoodQty(gt) += range.Roll(World.Rng)
+                    If SaleGoodQty(gt) < 0 Then SaleGoodQty(gt) = 0
                     If SaleGoodQty(gt) > SaleGoodQtyMax(gt) Then SaleGoodQty(gt) = SaleGoodQtyMax(gt)
                 End If
-            End If
-
-            'change price modifier
-            Dim demRange As Range = GetSaleGoodDemandRange(gt)
-            If demRange <> 0 Then
-                Dim min As Double = 1 + (demRange.Min / 100)
-                Dim max As Double = 1 + (demRange.Max / 100)
-                Dim change As Double = (Dev.FateRoll(World.Rng) / 100)
-                Dim modifier As Double = SaleGoodPriceModifier(gt) + change
-                If modifier < min Then modifier = min
-                If modifier > max Then modifier = max
-                SaleGoodPriceModifier(gt) = modifier
-            End If
-        Next
-
-        If World.ShipPlayer.IsAtSea = False AndAlso World.ShipPlayer.Isle.Equals(Me) Then
-            Report.Add("The markets have restocked.", ReportType.Commerce)
+            Next
         End If
     End Sub
 #End Region
@@ -319,11 +353,8 @@
 
 #Region "Tick"
     Public Sub Tick()
-        'check for political revolt
         TickPolitics()
-
-        'update market on King's day
-        If World.Calendar.Day = Calendar.CalendarDay.King Then TickMarket()
+        TickMarket()
     End Sub
 #End Region
 
