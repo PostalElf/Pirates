@@ -325,6 +325,8 @@
     Private TravelDestination As Isle = Nothing
     Private TravelProgress As Double = 0
     Private TravelTarget As Double = 0
+    Private CoordsX As Integer
+    Private CoordsY As Integer
     Public ReadOnly Property IsAtSea As Boolean
         Get
             If TravelRoute Is Nothing Then Return False Else Return True
@@ -419,6 +421,7 @@
 
         Dim speed As Double = GetTravelSpeed(world)
         TravelProgress += speed
+        UpdateCoords(speed)
         If TravelProgress >= TravelTarget Then
             Dim navigator As Crew = GetCrew(Nothing, CrewRole.Navigator)
             If navigator.GetSkillFromRole > TravelRoute Then UpgradeRoute(TravelOrigin, TravelDestination)
@@ -430,6 +433,9 @@
             Report.Add(Name & " makes some progress towards " & TravelDestination.Name & " (+" & speed.ToString("0.0") & ").", ReportType.TravelProgress)
         End If
     End Sub
+    Private Sub UpdateCoords(ByVal speed As Double)
+
+    End Sub
     Public Sub Teleport(ByVal target As Isle)
         Isle = target
         TravelRoute = Nothing
@@ -437,6 +443,8 @@
         TravelDestination = Nothing
         TravelProgress = 0
         TravelTarget = 0
+        CoordsX = Isle.X
+        CoordsY = Isle.Y
     End Sub
 #End Region
 
