@@ -58,6 +58,7 @@ Public Enum ReportType
     ShipDeath
     WindMoveToken
     MoveToken
+    Tactic
 
     Politics
     PoliticsMain

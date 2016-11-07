@@ -174,7 +174,7 @@
 
             Dim turn As Boolean = False
             If IgnoresJustTurned = False AndAlso (fpReference.ParentMove.Contains(BattleMove.TurnLeft) OrElse fpReference.ParentMove.Contains(BattleMove.TurnRight)) Then turn = True
-            Dim availableMovesTrimmed As List(Of MoveToken) = TrimAvailableMoves(_AvailableMoves, turn, Waterline)
+            Dim availableMovesTrimmed As List(Of MoveToken) = TrimAvailableMoves(_AvailableMoves, turn, Waterline, GetBlockedMoves)
             For Each mArray As MoveToken In availableMovesTrimmed
                 Dim secondPosition As BattlePosition() = fpReference.Square.GetPathables(fpReference.Facing, mArray)
                 secondPositions(firstPosition).Add(secondPosition)

@@ -108,6 +108,32 @@
     End Sub
 #End Region
 
+#Region "Buffs"
+    Private Buffs As New List(Of ShipBuff)
+    Public Function GetBuff(ByVal name As String) As Boolean
+        For Each b In Buffs
+            If b.Name = name Then Return True
+        Next
+        Return False
+    End Function
+    Public Sub AddBuff(ByVal buff As ShipBuff)
+        For Each b In Buffs
+            If b = buff Then b += buff.duration : Exit Sub
+        Next
+        Buffs.Add(buff)
+    End Sub
+    Private Sub BuffTick()
+        Dim deadBuffs As New List(Of ShipBuff)
+        For Each buff In Buffs
+            buff -= 1
+            If buff = 0 Then deadBuffs.Add(buff)
+        Next
+        For Each buff In deadBuffs
+            Buffs.Remove(buff)
+        Next
+    End Sub
+#End Region
+
 #Region "Movement"
     Protected JustTurned As Boolean = False
     Protected _AvailableMoves As New List(Of MoveToken)
@@ -117,12 +143,35 @@
             Dim wline As ShipWaterline
             If IgnoresJustTurned = True Then turn = False Else turn = JustTurned
             If IgnoresWaterline = True Then wline = ShipWaterline.Unladen Else wline = Waterline
-            Return TrimAvailableMoves(_AvailableMoves, turn, wline)
+            Return TrimAvailableMoves(_AvailableMoves, turn, wline, GetBlockedMoves)
         End Get
     End Property
-    Protected Shared Function TrimAvailableMoves(ByVal targetList As List(Of MoveToken), ByVal aJustTurned As Boolean, ByVal aWaterline As ShipWaterline) As List(Of MoveToken)
+    Private BlockedMoves As New Dictionary(Of MoveToken, Integer)
+    Public Function GetBlockedMoves() As List(Of MoveToken)
+        Dim total As New List(Of MoveToken)
+        For Each k In BlockedMoves.Keys
+            total.Add(k)
+        Next
+        Return total
+    End Function
+    Public Sub AddBlockedMove(ByVal movetoken As MoveToken, ByVal duration As Integer)
+        If BlockedMoves.Keys.Contains(movetoken) Then BlockedMoves.Add(movetoken, 0)
+        BlockedMoves(movetoken) += duration
+    End Sub
+    Private Sub BlockedMoveTick()
+        Dim killedMoves As New List(Of MoveToken)
+        For Each k In BlockedMoves.Keys
+            BlockedMoves(k) -= 1
+            If BlockedMoves(k) = 0 Then killedMoves.Add(k)
+        Next
+        For Each mt In killedMoves
+            BlockedMoves.Remove(mt)
+        Next
+    End Sub
+    Protected Shared Function TrimAvailableMoves(ByVal targetList As List(Of MoveToken), ByVal aJustTurned As Boolean, ByVal aWaterline As ShipWaterline, ByVal blockedMoves As List(Of MoveToken)) As List(Of MoveToken)
         Dim total As New List(Of MoveToken)
         For Each moves In targetList
+            If blockedMoves.Contains(moves) Then Continue For
             If aJustTurned = True OrElse aWaterline = ShipWaterline.Overladen Then
                 If moves.Length = 1 Then total.Add(moves)
             Else
@@ -554,6 +603,15 @@
         Next
         Return bestCrew
     End Function
+    Public Function GetCrewTalents() As List(Of CrewTalent)
+        Dim total As New List(Of CrewTalent)
+        For Each c In GetCrews(Nothing, Nothing)
+            For Each t In c.GetTalents
+                If total.Contains(t) = False Then total.Add(t)
+            Next
+        Next
+        Return total
+    End Function
 
     Public Mascot As ShipMascot
 #End Region
@@ -720,6 +778,8 @@
             Next
             JustFired(q) = False
         Next
+        BlockedMoveTick()
+        BuffTick()
     End Sub
     Public Sub EndCombat()
         InCombat = False

@@ -105,8 +105,7 @@
 
         'add movetokens
         For Each newMoveToken In newMoves
-            MoveTokens.Add(newMoveToken)
-            Report.Add(Name & " gained a new sailing token: " & newMoveToken.ToString, ReportType.MoveToken)
+            AddMoveToken(newMoveToken)
         Next
     End Sub
     Private Sub AddMoveTokenProgress(ByVal isAdvanced As Boolean, ByVal q As ShipQuarter, ByVal value As Integer, ByRef newMoves As List(Of MoveToken))
@@ -126,6 +125,10 @@
             Dim newMoveToken As MoveToken = ConvertQuarterToMoveToken(q, isAdvanced)
             If newMoveToken Is Nothing = False Then newMoves.Add(newMoveToken)
         End While
+    End Sub
+    Private Sub AddMoveToken(ByVal newMoveToken As MoveToken)
+        MoveTokens.Add(newMoveToken)
+        Report.Add(Name & " gained a new sailing token: " & newMoveToken.ToString, ReportType.MoveToken)
     End Sub
     Private Function ConvertQuarterToMoveToken(ByVal q As ShipQuarter, ByVal isAdvanced As Boolean) As MoveToken
         Dim newMoveToken As MoveToken = Nothing
@@ -205,7 +208,7 @@
     End Sub
     Public Overloads Sub CombatTick()
         MyBase.TickCombat()
-
+        GainTactics()
         GainMoveTokens()
         RunCommands()
     End Sub
@@ -220,6 +223,96 @@
         For Each Crew In GetCrews(Nothing, Nothing)
             MoveCrewToStation(Crew)
         Next
+    End Sub
+
+    Private Tactics As New List(Of String)
+    Private TacticProgress As Integer = 0
+    Private TacticThreshold As Integer = 25
+    Public Function TacticConsoleReport() As String
+        Return TacticProgress & "/" & TacticThreshold
+    End Function
+    Public Function GetTactics() As List(Of String)
+        Return Tactics
+    End Function
+    Private Sub GainTactics()
+        TacticProgress += GetLeadership()
+        While TacticProgress >= TacticThreshold
+            TacticProgress -= TacticThreshold
+            Dim tactic As String = GenerateTactic()
+            Tactics.Add(tactic)
+            Report.Add(Name & " has gained a new tactic: " & tactic, ReportType.Tactic)
+        End While
+    End Sub
+    Private Function GenerateTactic() As String
+        Dim talents As List(Of CrewTalent) = GetCrewTalents()
+        Dim all As New List(Of String)
+        With all
+            .Add("Drop Port Anchor")
+            .Add("Drop Starboard Anchor")
+            .Add("Encourage Crew")
+
+            Dim crew As Crew = GetCrew(Nothing, CrewRole.Alchemist)
+            If crew Is Nothing = False Then
+                If crew.GetSkillFromRole >= 3 Then .Add("Blinding Flare")
+            End If
+            crew = GetCrew(Nothing, CrewRole.Helmsman)
+            If crew Is Nothing = False Then
+                If crew.GetSkillFromRole >= 3 Then .Add("Exceptional Steering")
+            End If
+
+            If talents.Contains(CrewTalent.Windtouched) OrElse talents.Contains(CrewTalent.Windsinger) Then .Add("Windbound")
+            If talents.Contains(CrewTalent.Windsinger) Then .Add("Windsung")
+            If talents.Contains(CrewTalent.Deathkissed) OrElse talents.Contains(CrewTalent.Necrologist) Then .Add("Still the Winds")
+            If talents.Contains(CrewTalent.Necrologist) Then .Add("Death's Touch")
+            If talents.Contains(CrewTalent.Saltblooded) OrElse talents.Contains(CrewTalent.Seapriest) Then .Add("Awaken the Seas")
+            If talents.Contains(CrewTalent.Seapriest) Then .Add("Storm's Call")
+            If talents.Contains(CrewTalent.Flamelicked) OrElse talents.Contains(CrewTalent.Firemage) Then .Add("Artificery")
+            If talents.Contains(CrewTalent.Firemage) Then .Add("Flamecurse")
+        End With
+        Return Dev.GetRandom(Of String)(all, World.Rng)
+    End Function
+    Public Sub ExecuteTactic(ByVal tactic As String)
+        If BattleSquare Is Nothing Then Exit Sub
+
+        Select Case tactic
+            Case "Drop Port Anchor"
+                AddMoveToken(New MoveToken({BattleMove.TurnLeft}))
+            Case "Drop Starboard Anchor"
+                AddMoveToken(New MoveToken({BattleMove.TurnRight}))
+            Case "Encourage Crew"
+                AddBuff(New ShipBuff("Emboldened Crew", 6))
+            Case "Blinding Flare"
+                Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
+                Dim q As ShipQuarter = Module1.GetShipQuarter()
+                'TODO
+            Case "Exceptional Steering"
+                AddMoveToken(New MoveToken({BattleMove.Forward, BattleMove.TurnLeft}))
+                AddMoveToken(New MoveToken({BattleMove.Forward, BattleMove.TurnRight}))
+            Case "Windbound"
+                AddMoveToken(New MoveToken({BattleMove.Forward, BattleMove.Forward}))
+            Case "Windsung"
+                AddMoveToken(New MoveToken({BattleMove.Forward, BattleMove.Forward}))
+                AddMoveToken(New MoveToken({BattleMove.Forward, BattleMove.Forward}))
+            Case "Still the Winds"
+                Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
+                target.AddBlockedMove(New MoveToken({BattleMove.Forward}), 6)
+            Case "Death's Touch"
+                Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
+                For Each q In [Enum].GetValues(GetType(ShipQuarter))
+                    target.AddDamage(New Damage(0, 15, DamageType.Necromancy, Name), q, 100)
+                Next
+            Case "Awaken the Seas"
+                Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
+                Dim q As ShipQuarter = Module1.GetShipQuarter()
+                target.AddDamage(New Damage(0, 20, DamageType.Ramming, "Rogue Wave"), q, 100)
+            Case "Storm's Call"
+                Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
+                For Each q In [Enum].GetValues(GetType(ShipQuarter))
+                    target.AddDamage(New Damage(20, 10, DamageType.Ramming, Name), q, 100)
+                Next
+            Case "Artificery"
+            Case "Flamecurse"
+        End Select
     End Sub
 #End Region
 
@@ -576,6 +669,14 @@
                     Console.WriteLine()
                 Next
             Next
+            Console.Write(s & Dev.vbTab("Tactics:", t))
+            Console.Write("[")
+            For p = 1 To TacticThreshold
+                If p <= TacticProgress Then Console.Write("*") Else Console.Write("-")
+            Next
+            Console.Write("]  ")
+            Console.Write("x" & Tactics.Count)
+            Console.WriteLine()
         Else
             Console.WriteLine(Dev.vbSpace(1) & "Credit")
             For Each c As WorldFaction In [Enum].GetValues(GetType(WorldFaction))

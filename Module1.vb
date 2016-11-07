@@ -170,6 +170,14 @@
         Dim AITurn As Boolean = BattlePlayerInput(playerShip, battlefield)
         battlefield.CombatTick(AITurn)
     End Sub
+    Public Function GetBattleTarget(ByVal battlefield As Battlefield) As Ship
+        Dim combatants As List(Of Ship) = battlefield.GetCombatants
+        combatants.Remove(world.ShipPlayer)
+        Return Menu.getListChoice(Of Ship)(combatants, 0, "Select a target:")
+    End Function
+    Public Function GetShipQuarter() As ShipQuarter
+        Return Menu.getListChoice(Of ShipQuarter)(quarters, 0)
+    End Function
     Private Function BattlePlayerInput(ByRef ship As ShipPlayer, ByRef battlefield As Battlefield) As Boolean
         'return true when player ends turn
 
@@ -187,6 +195,7 @@
             Case ConsoleKey.NumPad6 : targetMove = New MoveToken({BattleMove.TurnRight})
             Case ConsoleKey.Spacebar : Return True
             Case ConsoleKey.NumPad2, ConsoleKey.OemComma : targetMove = New MoveToken({BattleMove.Backwards})
+            Case ConsoleKey.T : Return ExecuteTactic(ship, battlefield)
             Case ConsoleKey.W : ViewWeapons(ship) : Return False
             Case ConsoleKey.V : ViewBattlefield(battlefield) : Return False
             Case ConsoleKey.C : ManageCrews(ship) : Return False
@@ -206,11 +215,36 @@
         battlefield.ConsoleReportCombatants()
         Console.ReadKey()
     End Sub
+    Private Function ExecuteTactic(ByRef ship As ShipPlayer, ByRef battlefield As Battlefield) As Boolean
+        'return true if tactic ends turn
+        'currently nothing ends turn so...
+
+        Console.WriteLine()
+        Dim tactics As List(Of String) = ship.GetTactics
+        If tactics.Count = 0 Then
+            Console.WriteLine("You currently have no tactics.  (" & ship.TacticConsoleReport & ")")
+            Console.ReadKey()
+            Return False
+        End If
+        Dim tactic As String = Menu.getListChoice(Of String)(tactics, 0)
+        ship.executeTactic(tactic)
+        Return False
+    End Function
+    Private Sub GetPlayerAttack(ByRef ship As Ship, ByVal quarter As ShipQuarter)
+        Dim weaponList As List(Of ShipWeapon) = ship.GetWeapons(quarter)
+        If weaponList.Count = 0 Then Exit Sub
+
+        Dim target As ShipWeapon = Nothing
+        If weaponList.Count = 1 Then target = weaponList(0) Else target = Menu.getListChoice(weaponList, 0, vbCrLf & "Select weapon:")
+        If target Is Nothing Then Exit Sub
+        ship.Attack(target)
+    End Sub
+
     Private Sub SetCourse(ByVal ship As ShipPlayer)
         Dim routes As List(Of Route) = ship.GetRoutesFromLocation
         Dim destinations As New List(Of Isle)
         For Each r In routes
-            destinations.Add(r - ship.isle)
+            destinations.Add(r - ship.Isle)
         Next
 
         Dim targetDestination As Isle = Menu.getListChoice(Of Isle)(destinations, 0, "Select a destination:")
@@ -568,13 +602,4 @@
         Dim target As Crew = Menu.getListChoice(Of Crew)(crews, 0, "Select a crew member:")
         Return target
     End Function
-    Private Sub GetPlayerAttack(ByRef ship As Ship, ByVal quarter As ShipQuarter)
-        Dim weaponList As List(Of ShipWeapon) = ship.GetWeapons(quarter)
-        If weaponList.Count = 0 Then Exit Sub
-
-        Dim target As ShipWeapon = Nothing
-        If weaponList.Count = 1 Then target = weaponList(0) Else target = Menu.getListChoice(weaponList, 0, vbCrLf & "Select weapon:")
-        If target Is Nothing Then Exit Sub
-        ship.Attack(target)
-    End Sub
 End Module

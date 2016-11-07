@@ -389,6 +389,9 @@
     End Function
 
     Private Talents As New List(Of CrewTalent)
+    Public Function GetTalents() As List(Of CrewTalent)
+        Return Talents
+    End Function
     Public Function GetTalent(ByVal t As CrewTalent) As Boolean
         Return Talents.Contains(t)
     End Function

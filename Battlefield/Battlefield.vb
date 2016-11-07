@@ -117,6 +117,9 @@
     Private Combatants As New List(Of Ship)
     Public PlayerShip As ShipPlayer
     Private Melees As New List(Of Melee)
+    Public Function GetCombatants() As List(Of Ship)
+        Return Combatants
+    End Function
     Public Sub AddCombatant(ByRef combatant As Ship, ByVal x As Integer, ByVal y As Integer, ByVal facing As BattleDirection)
         AddCombatant(combatant, Square(x, y), facing)
     End Sub
