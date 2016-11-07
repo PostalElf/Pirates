@@ -356,27 +356,20 @@
     Private Sub ManageCrews(ByVal ship As ShipPlayer)
         Dim t As Integer = 12
         Dim s As String = Dev.vbSpace(1)
-        Dim quarters As New List(Of ShipQuarter)([Enum].GetValues(GetType(ShipQuarter)))
         Console.WriteLine()
 
-        For Each role In [Enum].GetValues(GetType(CrewRole))
-            Dim crews As New List(Of Crew)
-            For Each q In quarters
-                Dim cList As List(Of Crew) = ship.GetCrews(q, role)
-                If cList.Count > 0 Then crews.AddRange(cList)
+        For Each q In quarters
+            Dim crews = ship.GetCrews(q, Nothing)
+            If crews.Count = 0 Then Continue For
+            Console.WriteLine(q.ToString & ":")
+            For Each c In crews
+                Console.WriteLine(s & Dev.vbTab(c.Name, 30) & " Skill: " & c.GetSkillFromRole)
             Next
-
-            If crews.Count > 0 Then
-                Console.WriteLine(role.ToString & ":")
-                For Each Crew In crews
-                    Console.WriteLine(s & Dev.vbTab(Crew.ShipQuarter.ToString & ":", t) & Crew.Name & " (" & Crew.GetSkillFromRole() & ")")
-                Next
-                Console.WriteLine()
-            End If
+            Console.WriteLine()
         Next
         Console.WriteLine()
 
-        Dim target As Crew = GetCrew(ship)
+        Dim target As Crew = GetCrewByName(ship)
         If target Is Nothing Then Exit Sub
         Console.WriteLine()
         target.ConsoleReport()
@@ -559,13 +552,20 @@
         Else : Exit Sub
         End If
     End Sub
-    Private Function GetCrew(ByRef ship As ShipPlayer) As Crew
+    Private Function GetCrewByRole(ByRef ship As ShipPlayer) As Crew
         Dim roles As New List(Of CrewRole)([Enum].GetValues(GetType(CrewRole)))
         Dim role As CrewRole = Menu.getListChoice(Of CrewRole)(roles, 0, "Select crew role:")
 
         Dim choiceList As List(Of Crew) = ship.GetCrews(Nothing, role)
         If choiceList.Count = 1 Then Return choiceList(0)
         Dim target As Crew = Menu.getListChoice(choiceList, 0, "Which crew member?")
+        Return target
+    End Function
+    Private Function GetCrewByName(ByVal ship As ShipPlayer) As Crew
+        Dim crews As List(Of Crew) = ship.GetCrews(Nothing, Nothing)
+        If crews.Count = 0 Then Throw New Exception("No crew found.")
+        If crews.Count = 1 Then Return crews(0)
+        Dim target As Crew = Menu.getListChoice(Of Crew)(crews, 0, "Select a crew member:")
         Return target
     End Function
     Private Sub GetPlayerAttack(ByRef ship As Ship, ByVal quarter As ShipQuarter)

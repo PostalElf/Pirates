@@ -8,7 +8,7 @@
     Public Shared Function Generate(ByVal aRace As CrewRace, ByVal rng As Random, Optional ByVal skillMain As CrewSkill = Nothing, Optional ByVal skillSub As CrewSkill = Nothing) As Crew
         Dim crew As New Crew
         With crew
-            .Name = GenerateName(aRace, rng)
+            ._Name = GenerateName(aRace, rng)
             .Race = aRace
             .Health = 100
             .Morale = 100
@@ -74,7 +74,20 @@
         Return Name
     End Function
 
-    Public Name As String
+    Private _Name As String
+    Public Property Name As String
+        Get
+            If Title <> "" Then Return Title & " " & _Name Else Return _Name
+        End Get
+        Set(ByVal value As String)
+            _Name = value
+        End Set
+    End Property
+    Private ReadOnly Property Title As String
+        Get
+            If Role = Nothing Then Return "" Else Return Role.ToString
+        End Get
+    End Property
     Public Race As CrewRace
 
 #Region "Bonuses"
@@ -404,18 +417,18 @@
             Dim defSkill As Integer = target.GetSkill(skill) + weapon.Accuracy + Dev.FateRoll(World.Rng)
             If attSkill > defSkill Then
                 'success, damage
-                Dim damage As New Damage(0, weapon.Damage, weapon.DamageType, Name & "'s " & weapon.Name)
+                Dim damage As New Damage(0, weapon.Damage, weapon.DamageType, _Name & "'s " & weapon.Name)
                 target.Damage(damage)
                 weapon.UseWeapon(ship)
             ElseIf attSkill = defSkill Then
                 'glancing hit
                 Dim dmgValue As Integer = Dev.Constrain(weapon.Damage / 2, 1)
-                Dim damage As New Damage(0, dmgValue, weapon.DamageType, Name & "'s " & weapon.Name)
+                Dim damage As New Damage(0, dmgValue, weapon.DamageType, _Name & "'s " & weapon.Name)
                 target.Damage(damage)
                 weapon.UseWeapon(Ship)
             Else
                 'miss
-                Report.Add("[" & target.Ship.ID & "] " & target.Name & " fended off " & Name & "'s " & weapon.Name & ".", ReportType.CrewAttack)
+                Report.Add("[" & target.Ship.ID & "] " & target._Name & " fended off " & _Name & "'s " & weapon.Name & ".", ReportType.CrewAttack)
             End If
 
             'add xp
@@ -456,7 +469,7 @@
         DamageLog.Add(damage)
         Dim repType As ReportType
         If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDamage Else repType = ReportType.EnemyCrewDamage
-        Report.Add("[" & Ship.ID & "] " & Name & " was struck for " & damage.CrewDamage & " damage by " & damage.Sender & ".", repType)
+        Report.Add("[" & Ship.ID & "] " & _Name & " was struck for " & damage.CrewDamage & " damage by " & damage.Sender & ".", repType)
 
         If DamageSustained >= Health Then Death()
     End Sub
@@ -472,7 +485,7 @@
             'check for lingering injuries to treat
             If doctor Is Nothing = False AndAlso DamageSustained > 0 Then
                 Dim heal As Integer = doctor.GetSkillFromRole
-                Report.Add(Name & "'s injuries recover under the ministrations of the doctor. (-" & heal & " damage)", ReportType.Doctor)
+                Report.Add(_Name & "'s injuries recover under the ministrations of the doctor. (-" & heal & " damage)", ReportType.Doctor)
                 DamageSustained -= heal
                 If DamageSustained < 0 Then DamageSustained = 0
             End If
@@ -480,15 +493,15 @@
         End If
 
         If doctor Is Nothing Then
-            Report.Add(Name & "'s injuries worsen without a doctor. (+5 damage)", ReportType.CrewDamage)
+            Report.Add(_Name & "'s injuries worsen without a doctor. (+5 damage)", ReportType.CrewDamage)
             DamageSustained += 5
             If DamageSustained > Health Then Death()
             Exit Sub
-            End if
+        End If
         If doctor.Ship Is Nothing = False Then
             'if doctor is shipdoctor, spend medicine
             If Ship.CheckAddGood(GoodType.Medicine, -1) = False Then
-                Report.Add(Name & "'s injuries worsen without medicine. (+1 damage)", ReportType.CrewDamage)
+                Report.Add(_Name & "'s injuries worsen without medicine. (+1 damage)", ReportType.CrewDamage)
                 DamageSustained += 1
                 If DamageSustained > Health Then Death()
                 Exit Sub
@@ -515,12 +528,12 @@
             Dim heal As Integer = currentDamage.CrewDamage / 2
             DamageLog.Remove(currentDamage)
             DamageSustained -= heal
-            Report.Add("The doctor successfully treated " & Name & "'s worst injuries. (-" & heal & " damage)", ReportType.Doctor)
+            Report.Add("The doctor successfully treated " & _Name & "'s worst injuries. (-" & heal & " damage)", ReportType.Doctor)
         ElseIf skill = difficulty Then
             Dim heal As Integer = currentDamage.CrewDamage / 2
             DamageLog.Remove(currentDamage)
             DamageSustained -= heal
-            Report.Add("The doctor treated " & Name & "'s worst injuries with some difficulty. (-" & heal & " damage)", ReportType.Doctor)
+            Report.Add("The doctor treated " & _Name & "'s worst injuries with some difficulty. (-" & heal & " damage)", ReportType.Doctor)
 
             If Me.Race <> CrewRace.Unrelinquished Then
                 Dim scarRollBonus As Integer = 0
@@ -528,21 +541,21 @@
                 Dim scar As CrewBonus = GenerateScar(currentDamage, scarRollBonus)
                 If scar Is Nothing Then Exit Sub
                 AddBonus("scar", scar)
-                Report.Add(Name & " gains a new scar: " & scar.Name, ReportType.Doctor)
+                Report.Add(_Name & " gains a new scar: " & scar.Name, ReportType.Doctor)
 
                 'check for old scars and overwrite if necessary
                 If scar.Slot <> Nothing Then
                     Dim oldScar As CrewBonus = GetSlot(GetBonusList("scar"), scar.Slot)
                     If oldScar Is Nothing = False Then
                         RemoveBonus("scar", scar.Slot)
-                        Report.Add(Name & "'s new scar replaces an old scar: " & oldScar.Name, ReportType.Doctor)
+                        Report.Add(_Name & "'s new scar replaces an old scar: " & oldScar.Name, ReportType.Doctor)
                     End If
                 End If
             End If
         Else
             Dim dmg As Integer = World.Rng.Next(1, 6)
             If GetTalent(CrewTalent.Tough) = True Then dmg = 1
-            Report.Add("The doctor failed to treat " & Name & "'s worst injuries. (+" & dmg & " damage)", ReportType.Doctor)
+            Report.Add("The doctor failed to treat " & _Name & "'s worst injuries. (+" & dmg & " damage)", ReportType.Doctor)
             DamageSustained += dmg
             If DamageSustained > Health Then Death()
         End If
@@ -558,7 +571,7 @@
     Private Sub Death()
         Dim repType As ReportType
         If TypeOf Ship Is ShipPlayer Then repType = ReportType.CrewDeath Else repType = ReportType.EnemyCrewDeath
-        Report.Add("[" & Ship.ID & "] " & Name & " has perished!", repType)
+        Report.Add("[" & Ship.ID & "] " & _Name & " has perished!", repType)
         If Ship.BattleSquare Is Nothing = False AndAlso Ship.BattleSquare.Battlefield Is Nothing = False Then Ship.BattleSquare.Battlefield.AddDead(Me) Else Ship.RemoveCrew(Me)
     End Sub
 #End Region
@@ -655,7 +668,7 @@
     End Sub
     Private Function ConsumeGoods(ByVal goodType As GoodType, ByVal qty As Integer, ByVal positiveChange As Integer, ByVal negativeChange As Integer, ByVal shoreProvisors As List(Of GoodType)) As Integer
         If Not (TypeOf Ship Is ShipPlayer) Then Return 0
-        If shoreProvisors Is Nothing = False andalso shoreProvisors.Contains(goodType) Then Return positiveChange
+        If shoreProvisors Is Nothing = False AndAlso shoreProvisors.Contains(goodType) Then Return positiveChange
 
         Dim ps As ShipPlayer = CType(Ship, ShipPlayer)
         Dim good As Good = good.Generate(goodType, -qty)
@@ -707,7 +720,7 @@
         Dim ss As String = Dev.vbSpace(2)
         Dim t As Integer = 13
 
-        Console.WriteLine(Name)
+        Console.WriteLine(_Name)
         Console.WriteLine(s & "Race:   " & Race.ToString)
         Console.WriteLine(s & "Health: " & Health - DamageSustained & "/" & Health)
         Console.WriteLine(s & "Morale: " & Morale & "/100 (" & MoraleLevel.ToString & ")")
