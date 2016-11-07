@@ -753,11 +753,12 @@
 
         If damage.ShipDamage > 0 Then
             Report.Add(Name & " " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.", ReportType.ShipDamage)
-            DamageSustained(targetQuarter) += damage.ShipDamage
-            DamageLog(targetQuarter).Add(damage)
             If damage.Type = DamageType.Fire Then
                 FireProgress(targetQuarter) += damage.ShipDamage
                 Report.Add(Name & "'s " & targetQuarter.ToString & " is on fire! (" & FireProgress(targetQuarter) & "%)", ReportType.FireDamage)
+            Else
+                DamageSustained(targetQuarter) += damage.ShipDamage
+                DamageLog(targetQuarter).Add(damage)
             End If
         End If
         If damage.CrewDamage > 0 Then
@@ -810,6 +811,9 @@
     End Sub
     Public Sub EndCombat()
         InCombat = False
+        For Each q In [Enum].GetValues(GetType(ShipQuarter))
+            FireProgress(q) = 0
+        Next
     End Sub
 #End Region
 
