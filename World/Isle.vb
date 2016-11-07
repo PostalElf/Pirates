@@ -157,11 +157,13 @@
         While ReputationXP(fac) > ReputationThresholds(level)
             level += 1
             Reputation(fac) += 1
+            World.Reputation(fac) += 1
         End While
         If level > 0 Then
             While ReputationXP(fac) < ReputationThresholds(level)
                 level -= 1
                 Reputation(fac) -= 1
+                World.Reputation(fac) -= 1
             End While
         End If
     End Sub
@@ -229,6 +231,7 @@
         ship.AddCoins(WorldFaction, -totalCost)
         SaleGoodQty(gt) -= value
         ship.AddGood(gt, value)
+        If Reputation(IsleFaction.Merchant) <= 3 Then AddReputationXP(IsleFaction.Merchant, 0.01 * totalCost)
     End Sub
     Public Function CheckBuyGood(ByVal gt As GoodType, ByVal value As Integer, ByRef ship As ShipPlayer) As Boolean
         If SaleGoodDemand(gt) = SaleDemand.None Then Return False
@@ -244,6 +247,7 @@
         ship.AddGood(gt, -value)
         SaleGoodQty(gt) += value
         ship.AddCoins(WorldFaction, totalCost)
+        If Reputation(IsleFaction.Merchant) <= 3 Then AddReputationXP(IsleFaction.Merchant, 0.01 * totalCost)
     End Sub
     Private Shared Function ConvertDemandToPricePercentage(ByVal demand As SaleDemand, ByRef rng As Random) As Integer
         Select Case demand

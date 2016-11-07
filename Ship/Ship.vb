@@ -506,8 +506,6 @@
     End Sub
     Public Function GetLeadership() As Integer
         'captain leadership x2, firstmate just by itself
-        'leadership bonus to all skills = leadership / 5, rounded down
-        'on average you need at least captain leadership 2 + firstmate leadership 1 for first bonus
 
         Dim leadership As Integer = 0
         Dim captain As Crew = GetCrew(Nothing, CrewRole.Captain)
@@ -756,7 +754,7 @@
             Console.Write(" - Command " & commandCount)
             Console.WriteLine()
         Next
-        Console.WriteLine(t & Dev.vbTab("Leadership:", s) & GetLeadership() & " (+" & Math.Floor(GetLeadership() / 5) & ")")
+        Console.WriteLine(t & Dev.vbTab("Leadership:", s) & GetLeadership())
         Console.WriteLine(t & Dev.vbTab("Hullspace:", s) & HullSpaceUsed & "/" & HullSpaceMax)
         Console.Write(t & Dev.vbTab("Tonnage:", s) & Tonnage.ToString("0.0") & "/" & TonnageMax)
         Dim ratio As Double = Tonnage / TonnageMax * 100

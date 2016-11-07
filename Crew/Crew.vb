@@ -302,12 +302,6 @@
             If total = 0 Then total = 1
         End If
 
-        'get leadership bonus
-        If cs <> CrewSkill.Leadership Then
-            Dim leadership As Integer = Ship.GetLeadership
-            total += Math.Floor(leadership / 5)
-        End If
-
         Return total
     End Function
     Private Function GetBestSkill(ByVal meleeOnly As Boolean) As CrewSkill
