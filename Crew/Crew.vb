@@ -85,7 +85,16 @@
     End Property
     Private ReadOnly Property Title As String
         Get
-            If Role = Nothing Then Return "" Else Return Role.ToString
+            If Role = Nothing Then Return ""
+            Select Case Role
+                Case CrewRole.Captain : Return "Cpt."
+                Case CrewRole.FirstMate : Return "Bosun"
+                Case CrewRole.Sailor : Return "Seaman"
+                Case CrewRole.Doctor : Return "Dr."
+                Case CrewRole.Alchemist : Return "Hon."
+                Case CrewRole.Navigator : Return "Nav."
+                Case Else : Return Role.ToString
+            End Select
         End Get
     End Property
     Public Race As CrewRace
