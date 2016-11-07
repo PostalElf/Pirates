@@ -95,6 +95,7 @@
     <Compile Include="Goods\GoodType.vb" />
     <Compile Include="Report.vb" />
     <Compile Include="Goods\SaleDemand.vb" />
+    <Compile Include="Ship\Derivatives\ShipBuff.vb" />
     <Compile Include="World\IsleNoble.vb" />
     <Compile Include="World\IslePoliticalStatus.vb" />
     <Compile Include="World\WorldFaction.vb" />

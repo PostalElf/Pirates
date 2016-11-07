@@ -54,11 +54,13 @@ Public Enum ReportType
 
     PlayerShipAttack
     EnemyShipAttack
+    FireDamage
     ShipDamage
     ShipDeath
     WindMoveToken
     MoveToken
     Tactic
+    Buff
 
     Politics
     PoliticsMain

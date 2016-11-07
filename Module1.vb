@@ -93,6 +93,8 @@
 
         player.AddModule(ShipQuarter.Fore, ShipModule.Generate(ShipModule.ModuleType.Apothecary, ShipModule.ModuleQuality.Average, CrewRace.Human))
         player.AddGood(GoodType.Medicine, 10)
+        player.AddWeapon(ShipQuarter.Port, ShipWeapon.Generate("firecannon"))
+        player.AddGood(GoodType.Explosive, 10)
     End Sub
 
     Private Function MainPlayerInput() As Boolean

@@ -311,7 +311,12 @@
                     target.AddDamage(New Damage(20, 10, DamageType.Ramming, Name), q, 100)
                 Next
             Case "Artificery"
+                AddBuff(New ShipBuff("Artificery", 6))
             Case "Flamecurse"
+                Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
+                For Each q In [Enum].GetValues(GetType(ShipQuarter))
+                    'TODO
+                Next
         End Select
     End Sub
 #End Region

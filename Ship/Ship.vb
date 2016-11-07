@@ -22,6 +22,7 @@
             DamageLog.Add(quarter, New List(Of Damage))
             DamageSustained.Add(quarter, 0)
             HullPoints.Add(quarter, 100)
+            FireProgress.Add(quarter, 0)
             Crews.Add(quarter, New List(Of Crew))
             Modules.Add(quarter, New List(Of ShipModule))
             JustFired.Add(quarter, False)
@@ -121,6 +122,7 @@
             If b = buff Then b += buff.duration : Exit Sub
         Next
         Buffs.Add(buff)
+        Report.Add(Name & " has gained a new effect: " & buff.Name, ReportType.Buff)
     End Sub
     Private Sub BuffTick()
         Dim deadBuffs As New List(Of ShipBuff)
@@ -720,12 +722,32 @@
         Return Nothing
     End Function
 
+
     Public InCombat As Boolean = False
     Public HasHealed As Boolean = False
     Public Property InMelee As Boolean = False Implements MeleeHost.InMelee
     Private DamageSustained As New Dictionary(Of ShipQuarter, Integer)
     Protected HullPoints As New Dictionary(Of ShipQuarter, Integer)
     Private DamageLog As New Dictionary(Of ShipQuarter, List(Of Damage))
+    Private FireProgress As New Dictionary(Of ShipQuarter, Integer)
+    Private Sub FireTick()
+        For Each q As ShipQuarter In [Enum].GetValues(GetType(ShipQuarter))
+            If FireProgress(q) > 0 Then
+                Dim progress As Integer = Math.Ceiling(FireProgress(q) / 10)
+                If progress = 0 Then progress = 1
+                AddDamage(New Damage(progress, 0, DamageType.Fire, "Fire"), q, 100)
+
+                Dim crewDamage As Integer = 0
+                Select Case FireProgress(q)
+                    Case Is >= 100 : crewDamage = 20
+                    Case Is >= 75 : crewDamage = 15
+                    Case Is >= 50 : crewDamage = 10
+                    Case Is >= 25 : crewDamage = 5
+                End Select
+                If crewDamage > 0 Then AddDamage(New Damage(0, crewDamage, DamageType.Fire, "Fire"), q, 100)
+            End If
+        Next
+    End Sub
     Public Sub AddDamage(ByVal damage As Damage, ByVal targetQuarter As ShipQuarter, ByVal accuracy As Integer) Implements BattlefieldObject.Damage
         If IgnoresDamage = True Then Exit Sub
 
@@ -733,6 +755,10 @@
             Report.Add(Name & " " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.", ReportType.ShipDamage)
             DamageSustained(targetQuarter) += damage.ShipDamage
             DamageLog(targetQuarter).Add(damage)
+            If damage.Type = DamageType.Fire Then
+                FireProgress(targetQuarter) += damage.ShipDamage
+                Report.Add(Name & "'s " & targetQuarter.ToString & " is on fire! (" & FireProgress(targetQuarter) & "%)", ReportType.FireDamage)
+            End If
         End If
         If damage.CrewDamage > 0 Then
             For Each Crew In GetCrews(targetQuarter, Nothing)
@@ -753,7 +779,7 @@
         End If
         If quarter = Nothing Then Exit Sub
 
-        DamageLog(quarter).Remove(dmg)
+        If DamageLog(quarter).Contains(dmg) Then DamageLog(quarter).Remove(dmg)
         DamageSustained(quarter) -= dmg.ShipDamage
         HasHealed = True
     End Sub
@@ -778,6 +804,7 @@
             Next
             JustFired(q) = False
         Next
+        FireTick()
         BlockedMoveTick()
         BuffTick()
     End Sub
