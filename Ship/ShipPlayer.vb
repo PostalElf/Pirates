@@ -284,7 +284,7 @@
             Case "Blinding Flare"
                 Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
                 Dim q As ShipQuarter = Module1.GetShipQuarter()
-                'TODO
+                target.AddDamage(New Damage(15, 0, DamageType.Fire, Name), q, 100)
             Case "Exceptional Steering"
                 AddMoveToken(New MoveToken({BattleMove.Forward, BattleMove.TurnLeft}))
                 AddMoveToken(New MoveToken({BattleMove.Forward, BattleMove.TurnRight}))
@@ -315,7 +315,7 @@
             Case "Flamecurse"
                 Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
                 For Each q In [Enum].GetValues(GetType(ShipQuarter))
-                    'TODO
+                    target.AddDamage(New Damage(10, 0, DamageType.Fire, Name), q, 100)
                 Next
         End Select
     End Sub

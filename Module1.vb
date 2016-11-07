@@ -173,7 +173,7 @@
         battlefield.CombatTick(AITurn)
     End Sub
     Public Function GetBattleTarget(ByVal battlefield As Battlefield) As Ship
-        Dim combatants As List(Of Ship) = battlefield.GetCombatants
+        Dim combatants As New List(Of Ship)(battlefield.GetCombatants)
         combatants.Remove(world.ShipPlayer)
         Return Menu.getListChoice(Of Ship)(combatants, 0, "Select a target:")
     End Function
@@ -222,13 +222,14 @@
         'currently nothing ends turn so...
 
         Console.WriteLine()
-        Dim tactics As List(Of String) = ship.GetTactics
-        If tactics.Count = 0 Then
-            Console.WriteLine("You currently have no tactics.  (" & ship.TacticConsoleReport & ")")
-            Console.ReadKey()
-            Return False
-        End If
-        Dim tactic As String = Menu.getListChoice(Of String)(tactics, 0)
+        'Dim tactics As List(Of String) = ship.GetTactics
+        'If tactics.Count = 0 Then
+        '    Console.WriteLine("You currently have no tactics.  (" & ship.TacticConsoleReport & ")")
+        '    Console.ReadKey()
+        '    Return False
+        'End If
+        'Dim tactic As String = Menu.getListChoice(Of String)(tactics, 0)
+        Dim tactic As String = "Flamecurse"
         ship.executeTactic(tactic)
         Return False
     End Function

@@ -752,11 +752,12 @@
         If IgnoresDamage = True Then Exit Sub
 
         If damage.ShipDamage > 0 Then
-            Report.Add(Name & " " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.", ReportType.ShipDamage)
             If damage.Type = DamageType.Fire Then
                 FireProgress(targetQuarter) += damage.ShipDamage
-                Report.Add(Name & "'s " & targetQuarter.ToString & " is on fire! (" & FireProgress(targetQuarter) & "%)", ReportType.FireDamage)
+                Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " fire damage.", ReportType.FireDamage)
+                Report.Add(Name & "'s " & targetQuarter.ToString & " is " & FireProgress(targetQuarter) & "% on fire!", ReportType.FireDamage)
             Else
+                Report.Add(Name & "'s " & targetQuarter.ToString & " suffered " & damage.ShipDamage & " damage.", ReportType.ShipDamage)
                 DamageSustained(targetQuarter) += damage.ShipDamage
                 DamageLog(targetQuarter).Add(damage)
             End If
