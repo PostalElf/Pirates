@@ -148,28 +148,17 @@
             Return TrimAvailableMoves(_AvailableMoves, turn, wline, GetBlockedMoves)
         End Get
     End Property
-    Private BlockedMoves As New Dictionary(Of MoveToken, Integer)
-    Public Function GetBlockedMoves() As List(Of MoveToken)
+    Protected Function GetBlockedMoves() As List(Of MoveToken)
         Dim total As New List(Of MoveToken)
-        For Each k In BlockedMoves.Keys
-            total.Add(k)
+        For Each buff In Buffs
+            If buff.Name.Contains(":") = False Then Continue For
+            Dim s As String() = buff.Name.Split(":")
+            If s(0) = "Blocked" = False Then Continue For
+            Dim mt As MoveToken = MoveToken.ConvertStringToMoveToken(s(1))
+            If mt Is Nothing = False Then total.Add(mt)
         Next
         Return total
     End Function
-    Public Sub AddBlockedMove(ByVal movetoken As MoveToken, ByVal duration As Integer)
-        If BlockedMoves.Keys.Contains(movetoken) Then BlockedMoves.Add(movetoken, 0)
-        BlockedMoves(movetoken) += duration
-    End Sub
-    Private Sub BlockedMoveTick()
-        Dim killedMoves As New List(Of MoveToken)
-        For Each k In BlockedMoves.Keys
-            BlockedMoves(k) -= 1
-            If BlockedMoves(k) = 0 Then killedMoves.Add(k)
-        Next
-        For Each mt In killedMoves
-            BlockedMoves.Remove(mt)
-        Next
-    End Sub
     Protected Shared Function TrimAvailableMoves(ByVal targetList As List(Of MoveToken), ByVal aJustTurned As Boolean, ByVal aWaterline As ShipWaterline, ByVal blockedMoves As List(Of MoveToken)) As List(Of MoveToken)
         Dim total As New List(Of MoveToken)
         For Each moves In targetList
@@ -807,7 +796,6 @@
             JustFired(q) = False
         Next
         FireTick()
-        BlockedMoveTick()
         BuffTick()
     End Sub
     Public Sub EndCombat()

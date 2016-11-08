@@ -38,6 +38,19 @@
         Else : Return Nothing
         End If
     End Function
+    Public Shared Function ConvertStringToMoveToken(ByVal value As String) As MoveToken
+        Select Case value
+            Case "Full Sails" : Return New MoveToken({BattleMove.Forward, BattleMove.Forward})
+            Case "Half Sails" : Return New MoveToken({BattleMove.Forward})
+            Case "Port" : Return New MoveToken({BattleMove.Forward, BattleMove.TurnLeft})
+            Case "Starboard" : Return New MoveToken({BattleMove.Forward, BattleMove.TurnRight})
+            Case "Hard to Port" : Return New MoveToken({BattleMove.TurnLeft})
+            Case "Hard to Starboard" : Return New MoveToken({BattleMove.TurnRight})
+            Case "Tack Aft" : Return New MoveToken({BattleMove.Backwards})
+            Case "Halt" : Return New MoveToken({BattleMove.Halt})
+            Case Else : Return Nothing
+        End Select
+    End Function
 
     Public Shared Operator =(ByVal mt1 As MoveToken, ByVal mt2 As MoveToken) As Boolean
         If mt1.Length <> mt2.Length Then Return False

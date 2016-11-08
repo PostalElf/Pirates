@@ -295,7 +295,7 @@
                 AddMoveToken(New MoveToken({BattleMove.Forward, BattleMove.Forward}))
             Case "Still the Winds"
                 Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
-                target.AddBlockedMove(New MoveToken({BattleMove.Forward}), 6)
+                target.AddBuff(New ShipBuff("Blocked: Full Sails", 6))
             Case "Death's Touch"
                 Dim target As Ship = Module1.GetBattleTarget(BattleSquare.Battlefield)
                 For Each q In [Enum].GetValues(GetType(ShipQuarter))
