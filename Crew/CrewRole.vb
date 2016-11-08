@@ -8,4 +8,5 @@
     Helmsman
     Alchemist
     Doctor
+    Firewatch
 End Enum

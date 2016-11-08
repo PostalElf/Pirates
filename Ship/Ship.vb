@@ -471,7 +471,8 @@
 #Region "Crew"
     Private Crews As New Dictionary(Of ShipQuarter, List(Of Crew))
     Public Function GetAvailableRoles(ByVal quarter As ShipQuarter) As List(Of CrewRole)
-        Dim total As New List(Of CrewRole) From {CrewRole.Sailor}
+        Dim total As New List(Of CrewRole) From {CrewRole.Firewatch}
+        If Rigging.Rig = ShipRigging.ShipRig.ForeAft AndAlso (quarter = ShipQuarter.Fore OrElse quarter = ShipQuarter.Aft) Then total.Add(CrewRole.Sailor)
         If GetWeapons(quarter).Count > 0 Then total.Add(CrewRole.Gunner)
 
         Dim types As ShipModule.ModuleType() = {ShipModule.ModuleType.Kitchen, ShipModule.ModuleType.Maproom, ShipModule.ModuleType.Helm, ShipModule.ModuleType.Laboratory, ShipModule.ModuleType.Apothecary}
@@ -711,7 +712,6 @@
         Return Nothing
     End Function
 
-
     Public InCombat As Boolean = False
     Public HasHealed As Boolean = False
     Public Property InMelee As Boolean = False Implements MeleeHost.InMelee
@@ -721,6 +721,16 @@
     Private FireProgress As New Dictionary(Of ShipQuarter, Integer)
     Private Sub FireTick()
         For Each q As ShipQuarter In [Enum].GetValues(GetType(ShipQuarter))
+            'firewatch extinguish 3% per crew
+            If FireProgress(q) > 0 Then
+                Dim firewatch As Integer = GetCrews(q, CrewRole.Firewatch).Count * 3
+                If firewatch > 0 Then
+                    FireProgress(q) -= firewatch
+                    Report.Add(Name & "'s " & q.ToString & " firewatch puts out " & firewatch & "% of the fire.", ReportType.FireDamage)
+                End If
+            End If
+
+            'fire spreads
             If FireProgress(q) > 0 Then
                 Dim progress As Integer = Math.Ceiling(FireProgress(q) / 10)
                 If progress = 0 Then progress = 1
@@ -785,6 +795,7 @@
         Next
         If worstDamage.ShipDamage = -1 Then Return Nothing Else Return worstDamage
     End Function
+
     Public Sub EnterCombat()
         InCombat = True
     End Sub
